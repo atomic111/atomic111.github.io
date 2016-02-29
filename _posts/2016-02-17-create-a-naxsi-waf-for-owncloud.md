@@ -25,7 +25,7 @@ NAXSI can be operated in two different modes: Live or learning. Some application
 
 This article explains how to create a WAF for owncloud. Both the application as well as the WAF are completely deployed with docker containers. The following picture shows the application design:
 
-![Application Design](assets\article_images\2016-02-17-create-a-naxsi-waf-for-owncloud\design.png)
+![Application Design](http://atomic111.github.com/assets/article_images/2016-02-17-create-a-naxsi-waf-for-owncloud/design.png)
 
 # Description of NAXSI Approach
 

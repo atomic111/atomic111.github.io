@@ -2,7 +2,7 @@
 
 ## Test
 
-To run this blog locally use `jekyll serve` and open `http://localhost:4000/blog/` in your browser.
+To run this blog locally use `jekyll serve` and open `http://localhost:4000/` in your browser.
 
 ## Credits
 
