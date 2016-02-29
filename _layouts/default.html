@@ -1,6 +1,19 @@
----
-theme :
-  name : bootstrap-3
----
-{% include JB/setup %}
-{% include themes/bootstrap-3/default.html %}
+<html>
+	{% include head.html %}
+	<body>
+		{{ content }}
+		<script>
+		var width = $(window).width()
+		if ( width > 899 )
+		$( function(){
+			$.stellar({
+				responsive: true,
+			verticalScrolling: true,
+			horizontalOffset: 0,
+			verticalOffset: 0,
+			positionProperty: 'transform',
+			});
+		});
+		</script>
+	</body>
+</html>
