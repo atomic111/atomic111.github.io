@@ -92,7 +92,7 @@ Further reading [whitelists](https://github.com/nbs-system/naxsi/wiki/whitelists
 
 # Start the owncloud and create NAXSI rules
 
-First, we need to download the Project from [github](https://github.com/atomic111/example-NAXSI-owncloud.git) and just execute the `start.sh` bash script. It creates the data volume container for the Postgres database and for the Owncloud application. It also creates the Postgres container with default user/passwords (user=postgres and empty password) and creates Owncloud itself with the default user/password (user = admin, password = admin). **Not a good security practice. Sorry.** Let's focus on creating the WAF for owncloud.
+First, we need to install docker and docker-compose. Then download the Project from [github](https://github.com/atomic111/example-NAXSI-owncloud.git) and just execute the `start.sh` bash script. It creates the data volume container for the Postgres database and for the Owncloud application. It also creates the Postgres container with default user/passwords (user=postgres and empty password) and creates Owncloud itself with the default user/password (user = admin, password = admin). **Not a good security practice. Sorry.** Let's focus on creating the WAF for owncloud.
 
 The `start.sh` also creates the image and container for the NAXSI WAF. The container starts the WAF in LEARNING MODE and elasticsearch to store NAXSI events.
 
@@ -516,6 +516,8 @@ BasicRule  wl:1008 "mz:$URL:/index.php/apps/gallery/thumbnails|$ARGS_VAR:ids";
 BasicRule  wl:1008 "mz:$URL:/index.php/apps/galleryplus/files/list|$ARGS_VAR:mediatypes";
 BasicRule  wl:1008 "mz:$URL:/index.php/apps/galleryplus/thumbnails|$ARGS_VAR:ids";
 BasicRule  wl:1009 "mz:$URL:/index.php/apps/files_pdfviewer/|$ARGS_VAR:file";
+BasicRule  wl:1009 "mz:$URL:/|$BODY_VAR:requesttoken";
+BasicRule  wl:1009 "mz:$URL:/index.php|$ARGS_VAR:requesttoken";
 BasicRule  wl:1001,1009,1010,1011,1310,1311 "mz:$URL:/index.php/settings/personal/changepassword|$BODY_VAR:oldpassword";
 BasicRule  wl:1001,1009,1010,1011,1310,1311 "mz:$URL:/index.php/settings/personal/changepassword|$BODY_VAR:personal-password";
 BasicRule  wl:1001,1009,1010,1011,1310,1311 "mz:$URL:/index.php/settings/personal/changepassword|$BODY_VAR:personal-password-clone";
@@ -535,21 +537,28 @@ BasicRule  wl:2 "mz:$URL:/index.php/avatar/|BODY";
 BasicRule wl:17 "mz:$URL_X:/remote.php/webdav|$HEADERS_VAR:Accept"; #wl libinjection_sql on header
 ```
 
-Save this whitelist to `waf/naxsi_whitelist.rules` in the project's folder. Change the `create_start.sh` to disable learning mode of NAXSI and switch over to LIVE mode.
+Save this whitelist to `waf/naxsi_whitelist.rules` in the project's folder. Change the `docker-compose.yml` to disable learning mode of NAXSI and switch over to LIVE mode.
 
 ```bash
-#!/bin/bash
-
-# to create naxsi rules
-#docker run --name elasticsearch -p 9200:9200 -p 9300:9300 -d elasticsearch elasticsearch -Des.network.host=0.0.0.0
-#docker create --name owncloud-naxsi -e PROXY_REDIRECT_IP=owncloud -e LEARNING_MODE=yes --link owncloud-nginx:owncloud --link elasticsearch:elasticsearch -p 443:443 owncloud-naxsi
-
-# productiv
-docker create --name owncloud-naxsi -e PROXY_REDIRECT_IP=owncloud --link owncloud-nginx:owncloud -p 443:443 owncloud-naxsi
-docker start owncloud-naxsi
+waf:
+    build: ./waf
+    depends_on:
+      - app
+      - elasticsearch
+    links:
+      - app:owncloud
+      - elasticsearch:elasticsearch
+    environment:
+      - LEARNING_MODE=no
+      - PROXY_REDIRECT_IP=owncloud
+    ports:
+      - "443:443"
+    networks:
+      - frontend
+      - backend_app
 ```
 
-Change into the `waf` folder and run `./build-image.sh` to create a new image which includes the new `naxsi_whitelist.rules`. Start it via `./create_start.sh`
+Run `docker rm -f owncloud_waf_1` to shutdown and remove the running WAF container. Execute `docker-compose -p owncloud build` to create a new image which includes the new `naxsi_whitelist.rules`. Start it via `docker-compose -p owncloud up -d`
 
 ## Test the NAXSI WAF
 
