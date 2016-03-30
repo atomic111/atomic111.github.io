@@ -100,18 +100,18 @@ After the execution of `start.sh` it should look like this.
 
 ```bash
 ∅> docker ps --format "table {{.Names}}:\t{{.Ports}}"
-NAMES                PORTS
-owncloud-naxsi:      0.0.0.0:443->443/tcp
-elasticsearch:       0.0.0.0:9200->9200/tcp, 0.0.0.0:9300->9300/tcp
-owncloud-nginx:      80/tcp
-owncloud-postgres:   5432/tcp
+NAMES                       PORTS
+owncloud_waf_1:             0.0.0.0:443->443/tcp
+owncloud_app_1:             80/tcp
+owncloud_postgres_1:        5432/tcp
+owncloud_elasticsearch_1:   9200/tcp, 9300/tcp
 ```
 
 ## Create the first NAXSI rule
 
 Now the application is started and we have to browse the website to generate data in the logfile (`/var/log/nginx/naxsi_error.log`). Log into owncloud via your browser (`https://127.0.0.1`), upload a few pictures, create a folder, add a user, delete a file, delete a user, delete a group and click around. Create a lot of different events to prevent false-positives later on.
 
-To log into the WAF, run `docker exec -it owncloud-naxsi bash` and add a nxapi index to the elasticsearch database with the following command:
+To log into the WAF, run `docker exec -it owncloud_waf_1 bash` and add a nxapi index to the elasticsearch database with the following command:
 
 ```bash
 curl -XPUT 'http://elasticsearch:9200/nxapi/'
@@ -562,16 +562,16 @@ Run `docker rm -f owncloud_waf_1` to shutdown and remove the running WAF contain
 
 ## Test the NAXSI WAF
 
-Watch the log file from the `owncloud-naxsi` docker container.
+Watch the log file from the `owncloud_waf_1` docker container.
 
 ```bash
-∅> docker exec -it owncloud-naxsi tail -f /var/log/nginx/naxsi_error.log
+∅> docker exec -it owncloud_waf_1 tail -f /var/log/nginx/naxsi_error.log
 ```
 
 Go to the owncloud login page and put `user’ or 1=1;#` as username and password in the fields. Now you should see an error message in the NAXSI log file.
 
 ```bash
-2016/02/17 11:58:20 [error] 14#0: *1965 NAXSI_FMT: ip=127.0.0.1&server=127.0.0.1&uri=/&learning=0&vers=0.54&total_processed=499&total_blocked=8&block=1&cscore0=$SQL&score0=4&cscore1=$XSS&score1=8&zone0=BODY&id0=1008&var_name0=user, client: 127.0.0.1, server: owncloud_naxsi, request: "POST / HTTP/1.0", host: "127.0.0.1:8080"
+2016/03/30 09:30:39 [error] 15#0: *389 NAXSI_FMT: ip=127.0.0.1&server=127.0.0.1&uri=/&learning=0&vers=0.55rc1&total_processed=112&total_blocked=2&block=1&cscore0=$SQL&score0=4&cscore1=$XSS&score1=8&zone0=BODY&id0=1008&var_name0=user, client: 127.0.0.1, server: owncloud_naxsi, request: "POST / HTTP/1.0", host: "127.0.0.1:8080"
 ```
 
 **It's working. Have FUN!!!**
