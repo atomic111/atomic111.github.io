@@ -4,7 +4,7 @@
  <title>Patrick Münch Blog</title>
  <link href="http://atomic111.github.io/atom.xml" rel="self"/>
  <link href="http://atomic111.github.io/"/>
- <updated>2016-05-30T10:42:21+02:00</updated>
+ <updated>2016-05-30T10:53:56+02:00</updated>
  <id>http://atomic111.github.io</id>
  <author>
    <name>Patrick Münch</name>
@@ -15,7 +15,7 @@
  <entry>
    <title>Docker Security Tool: InSpec CIS Docker Benchmark</title>
    <link href="http://atomic111.github.io/blog/inspec-cis-docker"/>
-   <updated>2016-05-30T21:00:00+02:00</updated>
+   <updated>2016-05-30T12:00:00+02:00</updated>
    <id>http://atomic111.github.io/blog/inspec-cis-docker</id>
    <content type="html">&lt;p&gt;We have recently published the new InSpec CIS Docker Benchmark profile. This &lt;a href=&quot;https://github.com/chef/inspec&quot;&gt;InSpec&lt;/a&gt; compliance profile implement the &lt;a href=&quot;https://benchmarks.cisecurity.org/tools2/docker/CIS_Docker_1.11.0_Benchmark_v1.0.0.pdf&quot;&gt;CIS Docker 1.11.0 Benchmark&lt;/a&gt; in an automated way to provide security best-practice tests around the Docker daemon and containers in a production environment.&lt;/p&gt;
 

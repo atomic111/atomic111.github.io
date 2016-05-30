@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Docker Security Tool: InSpec CIS Docker Benchmark"
-date:   2016-05-30 19:00:00
+date:   2016-05-30 10:00:00
 image:
       url: /assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg
 video: false
