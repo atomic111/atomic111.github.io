@@ -45,29 +45,6 @@ or you can execute it directly from the github repo like:
 ```
 
 ```bash
-Pending: (Failures listed here are expected and do not affect your suite's status)
-
-  1) Operating System Detection Skipped control due to only_if condition.
-
-     # Not yet implemented
-     #
-
-  2) Operating System Detection Skipped control due to only_if condition.
-
-     # Not yet implemented
-     #
-
-  3) Operating System Detection Skipped control due to only_if condition.
-
-     # Not yet implemented
-     #
-
-  4) Operating System Detection Skipped control due to only_if condition.
-
-     # Not yet implemented
-     #
-
-
 Failures:
 
   1) Json /etc/docker/daemon.json ["default-ulimits", "nproc"] should eq "1024:2408"

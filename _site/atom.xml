@@ -4,7 +4,7 @@
  <title>Patrick Münch Blog</title>
  <link href="http://atomic111.github.io/atom.xml" rel="self"/>
  <link href="http://atomic111.github.io/"/>
- <updated>2016-05-30T12:36:17+02:00</updated>
+ <updated>2016-05-30T13:45:27+02:00</updated>
  <id>http://atomic111.github.io</id>
  <author>
    <name>Patrick Münch</name>
@@ -47,33 +47,7 @@ or you can execute it directly from the github repo like:&lt;/p&gt;
 &lt;/code&gt;&lt;/p&gt;
 
 &lt;p&gt;```bash
-Pending: (Failures listed here are expected and do not affect your suite’s status)&lt;/p&gt;
-
-&lt;p&gt;1) Operating System Detection Skipped control due to only_if condition.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt; # Not yet implemented
- #
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;2) Operating System Detection Skipped control due to only_if condition.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt; # Not yet implemented
- #
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;3) Operating System Detection Skipped control due to only_if condition.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt; # Not yet implemented
- #
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;4) Operating System Detection Skipped control due to only_if condition.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt; # Not yet implemented
- #
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Failures:&lt;/p&gt;
+Failures:&lt;/p&gt;
 
 &lt;p&gt;1) Json /etc/docker/daemon.json [“default-ulimits”, “nproc”] should eq “1024:2408”
      Failure/Error: DEFAULT_FAILURE_NOTIFIER = lambda { |failure, _opts| raise failure }&lt;/p&gt;
