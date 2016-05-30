@@ -4,7 +4,7 @@
  <title>Patrick Münch Blog</title>
  <link href="http://atomic111.github.io/atom.xml" rel="self"/>
  <link href="http://atomic111.github.io/"/>
- <updated>2016-05-30T12:21:16+02:00</updated>
+ <updated>2016-05-30T12:33:37+02:00</updated>
  <id>http://atomic111.github.io</id>
  <author>
    <name>Patrick Münch</name>
@@ -17,7 +17,7 @@
    <link href="http://atomic111.github.io/blog/inspec-cis-docker"/>
    <updated>2016-05-30T12:00:00+02:00</updated>
    <id>http://atomic111.github.io/blog/inspec-cis-docker</id>
-   <content type="html">&lt;p&gt;We have recently published the new InSpec CIS Docker Benchmark profile. This &lt;a href=&quot;https://github.com/chef/inspec&quot;&gt;InSpec&lt;/a&gt; compliance profile implement the &lt;a href=&quot;https://benchmarks.cisecurity.org/tools2/docker/CIS_Docker_1.11.0_Benchmark_v1.0.0.pdf&quot;&gt;CIS Docker 1.11.0 Benchmark&lt;/a&gt; in an automated way to provide security best-practice tests around the Docker daemon and containers in a production environment.&lt;/p&gt;
+   <content type="html">&lt;p&gt;We have recently published the new &lt;a href=&quot;https://github.com/dev-sec/cis-docker-benchmark&quot;&gt;InSpec CIS Docker Benchmark profile&lt;/a&gt;. This &lt;a href=&quot;https://github.com/chef/inspec&quot;&gt;InSpec&lt;/a&gt; compliance profile implement the &lt;a href=&quot;https://benchmarks.cisecurity.org/tools2/docker/CIS_Docker_1.11.0_Benchmark_v1.0.0.pdf&quot;&gt;CIS Docker 1.11.0 Benchmark&lt;/a&gt; in an automated way to provide security best-practice tests around the Docker daemon and containers in a production environment.&lt;/p&gt;
 
 &lt;p&gt;Having the CIS document is very important, but to have the ability to execute the benchmarks and to get immediately a status of your running environment is equally important. To achive the goal we have implemented the CIS Docker Benchmarks for Security which automates inpsecting a host configuration against the CIS Benchmark recommendations. We also started to include some attributes that you can configure tests to meet your production environment.&lt;/p&gt;
 
@@ -32,7 +32,7 @@
 &lt;p&gt;First of all download the github repo:&lt;/p&gt;
 
 &lt;p&gt;&lt;code&gt;bash
-git clone inspec exec https://github.com/dev-sec/cis-docker-benchmark.git -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sud
+git clone https://github.com/dev-sec/cis-docker-benchmark.git
 &lt;/code&gt;&lt;/p&gt;
 
 &lt;p&gt;Next you can execute the InSpec profile with&lt;/p&gt;
@@ -43,7 +43,7 @@ git clone inspec exec https://github.com/dev-sec/cis-docker-benchmark.git -t ssh
 or you can execute it directly from the github repo like:&lt;/p&gt;
 
 &lt;p&gt;&lt;code&gt;bash
-inspec exec https://github.com/dev-sec/cis-docker-benchmark.git -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sud
+∅&amp;gt; inspec exec https://github.com/dev-sec/cis-docker-benchmark.git -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sud
 &lt;/code&gt;&lt;/p&gt;
 
 &lt;p&gt;```bash

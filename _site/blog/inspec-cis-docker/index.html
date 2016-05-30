@@ -4,8 +4,8 @@
 	<link href="//gmpg.org/xfn/11" rel="profile">
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<link rel="canonical" href="http://atomic111.github.io/blog/inspec-cis-docker" />
-	<meta name="description" content="We have recently published the new InSpec CIS Docker Benchmark profile. This [InSpec](https://github.com/chef/inspec) compliance profile implement the [CIS Docker 1.11.0..." />
-	<meta property="og:description" content="We have recently published the new InSpec CIS Docker Benchmark profile. This [InSpec](https://github.com/chef/inspec) compliance profile implement the [CIS Docker 1.11.0..." />
+	<meta name="description" content="We have recently published the new [InSpec CIS Docker Benchmark profile](https://github.com/dev-sec/cis-docker-benchmark). This [InSpec](https://github.com/chef/inspec) compliance profile implement the [CIS Docker 1.11.0..." />
+	<meta property="og:description" content="We have recently published the new [InSpec CIS Docker Benchmark profile](https://github.com/dev-sec/cis-docker-benchmark). This [InSpec](https://github.com/chef/inspec) compliance profile implement the [CIS Docker 1.11.0..." />
 	<meta itemprop="image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
 	<meta property="og:image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
 	<meta property="og:title" content="Docker Security Tool: InSpec CIS Docker Benchmark" />
@@ -81,7 +81,7 @@
 </header>
 <div id="middle">
 	<div id="article">
-		<p>We have recently published the new InSpec CIS Docker Benchmark profile. This <a href="https://github.com/chef/inspec">InSpec</a> compliance profile implement the <a href="https://benchmarks.cisecurity.org/tools2/docker/CIS_Docker_1.11.0_Benchmark_v1.0.0.pdf">CIS Docker 1.11.0 Benchmark</a> in an automated way to provide security best-practice tests around the Docker daemon and containers in a production environment.</p>
+		<p>We have recently published the new <a href="https://github.com/dev-sec/cis-docker-benchmark">InSpec CIS Docker Benchmark profile</a>. This <a href="https://github.com/chef/inspec">InSpec</a> compliance profile implement the <a href="https://benchmarks.cisecurity.org/tools2/docker/CIS_Docker_1.11.0_Benchmark_v1.0.0.pdf">CIS Docker 1.11.0 Benchmark</a> in an automated way to provide security best-practice tests around the Docker daemon and containers in a production environment.</p>
 
 <p>Having the CIS document is very important, but to have the ability to execute the benchmarks and to get immediately a status of your running environment is equally important. To achive the goal we have implemented the CIS Docker Benchmarks for Security which automates inpsecting a host configuration against the CIS Benchmark recommendations. We also started to include some attributes that you can configure tests to meet your production environment.</p>
 
@@ -96,7 +96,7 @@
 <p>First of all download the github repo:</p>
 
 <p><code>bash
-git clone inspec exec https://github.com/dev-sec/cis-docker-benchmark.git -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sud
+git clone https://github.com/dev-sec/cis-docker-benchmark.git
 </code></p>
 
 <p>Next you can execute the InSpec profile with</p>
@@ -107,7 +107,7 @@ git clone inspec exec https://github.com/dev-sec/cis-docker-benchmark.git -t ssh
 or you can execute it directly from the github repo like:</p>
 
 <p><code>bash
-inspec exec https://github.com/dev-sec/cis-docker-benchmark.git -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sud
+∅&gt; inspec exec https://github.com/dev-sec/cis-docker-benchmark.git -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sud
 </code></p>
 
 <p>```bash
