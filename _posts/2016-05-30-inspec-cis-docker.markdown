@@ -128,7 +128,7 @@ Finished in 1.1 seconds (files took 10.51 seconds to load)
 197 examples, 7 failures, 4 pending
 ```
 
-As you can see it runs 197 InSpec tests with 7 failures. I am waiting that docker fixes tis failures:
+As you can see it runs 197 InSpec tests with 7 failures. I am waiting that docker fixes those failures:
 
 - https://docs.docker.com/engine/reference/commandline/daemon/#default-ulimits
 - https://github.com/docker/docker/issues/21050
