@@ -14,9 +14,9 @@ author_image: "https://avatars0.githubusercontent.com/u/7220740?s=400"
 author_link: "https://twitter.com/atomiczero111"
 ---
 
-We have recently published the new [InSpec CIS Docker Benchmark profile](https://github.com/dev-sec/cis-docker-benchmark). This [InSpec](https://github.com/chef/inspec) compliance profile implement the [CIS Docker 1.11.0 Benchmark](https://benchmarks.cisecurity.org/tools2/docker/CIS_Docker_1.11.0_Benchmark_v1.0.0.pdf) in an automated way to provide security best-practice tests around the Docker daemon and containers in a production environment.
+We have recently published the new [InSpec CIS Docker Benchmark profile](https://github.com/dev-sec/cis-docker-benchmark). This [InSpec](https://github.com/chef/inspec) compliance profile implements the [CIS Docker 1.11.0 Benchmark](https://benchmarks.cisecurity.org/tools2/docker/CIS_Docker_1.11.0_Benchmark_v1.0.0.pdf) in an automated way to provide security best-practice tests around the Docker daemon and containers in a production environment.
 
-Having the CIS document is very important, but to have the ability to execute the benchmarks and to get immediately a status of your running environment is equally important. To achive the goal we have implemented the CIS Docker Benchmarks for Security which automates inpsecting a host configuration against the CIS Benchmark recommendations. We also started to include some attributes that you can configure tests to meet your production environment.
+Having the CIS document is very important, but to have the ability to execute the benchmarks and to get immediately a status of your running environment is equally important. To achive the goal we have implemented the CIS Docker Benchmarks for Security, which automates inpsecting a host configuration against the CIS Benchmark recommendations. We also started to include some attributes, that you can configure tests to meet your production environment.
 
 We are using InSpec to implement the CIS Docker Benchmark. InSpec is an open-source testing framework for infrastructure with a human- and machine-readable language for specifying compliance, security and policy requirements.
 
