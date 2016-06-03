@@ -111,8 +111,7 @@ Finished in 1.1 seconds (files took 10.51 seconds to load)
 
 As you can see it runs 197 InSpec tests with 7 failures. I am waiting that docker fixes those failures:
 
-- https://docs.docker.com/engine/reference/commandline/daemon/#default-ulimits
-- https://github.com/docker/docker/issues/21050
-- https://github.com/docker/docker/issues/22311
+- [Docker images vanish when using user namespaces](https://github.com/docker/docker/issues/21050)
+- [logs-opts seems broken in daemon.json](https://github.com/docker/docker/issues/22311)
 
 Feedback and Pull Request are welcome
