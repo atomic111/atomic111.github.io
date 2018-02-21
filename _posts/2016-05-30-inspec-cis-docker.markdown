@@ -28,23 +28,24 @@ I started a Centos 7 vagrant box and implemented all CIS Docker Benchmark recomm
 
 First of all download the github repo:
 
-```bash
+```
 git clone https://github.com/dev-sec/cis-docker-benchmark.git
 ```
 
 Next you can execute the InSpec profile with
 
-
-```bash
+```
 ∅> inspec exec cis-docker-benchmark -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sudo
 ```
+
 or you can execute it directly from the github repo like:
 
-```bash
-∅> inspec exec https://github.com/dev-sec/cis-docker-benchmark.git -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sud
+```
+∅> inspec exec https://github.com/dev-sec/cis-docker-benchmark.git -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sudo
 ```
 
-```bash
+Result:
+```
 Failures:
 
   1) Json /etc/docker/daemon.json ["default-ulimits", "nproc"] should eq "1024:2408"

@@ -1,0 +1,187 @@
+<html>
+	<head>
+	
+	<link href="//gmpg.org/xfn/11" rel="profile">
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<link rel="canonical" href="http://atomic111.github.io/article/homematic-ccu2-fileread" />
+	<meta name="description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
+	<meta property="og:description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
+	<meta itemprop="image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
+	<meta property="og:image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
+	<meta property="og:title" content="  Directory Traversal / Arbitrary File Read in HomeMatic CCU2" />
+	<meta property="og:type" content="article" />
+	<meta property="og:url" content="http://atomic111.github.io/article/homematic-ccu2-fileread" />
+	<meta property="og:site_name" content="Patrick Blog" />
+	<title>  Directory Traversal / Arbitrary File Read in HomeMatic CCU2 &middot; Patrick Blog</title>
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="HandheldFriendly" content="True" />
+	<meta name="MobileOptimized" content="320" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="stylesheet" type="text/css" media="only screen and (min-width: 900px)" href="/assets/css/desktop.css" />
+	<link rel="stylesheet" type="text/css" media="only screen and (max-width: 899px)" href="/assets/css/mobile.css" />
+	<link href="/assets/css/genericons.css" type="text/css" rel="stylesheet" />
+	<link href="/assets/css/syntax.css" type="text/css" rel="stylesheet" />
+	<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Fenix:400,400italic">
+	<link rel="apple-touch-icon" href="http://atomic111.github.io/assets/images/logo.jpeg">
+	<link rel="shortcut icon" href="http://atomic111.github.io/assets/images/favicon.ico">
+	<link rel="alternate" type="application/rss+xml" title="RSS" href="http://atomic111.github.io/atom.xml">
+	<script type="text/javascript" src="/assets/js/jquery-2.1.0.min.js"></script>
+	
+	<script type="text/javascript" src="/assets/js/jquery.stellar.min.js"></script>
+	
+	
+	<!-- Asynchronous Google Analytics snippet -->
+	<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-74418092-1', 'auto');
+		ga('send', 'pageview');
+	</script>
+	
+	<!-- Theme Color for Chrome on Android Lollipop -->
+	<meta name="theme-color" content="#302F2D">
+</head>
+
+	<body>
+		<header class="clean" style="background-image: url(/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg); height: 100%; " data-stellar-background-ratio="0.5" data-stellar-horizontal-offset="50">
+	
+	<label class="menu" for="_1">
+	<span class="genericon genericon-menu"></span>
+</label>
+<input id="_1" type="checkbox">
+<div class="menu-content">
+	<p class="menu-title">Patrick Blog<p>
+	<div class="menu" style="background-color: #1a1a1a; z-index: -1;"></div>
+	
+		<a href="/">Home</a>
+	
+	<hr>
+	<a href="https://twitter.com/atomiczero111" class="social-links-menu" target="_blank" title="Follow me on twitter"><span class="genericon genericon-twitter"></span></a><a href="https://github.com/atomic111" class="social-links-menu" target="_blank" title="Fork me on github"><span class="genericon genericon-github"></span></a>
+</div>
+<div class="social-links" data-stellar-ratio="0.1">
+	
+		<a href="https://twitter.com/atomiczero111" target="_blank" title="Follow me on twitter"><span class="genericon genericon-twitter"></span></a>
+	
+		<a href="https://github.com/atomic111" target="_blank" title="Fork me on github"><span class="genericon genericon-github"></span></a>
+	
+</div>
+
+	<div id="post-info" data-stellar-ratio="0.7">
+		<h1>  Directory Traversal / Arbitrary File Read in HomeMatic CCU2</h1>
+		
+		<a class="site-title" href="https://twitter.com/atomiczero111"><div class="site-icon-small" style="background-image: url(https://avatars0.githubusercontent.com/u/7220740?s=400);"></div>Patrick Münch</a>, in 21 February 2018
+	</div>
+	
+	<div id="nav-icon" style="bottom: 30px;" data-stellar-ratio="4">
+		<a class="scroll" data-speed="500" href="#article"><span class="genericon genericon-expand"></span></a>
+	</div>
+</header>
+<div id="middle">
+	<div id="article">
+		<h1 id="background">Background</h1>
+
+<p>HomeMatic is a home automation system consisting of various components for automating several parts of a building, including different sensors and actuators. The HomeMatic CCU2 is a central control unit, which is responsible for integrating these components with each other.</p>
+
+<p>From the vendor’s website (<a href="http://www.eq-3.de/produkte/homematic.html">eQ-3</a>):
+“The Homematic Central Control Unit CCU2 is responsible for numerous control, signalling and supervision functions across all areas of the Homematic system. The device includes a browser based user interface to the up the system. It can be controlled in the local network as well as via Internet. The Homematic software offers various configuration and application possibilities, so that there are no limits to creativity for installing your individual smart home.”</p>
+
+<p>While analyzing the implementation of the CCU2’s web interface, one
+Directory Traversal vulnerabilities has been identified, which can be
+exploited in order to read files from the CCU2’s filesystem. This
+vulnerability can be exploited by unauthenticated attackers
+with access to the web interface.</p>
+
+<p>The system provides a JSON API, which exposes various methods.
+While some methods require the connecting user to be authenticated, a
+number of methods can also be used anonymously.</p>
+
+<p>A code review of the file api/methods/user/getlanguage.tcl revealed
+that the User.getLanguage method allows unauthenticated
+attackers to read the first line of an arbitrary file on the CCU2’s
+filesystem.</p>
+
+<p>Please consider the following excerpt from the file
+api/methods/user/getlanguage.tcl:</p>
+
+<p>```
+if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}] == 0} {
+  set data [read $fp]
+  set lang [split $data “\n”]
+  close $fp
+} else {
+  set lang “0”
+}</p>
+
+<p>jsonrpc_response [lindex $lang 0]
+```</p>
+
+	</div>
+	
+	<div id="comments">
+		
+	
+	<script src="https://apis.google.com/js/plusone.js"></script>
+	<div id="g-comments" class="g-comments" data-href="http://atomic111.github.io/article/homematic-ccu2-fileread" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
+	<script>
+		var width = $('#comments').width() * 0.9;
+		width = Math.round(width);
+		$("#g-comments").attr({ "data-width": width });
+	</script>
+
+
+	</div>
+	
+	<div class="social center">
+		<div class="network">
+		<a class="hn-link" href="javascript:window.location=%22http://news.ycombinator.com/submitlink?u=%22+encodeURIComponent(document.location)+%22&amp;t=%22+encodeURIComponent(document.title)">Discuss on Hacker News</a>
+		</div>
+		<div class="network twitter">
+		<a href="https://twitter.com/share" class="twitter-share-button" data-via="atomic111_io" data-count="none">Tweet</a>
+		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+		</div>
+	</div>
+</div>
+
+	
+	
+	
+	
+	
+	
+
+
+<footer class="clean" style="background-image: url(/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg); height: 75%; min-height: 500px; " data-stellar-background-ratio="0.5" data-stellar-horizontal-offset="50" data-stellar-vertical-offset="50">
+	<div id="nav-icon" style="top: 60px;" data-stellar-ratio="0.8">
+		<a class="scroll" data-speed="500" href="#article"><span class="genericon genericon-collapse"></span></a>
+	</div>
+	<div id="post-info" data-stellar-ratio="0.5" data-stellar-vertical-offset="120">
+		<h3>Read next</h3>
+		<a href="/article/homematic-ccu2-flieread">
+			<h1>Directory Traversal / Arbitrary File Read in HomeMatic CCU2</h1>
+			
+				<h2></h2>
+			
+		</a>
+	</div>
+	<p class="copyright">&copy;2018, <a href="http://atomic111.github.io" target="_blank">Patrick Münch</a>. <a href="" target="_blank">All rights reserved</a>.</p>
+</footer>
+<script src="/assets/js/smooth-scroll.js"></script>
+
+		<script>
+		var width = $(window).width()
+		if ( width > 899 )
+		$( function(){
+			$.stellar({
+				responsive: true,
+			verticalScrolling: true,
+			horizontalOffset: 0,
+			verticalOffset: 0,
+			positionProperty: 'transform',
+			});
+		});
+		</script>
+	</body>
+</html>
