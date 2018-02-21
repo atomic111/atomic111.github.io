@@ -3,16 +3,16 @@
 	
 	<link href="//gmpg.org/xfn/11" rel="profile">
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<link rel="canonical" href="http://atomic111.github.io/blog/inspec-cis-docker" />
+	<link rel="canonical" href="http://atomic111.github.io/article/inspec-cis-docker" />
 	<meta name="description" content="We have recently published the new [InSpec CIS Docker Benchmark profile](https://github.com/dev-sec/cis-docker-benchmark). This [InSpec](https://github.com/chef/inspec) compliance profile implements the [CIS Docker 1.11.0..." />
 	<meta property="og:description" content="We have recently published the new [InSpec CIS Docker Benchmark profile](https://github.com/dev-sec/cis-docker-benchmark). This [InSpec](https://github.com/chef/inspec) compliance profile implements the [CIS Docker 1.11.0..." />
 	<meta itemprop="image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
 	<meta property="og:image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
 	<meta property="og:title" content="Docker Security Tool: InSpec CIS Docker Benchmark" />
 	<meta property="og:type" content="article" />
-	<meta property="og:url" content="http://atomic111.github.io/blog/inspec-cis-docker" />
-	<meta property="og:site_name" content="Patrick Münch Blog" />
-	<title>Docker Security Tool: InSpec CIS Docker Benchmark &middot; Patrick Münch Blog</title>
+	<meta property="og:url" content="http://atomic111.github.io/article/inspec-cis-docker" />
+	<meta property="og:site_name" content="Patrick Blog" />
+	<title>Docker Security Tool: InSpec CIS Docker Benchmark &middot; Patrick Blog</title>
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="HandheldFriendly" content="True" />
 	<meta name="MobileOptimized" content="320" />
@@ -53,19 +53,19 @@
 </label>
 <input id="_1" type="checkbox">
 <div class="menu-content">
-	<p class="menu-title">Patrick Münch Blog<p>
+	<p class="menu-title">Patrick Blog<p>
 	<div class="menu" style="background-color: #1a1a1a; z-index: -1;"></div>
 	
 		<a href="/">Home</a>
 	
 	<hr>
-	<a href="https://twitter.com/atomiczero111" class="social-links-menu" target="_blank" title="Follow us on twitter"><span class="genericon genericon-twitter"></span></a><a href="https://github.com/atomic111" class="social-links-menu" target="_blank" title="Fork us on github"><span class="genericon genericon-github"></span></a>
+	<a href="https://twitter.com/atomiczero111" class="social-links-menu" target="_blank" title="Follow me on twitter"><span class="genericon genericon-twitter"></span></a><a href="https://github.com/atomic111" class="social-links-menu" target="_blank" title="Fork me on github"><span class="genericon genericon-github"></span></a>
 </div>
 <div class="social-links" data-stellar-ratio="0.1">
 	
-		<a href="https://twitter.com/atomiczero111" target="_blank" title="Follow us on twitter"><span class="genericon genericon-twitter"></span></a>
+		<a href="https://twitter.com/atomiczero111" target="_blank" title="Follow me on twitter"><span class="genericon genericon-twitter"></span></a>
 	
-		<a href="https://github.com/atomic111" target="_blank" title="Fork us on github"><span class="genericon genericon-github"></span></a>
+		<a href="https://github.com/atomic111" target="_blank" title="Fork me on github"><span class="genericon genericon-github"></span></a>
 	
 </div>
 
@@ -95,22 +95,24 @@
 
 <p>First of all download the github repo:</p>
 
-<p><code>bash
+<p><code>
 git clone https://github.com/dev-sec/cis-docker-benchmark.git
 </code></p>
 
 <p>Next you can execute the InSpec profile with</p>
 
-<p><code>bash
+<p><code>
 ∅&gt; inspec exec cis-docker-benchmark -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sudo
-</code>
-or you can execute it directly from the github repo like:</p>
-
-<p><code>bash
-∅&gt; inspec exec https://github.com/dev-sec/cis-docker-benchmark.git -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sud
 </code></p>
 
-<p>```bash
+<p>or you can execute it directly from the github repo like:</p>
+
+<p><code>
+∅&gt; inspec exec https://github.com/dev-sec/cis-docker-benchmark.git -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sudo
+</code></p>
+
+<p>Result:
+```
 Failures:</p>
 
 <p>1) Json /etc/docker/daemon.json [“default-ulimits”, “nproc”] should eq “1024:2408”
@@ -195,7 +197,7 @@ Failures:</p>
 		
 	
 	<script src="https://apis.google.com/js/plusone.js"></script>
-	<div id="g-comments" class="g-comments" data-href="http://atomic111.github.io/blog/inspec-cis-docker" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
+	<div id="g-comments" class="g-comments" data-href="http://atomic111.github.io/article/inspec-cis-docker" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
 	<script>
 		var width = $('#comments').width() * 0.9;
 		width = Math.round(width);
@@ -210,36 +212,34 @@ Failures:</p>
 		<a class="hn-link" href="javascript:window.location=%22http://news.ycombinator.com/submitlink?u=%22+encodeURIComponent(document.location)+%22&amp;t=%22+encodeURIComponent(document.title)">Discuss on Hacker News</a>
 		</div>
 		<div class="network twitter">
-		<a href="https://twitter.com/share" class="twitter-share-button" data-via="atomiczero111" data-count="none">Tweet</a>
+		<a href="https://twitter.com/share" class="twitter-share-button" data-via="atomic111_io" data-count="none">Tweet</a>
 		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
 		</div>
 	</div>
 </div>
 
 	
-		
-		
-		
-		
-		
-		
+	
+	
+	
+	
 	
 
 
-<footer class="clean" style="background-image: url(/assets/images/cover.jpeg); height: 75%; min-height: 500px; " data-stellar-background-ratio="0.5" data-stellar-horizontal-offset="50" data-stellar-vertical-offset="50">
+<footer class="clean" style="background-image: url(/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg); height: 75%; min-height: 500px; " data-stellar-background-ratio="0.5" data-stellar-horizontal-offset="50" data-stellar-vertical-offset="50">
 	<div id="nav-icon" style="top: 60px;" data-stellar-ratio="0.8">
 		<a class="scroll" data-speed="500" href="#article"><span class="genericon genericon-collapse"></span></a>
 	</div>
 	<div id="post-info" data-stellar-ratio="0.5" data-stellar-vertical-offset="120">
-		<h3>Featured post</h3>
-		<a href="/blog/create-a-naxsi-waf-for-owncloud">
-			<h1>Create a NAXSI WAF for Owncloud</h1>
+		<h3>Read next</h3>
+		<a href="/article/homematic-ccu2-fileread">
+			<h1>  Directory Traversal / Arbitrary File Read in HomeMatic CCU2</h1>
 			
 				<h2></h2>
 			
 		</a>
 	</div>
-	<p class="copyright">&copy;2016, <a href="http://atomic111.github.io/" target="_blank">Patrick Münch</a>. All rights reserved.</p>
+	<p class="copyright">&copy;2018, <a href="http://atomic111.github.io" target="_blank">Patrick Münch</a>. <a href="" target="_blank">All rights reserved</a>.</p>
 </footer>
 <script src="/assets/js/smooth-scroll.js"></script>
 

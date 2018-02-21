@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
- <title>Patrick Münch Blog</title>
+ <title>Patrick Blog</title>
  <link href="http://atomic111.github.io/atom.xml" rel="self"/>
  <link href="http://atomic111.github.io/"/>
- <updated>2016-06-03T13:36:11+02:00</updated>
+ <updated>2018-02-21T15:44:34+01:00</updated>
  <id>http://atomic111.github.io</id>
  <author>
    <name>Patrick Münch</name>
@@ -13,10 +13,108 @@
 
  
  <entry>
+   <title>Directory Traversal / Arbitrary File Read in HomeMatic CCU2</title>
+   <link href="http://atomic111.github.io/article/homematic-ccu2-flieread"/>
+   <updated>2018-02-21T15:26:00+00:00</updated>
+   <id>http://atomic111.github.io/article/homematic-ccu2-flieread</id>
+   <content type="html">&lt;h1 id=&quot;background&quot;&gt;Background&lt;/h1&gt;
+
+&lt;p&gt;HomeMatic is a home automation system consisting of various components for automating several parts of a building, including different sensors and actuators. The HomeMatic CCU2 is a central control unit, which is responsible for integrating these components with each other.&lt;/p&gt;
+
+&lt;p&gt;From the vendor’s website (&lt;a href=&quot;http://www.eq-3.de/produkte/homematic/zentralen-und-gateways.html&quot;&gt;eQ-3&lt;/a&gt;):&lt;/p&gt;
+
+&lt;p&gt;“The Homematic Central Control Unit CCU2 is responsible for numerous control, signalling and supervision functions across all areas of the Homematic system. The device includes a browser based user interface to the up the system. It can be controlled in the local network as well as via Internet. The Homematic software offers various configuration and application possibilities, so that there are no limits to creativity for installing your individual smart home.”&lt;/p&gt;
+
+&lt;h1 id=&quot;issue-description&quot;&gt;Issue Description&lt;/h1&gt;
+
+&lt;p&gt;While analyzing the implementation of the CCU2’s web interface, one Directory Traversal vulnerabilities has been identified, which can be exploited in order to read files from the CCU2’s filesystem. This vulnerability can be exploited by unauthenticated attackers
+with access to the web interface.&lt;/p&gt;
+
+&lt;p&gt;The system provides a JSON API, which exposes various methods. While some methods require the connecting user to be authenticated, a number of methods can also be used anonymously.&lt;/p&gt;
+
+&lt;p&gt;A code review of the file api/methods/user/getlanguage.tcl revealed that the User.getLanguage method allows unauthenticated attackers to read the first line of an arbitrary file on the CCU2’s filesystem.&lt;/p&gt;
+
+&lt;p&gt;Please consider the following excerpt from the file api/methods/user/getlanguage.tcl:&lt;/p&gt;
+
+&lt;p&gt;```
+if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}] == 0} {
+  set data [read $fp]
+  set lang [split $data “\n”]
+  close $fp
+} else {
+  set lang “0”
+}&lt;/p&gt;
+
+&lt;p&gt;jsonrpc_response [lindex $lang 0]
+```&lt;/p&gt;
+
+&lt;p&gt;Please note that the web server is running as root, which means that this vulnerability can be exploited in order to disclose the first line of any file on the target’s filesystem.&lt;/p&gt;
+
+&lt;p&gt;One particular way to exploit this issue is to read the file /tmp/event/subscriber.list, which contains existing session IDs. These session IDs can subsequently be used to impersonate other users on the system.&lt;/p&gt;
+
+&lt;h1 id=&quot;credit&quot;&gt;Credit&lt;/h1&gt;
+
+&lt;p&gt;Gregor Kopf of &lt;a href=&quot;https://secfault-security.com&quot;&gt;Secfault Security GmbH&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA Systemvertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;disclaimer&quot;&gt;Disclaimer&lt;/h1&gt;
+
+&lt;p&gt;The information provided is released “as is” without warranty of any kind. The publisher disclaims all warranties, either express or implied, including all warranties of merchantability. No responsibility is taken for the correctness of this information. In no event shall the publisher be liable for any damages whatsoever including direct, indirect, incidental, consequential, loss of business profits or special damages, even if the publisher has been advised of the possibility of such damages.&lt;/p&gt;
+
+&lt;p&gt;The contents of this advisory are copyright (c) 2017 Secfault Security GmbH &amp;amp; SVA System Vertrieb Alexander GmbH and may be distributed freely provided that no fee is charged for this distribution and proper credit is given.&lt;/p&gt;
+</content>
+ </entry>
+
+ <entry>
+   <title>  Directory Traversal / Arbitrary File Read in HomeMatic CCU2</title>
+   <link href="http://atomic111.github.io/article/homematic-ccu2-fileread"/>
+   <updated>2018-02-21T14:04:00+00:00</updated>
+   <id>http://atomic111.github.io/article/homematic-ccu2-fileread</id>
+   <content type="html">&lt;h1 id=&quot;background&quot;&gt;Background&lt;/h1&gt;
+
+&lt;p&gt;HomeMatic is a home automation system consisting of various components for automating several parts of a building, including different sensors and actuators. The HomeMatic CCU2 is a central control unit, which is responsible for integrating these components with each other.&lt;/p&gt;
+
+&lt;p&gt;From the vendor’s website (&lt;a href=&quot;http://www.eq-3.de/produkte/homematic.html&quot;&gt;eQ-3&lt;/a&gt;):
+“The Homematic Central Control Unit CCU2 is responsible for numerous control, signalling and supervision functions across all areas of the Homematic system. The device includes a browser based user interface to the up the system. It can be controlled in the local network as well as via Internet. The Homematic software offers various configuration and application possibilities, so that there are no limits to creativity for installing your individual smart home.”&lt;/p&gt;
+
+&lt;p&gt;While analyzing the implementation of the CCU2’s web interface, one
+Directory Traversal vulnerabilities has been identified, which can be
+exploited in order to read files from the CCU2’s filesystem. This
+vulnerability can be exploited by unauthenticated attackers
+with access to the web interface.&lt;/p&gt;
+
+&lt;p&gt;The system provides a JSON API, which exposes various methods.
+While some methods require the connecting user to be authenticated, a
+number of methods can also be used anonymously.&lt;/p&gt;
+
+&lt;p&gt;A code review of the file api/methods/user/getlanguage.tcl revealed
+that the User.getLanguage method allows unauthenticated
+attackers to read the first line of an arbitrary file on the CCU2’s
+filesystem.&lt;/p&gt;
+
+&lt;p&gt;Please consider the following excerpt from the file
+api/methods/user/getlanguage.tcl:&lt;/p&gt;
+
+&lt;p&gt;```
+if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}] == 0} {
+  set data [read $fp]
+  set lang [split $data “\n”]
+  close $fp
+} else {
+  set lang “0”
+}&lt;/p&gt;
+
+&lt;p&gt;jsonrpc_response [lindex $lang 0]
+```&lt;/p&gt;
+</content>
+ </entry>
+
+ <entry>
    <title>Docker Security Tool: InSpec CIS Docker Benchmark</title>
-   <link href="http://atomic111.github.io/blog/inspec-cis-docker"/>
-   <updated>2016-05-30T12:00:00+02:00</updated>
-   <id>http://atomic111.github.io/blog/inspec-cis-docker</id>
+   <link href="http://atomic111.github.io/article/inspec-cis-docker"/>
+   <updated>2016-05-30T10:00:00+00:00</updated>
+   <id>http://atomic111.github.io/article/inspec-cis-docker</id>
    <content type="html">&lt;p&gt;We have recently published the new &lt;a href=&quot;https://github.com/dev-sec/cis-docker-benchmark&quot;&gt;InSpec CIS Docker Benchmark profile&lt;/a&gt;. This &lt;a href=&quot;https://github.com/chef/inspec&quot;&gt;InSpec&lt;/a&gt; compliance profile implements the &lt;a href=&quot;https://benchmarks.cisecurity.org/tools2/docker/CIS_Docker_1.11.0_Benchmark_v1.0.0.pdf&quot;&gt;CIS Docker 1.11.0 Benchmark&lt;/a&gt; in an automated way to provide security best-practice tests around the Docker daemon and containers in a production environment.&lt;/p&gt;
 
 &lt;p&gt;Having the CIS document is very important, but to have the ability to execute the benchmarks and to get immediately a status of your running environment is equally important. To achive the goal we have implemented the CIS Docker Benchmarks for Security, which automates inpsecting a host configuration against the CIS Benchmark recommendations. We also started to include some attributes, that you can configure tests to meet your production environment.&lt;/p&gt;
@@ -31,22 +129,24 @@
 
 &lt;p&gt;First of all download the github repo:&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;bash
+&lt;p&gt;&lt;code&gt;
 git clone https://github.com/dev-sec/cis-docker-benchmark.git
 &lt;/code&gt;&lt;/p&gt;
 
 &lt;p&gt;Next you can execute the InSpec profile with&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;bash
+&lt;p&gt;&lt;code&gt;
 ∅&amp;gt; inspec exec cis-docker-benchmark -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sudo
-&lt;/code&gt;
-or you can execute it directly from the github repo like:&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;bash
-∅&amp;gt; inspec exec https://github.com/dev-sec/cis-docker-benchmark.git -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sud
 &lt;/code&gt;&lt;/p&gt;
 
-&lt;p&gt;```bash
+&lt;p&gt;or you can execute it directly from the github repo like:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;
+∅&amp;gt; inspec exec https://github.com/dev-sec/cis-docker-benchmark.git -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sudo
+&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Result:
+```
 Failures:&lt;/p&gt;
 
 &lt;p&gt;1) Json /etc/docker/daemon.json [“default-ulimits”, “nproc”] should eq “1024:2408”
@@ -129,9 +229,623 @@ Failures:&lt;/p&gt;
  
  <entry>
    <title>Create a NAXSI WAF for Owncloud</title>
-   <link href="http://atomic111.github.io/blog/create-a-naxsi-waf-for-owncloud"/>
-   <updated>2016-02-17T20:00:00+01:00</updated>
-   <id>http://atomic111.github.io/blog/create-a-naxsi-waf-for-owncloud</id>
+   <link href="http://atomic111.github.io/article/create-a-naxsi-waf-for-owncloud"/>
+   <updated>2016-02-17T19:00:00+00:00</updated>
+   <id>http://atomic111.github.io/article/create-a-naxsi-waf-for-owncloud</id>
+   <content type="html">&lt;h1 id=&quot;introduction&quot;&gt;Introduction&lt;/h1&gt;
+
+&lt;p&gt;A secure architecture of a web application consists of 3 components: a frontend, an application and a data backend. The frontend server’s task from a security perspective is to terminate SSL and to be the first line of defense. That means it inspects and validates requests from the untrusted outside world.&lt;/p&gt;
+
+&lt;p&gt;Since 2011, the NAXSI module has become available, which quickly turns your nginx into a “Web Application Firewall” (WAF). Nginx with NAXSI can operate as a high-performance standalone WAF, if set up correctly.&lt;/p&gt;
+
+&lt;p&gt;NAXSI can filter different values like URLs, request parameters, cookies, headers, and/or the body of HTTP requests. Those values can be filtered separately as well as in combination. The NAXSI module can be enabled or disabled per location within the Nginx configuration.&lt;/p&gt;
+
+&lt;p&gt;NAXSI can be operated in two different modes: Live or learning. Some applications get very creative, with special characters encoded in cookies and other nasty tricks. This brings even experienced WAF admins quickly to the brink of insanity. The great learning feature in conjunction with automatic whitelisting puts you in the position to create WAF rules for any application and almost completely remove false-positives.&lt;/p&gt;
+
+&lt;p&gt;This article explains how to create a WAF for owncloud. Both the application as well as the WAF are completely deployed with docker containers. The following picture shows the application design:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://atomic111.github.com/assets/article_images/2016-02-17-create-a-naxsi-waf-for-owncloud/design.png&quot; alt=&quot;Application Design&quot; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;description-of-naxsi-approach&quot;&gt;Description of NAXSI Approach&lt;/h1&gt;
+
+&lt;p&gt;NAXSI stands for “Nginx Anti Xss &amp;amp; Sql Injection”. NAXSI WAF detects unexpected characters in HTTP requests/arguments and blocks these. It prevents an attacker from leveraging web vulnerabilities of a site, no matter in which language the website is developed. It protects the website from the &lt;a href=&quot;https://www.owasp.org/index.php/Category:OWASP_Top_Ten_Project&quot;&gt;TOP 10 OWASP threats&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://atomic111.github.com/assets/article_images/2016-02-17-create-a-naxsi-waf-for-owncloud/principle.png&quot; alt=&quot;Principle&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The NXTOOL is helpful for the learning process. It writes all NAXSI events to elasticsearch. It also generates the whitelist.&lt;/p&gt;
+
+&lt;p&gt;The learning process is needed to identify “false positives” and prevent them. Without this phase, we run into the risk that applications end up not running at all. If we allow too much, however, we leave a window of exploitation for an external attacker. As you can see, the learning process is critical to the WAF’s quality.&lt;/p&gt;
+
+&lt;h1 id=&quot;description-of-naxsi-rules&quot;&gt;Description of NAXSI Rules&lt;/h1&gt;
+
+&lt;p&gt;NAXSI rules have a straightforward design: They consit of three basic types of rules. The MainRule defines a detection-pattern and scores. The BasicRule defines whitelists for a MainRule. The CheckRule defines actions when a score is met.&lt;/p&gt;
+
+&lt;h2 id=&quot;mainrule&quot;&gt;MainRule&lt;/h2&gt;
+
+&lt;p&gt;MainRule is an identifier which marks detection-rules, unlike BasicRules, which are usually used to whitelist certain MainRules.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://atomic111.github.com/assets/article_images/2016-02-17-create-a-naxsi-waf-for-owncloud/mainrule.png&quot; alt=&quot;MainRule&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;match-pattern&quot;&gt;Match Pattern&lt;/h3&gt;
+
+&lt;p&gt;The Match Pattern supports two formats:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;rx: regular expressions&lt;/li&gt;
+  &lt;li&gt;str: string matcher&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;String matcher are faster than regular expressions, which makes them the preferred pattern. This example uses a regular expression to search for the keyword &lt;code&gt;select|from&lt;/code&gt; in the request.&lt;/p&gt;
+
+&lt;h3 id=&quot;msg&quot;&gt;MSG&lt;/h3&gt;
+
+&lt;p&gt;MSG is a human readable message and describes the pattern. This example includes the message &lt;code&gt;select and from sql keywords&lt;/code&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;match-zone&quot;&gt;Match Zone&lt;/h3&gt;
+
+&lt;p&gt;Match zones defines which part of the request will be searched to find the specified pattern. This example rule searches in &lt;code&gt;BODY|URL|ARGS|$HEADERS_VAR:Cookie&lt;/code&gt;. With this simple expression, it is easy to target the whole body. This includes the complete content and every variable name in the body. It also searches in the URL and in the request ARGS, including the complete content and every name of variable in its arguments. &lt;code&gt;$HEADERS_VAR:Cookie&lt;/code&gt; means that NAXSI will also search in the HTTP “Cookie” header for the specified pattern.&lt;/p&gt;
+
+&lt;h3 id=&quot;score-section&quot;&gt;Score Section&lt;/h3&gt;
+
+&lt;p&gt;s is the score section. It is a “named” counter and will increase the &lt;code&gt;SQL&lt;/code&gt; counter by 4.&lt;/p&gt;
+
+&lt;h3 id=&quot;id&quot;&gt;ID&lt;/h3&gt;
+
+&lt;p&gt;id is the ID of the rule. This example has the ID &lt;code&gt;1000&lt;/code&gt;. Those IDs will be used in NAXSI_FMT and/or to whitelist this ID for a special request.&lt;/p&gt;
+
+&lt;p&gt;Further reading: &lt;a href=&quot;https://github.com/nbs-system/naxsi/wiki/rulessyntax&quot;&gt;rules syntax&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;basicrule&quot;&gt;BasicRule&lt;/h2&gt;
+
+&lt;p&gt;Basic Rules are used to create whitelists&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://atomic111.github.com/assets/article_images/2016-02-17-create-a-naxsi-waf-for-owncloud/basicrule.png&quot; alt=&quot;MainRule&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;whitelist&quot;&gt;Whitelist&lt;/h3&gt;
+
+&lt;p&gt;Which rule ID(s) are whitelisted. The example whitelists the rules 1011 and 1010 to allow special characters within the password field.&lt;/p&gt;
+
+&lt;h3 id=&quot;match-zone-1&quot;&gt;Match Zone&lt;/h3&gt;
+
+&lt;p&gt;Match zones defines which part of the request will be searched for the specified pattern (like for MainRules). This example rule searches in &lt;code&gt;$BODY_VAR:password&lt;/code&gt; for the specified pattern. &lt;code&gt;$BODY_VAR:password&lt;/code&gt; means NAXSI will search for the body variable named “password” for the specified pattern.&lt;/p&gt;
+
+&lt;p&gt;Further reading &lt;a href=&quot;https://github.com/nbs-system/naxsi/wiki/whitelists&quot;&gt;whitelists&lt;/a&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;start-the-owncloud-and-create-naxsi-rules&quot;&gt;Start the owncloud and create NAXSI rules&lt;/h1&gt;
+
+&lt;p&gt;First, we need to install docker and docker-compose. Then download the Project from &lt;a href=&quot;https://github.com/atomic111/example-NAXSI-owncloud.git&quot;&gt;github&lt;/a&gt; and just execute the &lt;code&gt;start.sh&lt;/code&gt; bash script. It creates the data volume container for the Postgres database and for the Owncloud application. It also creates the Postgres container with default user/passwords (user=postgres and empty password) and creates Owncloud itself with the default user/password (user = admin, password = admin). &lt;strong&gt;Not a good security practice. Sorry.&lt;/strong&gt; Let’s focus on creating the WAF for owncloud.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;start.sh&lt;/code&gt; also creates the image and container for the NAXSI WAF. The container starts the WAF in LEARNING MODE and elasticsearch to store NAXSI events.&lt;/p&gt;
+
+&lt;p&gt;After the execution of &lt;code&gt;start.sh&lt;/code&gt; it should look like this.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;
+∅&amp;gt; docker ps --format &quot;table :\t&quot;
+NAMES                       PORTS
+owncloud_waf_1:             0.0.0.0:443-&amp;gt;443/tcp
+owncloud_app_1:             80/tcp
+owncloud_postgres_1:        5432/tcp
+owncloud_elasticsearch_1:   9200/tcp, 9300/tcp
+&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;create-the-first-naxsi-rule&quot;&gt;Create the first NAXSI rule&lt;/h2&gt;
+
+&lt;p&gt;Now the application is started and we have to browse the website to generate data in the logfile (&lt;code&gt;/var/log/nginx/naxsi_error.log&lt;/code&gt;). Log into owncloud via your browser (&lt;code&gt;https://127.0.0.1&lt;/code&gt;), upload a few pictures, create a folder, add a user, delete a file, delete a user, delete a group and click around. Create a lot of different events to prevent false-positives later on.&lt;/p&gt;
+
+&lt;p&gt;To log into the WAF, run &lt;code&gt;docker exec -it owncloud_waf_1 bash&lt;/code&gt; and add a nxapi index to the elasticsearch database with the following command:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;
+curl -XPUT &#39;http://elasticsearch:9200/nxapi/&#39;
+{&quot;acknowledged&quot;:true}
+&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Next, we need to load the data from the log file into ElasticSearch with the following command:&lt;/p&gt;
+
+&lt;p&gt;```
+nxtool.py -c /etc/nginx/nxapi.json –files=/var/log/nginx/naxsi_error.log
+# size :1000
+WARNING:root:List of files :[‘/var/log/nginx/naxsi_error.log’]
+log open
+{‘date’: ‘2016-02-16T14:29:33+00’, ‘events’: [{‘zone’: ‘HEADERS’, ‘ip’: ‘127.0.0.1’, ‘uri’: ‘/’, ‘server’: ‘127.0.0.1’, ‘content’: ‘’, ‘var_name’: ‘cookie’, ‘coords’: [104.195397, 35.86166], ‘country’: ‘CN’, ‘date’: ‘2016-02-16T14:29:33+00’, ‘id’: ‘1315’}]}
+{‘date’: ‘2016-02-16T14:29:36+00’, ‘events’: [{‘zone’: ‘HEADERS’, ‘ip’: ‘127.0.0.1’, ‘uri’: ‘/index.php/apps/files/’, ‘server’: ‘127.0.0.1’, ‘content’: ‘’, ‘var_name’: ‘cookie’, ‘coords’: [104.195397, 35.86166], ‘country’: ‘CN’, ‘date’: ‘2016-02-16T14:29:36+00’, ‘id’: ‘1315’}]}&lt;/p&gt;
+
+&lt;p&gt;…&lt;/p&gt;
+
+&lt;p&gt;{‘date’: ‘2016-02-16T14:52:22+00’, ‘events’: [{‘zone’: ‘HEADERS’, ‘ip’: ‘127.0.0.1’, ‘uri’: ‘/index.php/heartbeat’, ‘server’: ‘127.0.0.1’, ‘content’: ‘’, ‘var_name’: ‘cookie’, ‘coords’: [104.195397, 35.86166], ‘country’: ‘CN’, ‘date’: ‘2016-02-16T14:52:22+00’, ‘id’: ‘1315’}, {‘zone’: ‘BODY’, ‘ip’: ‘127.0.0.1’, ‘uri’: ‘/index.php/heartbeat’, ‘server’: ‘127.0.0.1’, ‘content’: ‘’, ‘var_name’: ‘’, ‘coords’: [104.195397, 35.86166], ‘country’: ‘CN’, ‘date’: ‘2016-02-16T14:52:22+00’, ‘id’: ‘16’}]}
+Written 710 events
+root@18cecd3232a2:/opt#
+```&lt;/p&gt;
+
+&lt;p&gt;The following command displays the top servers which raised the most exceptions. Also the top URIs and zones which raised exceptions are shown. We need the URI list to generate the whitelists for specific requests.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;
+nxtool.py -x -c /etc/nginx/nxapi.json
+# size :1000
+# Whitelist(ing) ratio :
+# Top servers :
+# 127.0.0.1 100.0% (total:710/710)
+# Top URI(s) :
+# /core/img/breadcrumb.svg 2.54% (total:18/710)
+# /index.php/core/ajax/appconfig.php 2.39% (total:17/710)
+# /index.php/settings/users/users 2.39% (total:17/710)
+# /cron.php 2.25% (total:16/710)
+# /index.php/core/js/oc.js 2.25% (total:16/710)
+# /index.php/apps/notifications 2.11% (total:15/710)
+# /index.php/avatar/admin/128 2.11% (total:15/710)
+# /index.php/core/ajax/share.php 1.69% (total:12/710)
+# /index.php/apps/files/ajax/getstoragestats.php 1.55% (total:11/710)
+# /index.php/settings/users/groups 1.27% (total:9/710)
+# /index.php/apps/files/ajax/upload.php 1.13% (total:8/710)
+# Top Zone(s) :
+# HEADERS 95.07% (total:675/710)
+# URL 2.82% (total:20/710)
+# BODY 1.69% (total:12/710)
+# BODY|NAME 0.28% (total:2/710)
+# ARGS 0.14% (total:1/710)
+# Top Peer(s) :
+# 127.0.0.1 100.0% (total:710/710)
+root@18cecd3232a2:/opt#
+&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Now generate a whitelist for the first URI and save the &lt;code&gt;BasicRule  wl:1315 &quot;mz:$HEADERS_VAR:cookie&quot;;&lt;/code&gt; in the &lt;code&gt;naxsi_whitelist.rules&lt;/code&gt; file.&lt;/p&gt;
+
+&lt;p&gt;```
+nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -f –filter ‘uri /core/img/breadcrumb.svg’ –slack
+# size :1000
+#  template :/usr/local/nxapi/tpl/HEADERS/cookies.tpl
+Nb of hits : 106
+#  template matched, generating all rules.
+1 whitelists …
+#Rule (1315) double encoding !
+#total hits 106
+#peers : 127.0.0.1
+#uri : /core/img/breadcrumb.svg
+#var_name : cookie&lt;/p&gt;
+
+&lt;p&gt;BasicRule  wl:1315 “mz:$HEADERS_VAR:cookie”;
+#  template :/usr/local/nxapi/tpl/BODY/url-wide-id.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/BODY/url-wide-id-BODY-NAME.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/BODY/precise-id.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/BODY/var_name-wide-id.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/BODY/site-wide-id.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/ARGS/url-wide-id.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/ARGS/url-wide-id-NAME.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/ARGS/precise-id.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/ARGS/site-wide-id.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/APPS/google_analytics-ARGS.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/URI/url-wide-id.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/URI/global-url-0x_in_pircutres.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/URI/site-wide-id.tpl
+Nb of hits : 0
+root@18cecd3232a2:/opt#
+&lt;code&gt;
+&lt;/code&gt;
+echo “BasicRule  wl:1315 &quot;mz:$HEADERS_VAR:cookie&quot;;” &amp;gt; /etc/nginx/naxsi_whitelist.rules
+```&lt;/p&gt;
+
+&lt;p&gt;Now tag the request with the corresponding rule inside elasticsearch.&lt;/p&gt;
+
+&lt;p&gt;```
+nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -w /etc/nginx/naxsi_whitelist.rules –tag
+# size :1000
+#Loading tpl ‘/etc/nginx/naxsi_whitelist.rules’
+TAG RULE :{‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
+                             {‘match’: {‘zone’: ‘HEADERS’}},
+                             {‘match’: {‘var_name’: ‘cookie’}},
+                             {‘match’: {u’whitelisted’: u’false’}},
+                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
+ ‘size’: ‘0’}
+5151 items to be tagged …
+Tagged 515 events out of 5151
+Tagged 1030 events out of 5151
+Tagged 1545 events out of 5151
+Tagged 2060 events out of 5151
+Tagged 2575 events out of 5151
+Tagged 3090 events out of 5151
+Tagged 3605 events out of 5151
+Tagged 4120 events out of 5151
+Tagged 4635 events out of 5151
+Tagged 5150 events out of 5151
+Tagged 5151 events out of 5151&lt;/p&gt;
+
+&lt;p&gt;TAG RULE :{‘from’: 0,
+ ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
+                             {‘match’: {‘zone’: ‘HEADERS’}},
+                             {‘match’: {‘var_name’: ‘cookie’}},
+                             {‘match’: {u’whitelisted’: u’false’}},
+                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
+ ‘size’: ‘0’}
+178 items to be tagged …
+Tagged 17 events out of 178
+Tagged 34 events out of 178
+Tagged 51 events out of 178
+Tagged 68 events out of 178
+Tagged 85 events out of 178
+Tagged 102 events out of 178
+Tagged 119 events out of 178
+Tagged 136 events out of 178
+Tagged 153 events out of 178
+Tagged 170 events out of 178
+Tagged 178 events out of 178&lt;/p&gt;
+
+&lt;p&gt;TAG RULE :{‘from’: 0,
+ ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
+                             {‘match’: {‘zone’: ‘HEADERS’}},
+                             {‘match’: {‘var_name’: ‘cookie’}},
+                             {‘match’: {u’whitelisted’: u’false’}},
+                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
+ ‘size’: ‘0’}
+123 items to be tagged …
+Tagged 12 events out of 123
+Tagged 24 events out of 123
+Tagged 36 events out of 123
+Tagged 48 events out of 123
+Tagged 60 events out of 123
+Tagged 72 events out of 123
+Tagged 84 events out of 123
+Tagged 96 events out of 123
+Tagged 108 events out of 123
+Tagged 120 events out of 123
+Tagged 123 events out of 123&lt;/p&gt;
+
+&lt;p&gt;TAG RULE :{‘from’: 0,
+ ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
+                             {‘match’: {‘zone’: ‘HEADERS’}},
+                             {‘match’: {‘var_name’: ‘cookie’}},
+                             {‘match’: {u’whitelisted’: u’false’}},
+                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
+ ‘size’: ‘0’}
+99 items to be tagged …
+Tagged 99 events out of 99&lt;/p&gt;
+
+&lt;p&gt;TAG RULE :{‘from’: 0,
+ ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
+                             {‘match’: {‘zone’: ‘HEADERS’}},
+                             {‘match’: {‘var_name’: ‘cookie’}},
+                             {‘match’: {u’whitelisted’: u’false’}},
+                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
+ ‘size’: ‘0’}
+49 items to be tagged …
+Tagged 49 events out of 49&lt;/p&gt;
+
+&lt;p&gt;TAG RULE :{‘from’: 0,
+ ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
+                             {‘match’: {‘zone’: ‘HEADERS’}},
+                             {‘match’: {‘var_name’: ‘cookie’}},
+                             {‘match’: {u’whitelisted’: u’false’}},
+                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
+ ‘size’: ‘0’}
+0 items to be tagged …&lt;/p&gt;
+
+&lt;p&gt;5600 items tagged …
+```&lt;/p&gt;
+
+&lt;p&gt;When you look to the report again, it will confirm, that the number of requests decreased&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;
+nxtool.py -x -c /etc/nginx/nxapi.json -s 127.0.0.1
+# size :1000
+# Whitelist(ing) ratio :
+# Top servers :
+# 127.0.0.1 100.0% (total:424/424)
+# Top URI(s) :
+# /index.php/apps/files/ajax/upload.php 10.38% (total:44/424)
+# /index.php/heartbeat 8.02% (total:34/424)
+# /index.php/apps/files/ajax/delete.php 5.66% (total:24/424)
+# /index.php/avatar/cropped 5.66% (total:24/424)
+# /index.php/core/ajax/share.php 5.66% (total:24/424)
+# /index.php/apps/gallery/files/list 4.95% (total:21/424)
+# /index.php/core/ajax/appconfig.php 4.25% (total:18/424)
+# /index.php/settings/apps/list 4.25% (total:18/424)
+# /index.php/apps/files_trashbin/ajax/delete.php 3.77% (total:16/424)
+# /core/css/multiselect.css 3.54% (total:15/424)
+# /index.php/apps/gallery/thumbnails 3.54% (total:15/424)
+# Top Zone(s) :
+# URL 41.27% (total:175/424)
+# BODY 30.42% (total:129/424)
+# BODY|NAME 13.68% (total:58/424)
+# ARGS 8.49% (total:36/424)
+# ARGS|NAME 6.13% (total:26/424)
+# Top Peer(s) :
+# 127.0.0.1 100.0% (total:424/424)
+&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;create-the-second-naxsi-rule&quot;&gt;Create the second NAXSI rule&lt;/h2&gt;
+
+&lt;p&gt;```
+nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -f –filter ‘uri /index.php/apps/files/ajax/upload.php’ –slack
+# size :1000
+#  template :/usr/local/nxapi/tpl/HEADERS/cookies.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/BODY/url-wide-id.tpl
+Nb of hits : 44
+#  template matched, generating all rules.
+1 whitelists …
+#msg: A generic whitelist, true for the whole uri
+#Rule (2) request too big, stored on disk and not parsed
+#total hits 44
+#peers : 127.0.0.1
+#uri : /index.php/apps/files/ajax/upload.php&lt;/p&gt;
+
+&lt;p&gt;BasicRule  wl:2 “mz:$URL:/index.php/apps/files/ajax/upload.php|BODY”;
+#  template :/usr/local/nxapi/tpl/BODY/url-wide-id-BODY-NAME.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/BODY/precise-id.tpl
+Nb of hits : 44
+#  template matched, generating all rules.
+1 whitelists …
+#msg: A generic, precise wl tpl (url+var+id)
+#Rule (2) request too big, stored on disk and not parsed
+#total hits 44
+#peers : 127.0.0.1
+#uri : /index.php/apps/files/ajax/upload.php&lt;/p&gt;
+
+&lt;p&gt;BasicRule  wl:2 “mz:$URL:/index.php/apps/files/ajax/upload.php|BODY”;
+#  template :/usr/local/nxapi/tpl/BODY/var_name-wide-id.tpl
+Nb of hits : 44
+#  template matched, generating all rules.
+1 whitelists …
+#msg: A generic rule to spot var-name specific WL
+#Rule (2) request too big, stored on disk and not parsed
+#total hits 44
+#peers : 127.0.0.1
+#uri : /index.php/apps/files/ajax/upload.php&lt;/p&gt;
+
+&lt;p&gt;BasicRule  wl:2 “mz:BODY”;
+#  template :/usr/local/nxapi/tpl/BODY/site-wide-id.tpl
+Nb of hits : 44
+#  template matched, generating all rules.
+1 whitelists …
+#msg: A generic, wide (id+zone) wl
+#Rule (2) request too big, stored on disk and not parsed
+#total hits 44
+#peers : 127.0.0.1
+#uri : /index.php/apps/files/ajax/upload.php&lt;/p&gt;
+
+&lt;p&gt;BasicRule  wl:2 “mz:BODY”;
+#  template :/usr/local/nxapi/tpl/ARGS/url-wide-id.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/ARGS/url-wide-id-NAME.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/ARGS/precise-id.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/ARGS/site-wide-id.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/APPS/google_analytics-ARGS.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/URI/url-wide-id.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/URI/global-url-0x_in_pircutres.tpl
+Nb of hits : 0
+#  template :/usr/local/nxapi/tpl/URI/site-wide-id.tpl
+Nb of hits : 0
+root@18cecd3232a2:/opt#
+```&lt;/p&gt;
+
+&lt;p&gt;NXTOOL creates some rules for the same URI. The Main rule 2 protects against request which are to big and won´t be parsed. If we choose the &lt;code&gt;BasicRule  wl:2 &quot;mz:BODY&quot;;&lt;/code&gt;, we would allow for big requests on all URIs. That is not what we want. Instead, I recommend the &lt;code&gt;BasicRule  wl:2 &quot;mz:$URL:/index.php/apps/files/ajax/upload.php|BODY&quot;;&lt;/code&gt; because this rules allows only big requests for a specific URI.&lt;/p&gt;
+
+&lt;p&gt;Save the rule in the &lt;code&gt;naxsi_whitelist.rules&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;
+echo &quot;BasicRule  wl:2 \&quot;mz:\$URL:/index.php/apps/files/ajax/upload.php\|BODY\&quot;;&quot; &amp;gt;&amp;gt; /etc/nginx/naxsi_whitelist.rules
+&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Tag the request with the corresponding rule within elasticsearch.&lt;/p&gt;
+
+&lt;p&gt;```
+nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -w /etc/nginx/naxsi_whitelist.rules –tag
+# size :1000
+#Loading tpl ‘/etc/nginx/naxsi_whitelist.rules’
+TAG RULE :{‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
+                             {‘match’: {‘zone’: ‘HEADERS’}},
+                             {‘match’: {‘var_name’: ‘cookie’}},
+                             {‘match’: {u’whitelisted’: u’false’}},
+                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
+ ‘size’: ‘0’}
+0 items to be tagged …&lt;/p&gt;
+
+&lt;p&gt;TAG RULE :{‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘2’}},
+                             {‘match’: {‘uri’: ‘/index.php/apps/files/ajax/upload.php’}},
+                             {‘match’: {‘zone’: ‘BODY’}},
+                             {‘match’: {u’whitelisted’: u’false’}},
+                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
+ ‘size’: ‘0’}
+44 items to be tagged …
+Tagged 44 events out of 44&lt;/p&gt;
+
+&lt;p&gt;TAG RULE :{‘from’: 0,
+ ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘2’}},
+                             {‘match’: {‘uri’: ‘/index.php/apps/files/ajax/upload.php’}},
+                             {‘match’: {‘zone’: ‘BODY’}},
+                             {‘match’: {u’whitelisted’: u’false’}},
+                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
+ ‘size’: ‘0’}
+44 items to be tagged …
+Tagged 44 events out of 44&lt;/p&gt;
+
+&lt;p&gt;TAG RULE :{‘from’: 0,
+ ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘2’}},
+                             {‘match’: {‘uri’: ‘/index.php/apps/files/ajax/upload.php’}},
+                             {‘match’: {‘zone’: ‘BODY’}},
+                             {‘match’: {u’whitelisted’: u’false’}},
+                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
+ ‘size’: ‘0’}
+0 items to be tagged …&lt;/p&gt;
+
+&lt;p&gt;88 items tagged …
+root@18cecd3232a2:/opt#
+```&lt;/p&gt;
+
+&lt;p&gt;Repeat these steps for all other requests until you get a complete whitelist similar to this:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;
+BasicRule  wl:1000 &quot;mz:$URL:/apps/activity/img/delete-color.svg|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/apps/files/img/delete.svg|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/apps/updater/css/updater.css|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/apps/updater/img/app.svg|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/apps/updater/js/3rdparty/angular.js|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/apps/updater/js/updater.js|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/apps/updater/l10n/de_DE.js|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/core/css/multiselect.css|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/core/img/actions/delete-hover.svg|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/core/img/actions/delete.svg|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/core/js/multiselect.js|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/core/js/singleselect.js|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/core/vendor/select2/select2-spinner.gif|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/core/vendor/select2/select2.css|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/core/vendor/select2/select2.js|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/core/vendor/select2/select2.png|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/index.php/apps/activity/settings|BODY|NAME&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/index.php/apps/files/ajax/delete.php|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/index.php/apps/files_trashbin/ajax/delete.php|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/index.php/apps/files_trashbin/ajax/undelete.php|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/index.php/apps/updater/backup/index|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/index.php/settings/apps/list|ARGS|NAME&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/settings/js/users/deleteHandler.js|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/settings/js/users/deleteHandler.js|URL&quot;;
+BasicRule  wl:1000 &quot;mz:$URL:/index.php/apps/files/ajax/scan.php|$ARGS_VAR:requesttoken&quot;;
+BasicRule  wl:1001,1310,1311 &quot;mz:$URL:/index.php/apps/files/ajax/delete.php|$BODY_VAR:files&quot;;
+BasicRule  wl:1001,1310,1311 &quot;mz:$URL:/index.php/apps/files_trashbin/ajax/delete.php|$BODY_VAR:files&quot;;
+BasicRule  wl:1001,1310,1311 &quot;mz:$URL:/index.php/apps/files_trashbin/ajax/undelete.php|$BODY_VAR:files&quot;;
+BasicRule  wl:1001,1310,1311 &quot;mz:$URL:/index.php/core/ajax/appconfig.php|$BODY_VAR:value&quot;;
+BasicRule  wl:1002 &quot;mz:$URL_X:/core/css/images|URL&quot;;
+BasicRule  wl:1002 &quot;mz:$URL:/index.php/core/preview.png|$HEADERS_VAR:cookie&quot;;
+BasicRule  wl:1002 &quot;mz:$URL:/index.php/core/ajax/appconfig.php|$HEADERS_VAR:cookie&quot;;
+BasicRule  wl:1002 &quot;mz:$URL:/index.php/core/ajax/share.php|$HEADERS_VAR:cookie&quot;;
+BasicRule  wl:1002 &quot;mz:$URL:/index.php/core/js/oc.js|$HEADERS_VAR:cookie&quot;;
+BasicRule  wl:1002 &quot;mz:$URL:/core/img/breadcrumb.svg|$HEADERS_VAR:cookie&quot;;
+BasicRule  wl:1002 &quot;mz:$URL:/index.php/apps/notifications|$HEADERS_VAR:cookie&quot;;
+BasicRule  wl:1002 &quot;mz:$URL_X:/index.php/avatar|$HEADERS_VAR:cookie&quot;;
+BasicRule  wl:1002 &quot;mz:$URL_X:/index.php/apps/files_trashbin/ajax|$HEADERS_VAR:cookie&quot;;
+BasicRule  wl:1002 &quot;mz:$URL:/index.php/apps/files/ajax/getstoragestats.php|$HEADERS_VAR:cookie&quot;;
+BasicRule  wl:1002 &quot;mz:$URL:/cron.php|$HEADERS_VAR:cookie&quot;;
+BasicRule  wl:1005 &quot;mz:$URL:/index.php/core/ajax/share.php|$BODY_VAR:sharewith[password]&quot;;
+BasicRule  wl:1008 &quot;mz:$URL:/index.php/apps/gallery/files/list|$ARGS_VAR:mediatypes&quot;;
+BasicRule  wl:1008 &quot;mz:$URL:/index.php/apps/gallery/thumbnails|$ARGS_VAR:ids&quot;;
+BasicRule  wl:1008 &quot;mz:$URL:/index.php/apps/galleryplus/files/list|$ARGS_VAR:mediatypes&quot;;
+BasicRule  wl:1008 &quot;mz:$URL:/index.php/apps/galleryplus/thumbnails|$ARGS_VAR:ids&quot;;
+BasicRule  wl:1009 &quot;mz:$URL:/index.php/apps/files_pdfviewer/|$ARGS_VAR:file&quot;;
+BasicRule  wl:1009 &quot;mz:$URL:/|$BODY_VAR:requesttoken&quot;;
+BasicRule  wl:1009 &quot;mz:$URL:/index.php|$ARGS_VAR:requesttoken&quot;;
+BasicRule  wl:1001,1009,1010,1011,1310,1311 &quot;mz:$URL:/index.php/settings/personal/changepassword|$BODY_VAR:oldpassword&quot;;
+BasicRule  wl:1001,1009,1010,1011,1310,1311 &quot;mz:$URL:/index.php/settings/personal/changepassword|$BODY_VAR:personal-password&quot;;
+BasicRule  wl:1001,1009,1010,1011,1310,1311 &quot;mz:$URL:/index.php/settings/personal/changepassword|$BODY_VAR:personal-password-clone&quot;;
+BasicRule  wl:1001,1009,1010,1011,1310,1311 &quot;mz:$URL:/index.php/settings/users/users|$BODY_VAR:password&quot;;
+BasicRule  wl:1001,1009,1010,1011,1310,1311 &quot;mz:$URL:/|$BODY_VAR:password&quot;;
+BasicRule  wl:1302,1303 &quot;mz:$URL:/index.php/apps/files/api/v1/tags/_$!&amp;lt;Favorite&amp;gt;!$_/files|URL&quot;;
+BasicRule  wl:1310,1311 &quot;mz:$URL:/index.php/avatar/cropped|BODY|NAME&quot;;
+BasicRule  wl:1310,1311 &quot;mz:$URL:/index.php/core/ajax/share.php|ARGS|NAME&quot;;
+BasicRule  wl:1310,1311 &quot;mz:$URL:/index.php/core/ajax/share.php|BODY|NAME&quot;;
+BasicRule  wl:1310,1311 &quot;mz:$URL:/index.php/settings/users/users|BODY|NAME&quot;;
+BasicRule  wl:1311,1310,1011 &quot;mz:$URL:/index.php/settings/users/users|BODY|NAME&quot;;
+BasicRule  wl:1315 &quot;mz:$HEADERS_VAR:cookie&quot;;
+BasicRule  wl:1315 &quot;mz:$URL:/index.php/apps/files_pdfviewer/|$ARGS_VAR:file&quot;;
+BasicRule  wl:16 &quot;mz:$URL:/index.php/heartbeat|BODY&quot;;
+BasicRule  wl:2 &quot;mz:$URL:/index.php/apps/files/ajax/upload.php|BODY&quot;;
+BasicRule  wl:2 &quot;mz:$URL:/index.php/avatar/|BODY&quot;;
+BasicRule wl:17 &quot;mz:$URL_X:/remote.php/webdav|$HEADERS_VAR:Accept&quot;; #wl libinjection_sql on header
+&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Save this whitelist to &lt;code&gt;waf/naxsi_whitelist.rules&lt;/code&gt; in the project’s folder. Change the &lt;code&gt;docker-compose.yml&lt;/code&gt; to disable learning mode of NAXSI and switch over to LIVE mode.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;
+waf:
+    build: ./waf
+    depends_on:
+      - app
+      - elasticsearch
+    links:
+      - app:owncloud
+      - elasticsearch:elasticsearch
+    environment:
+      - LEARNING_MODE=no
+      - PROXY_REDIRECT_IP=owncloud
+    ports:
+      - &quot;443:443&quot;
+    networks:
+      - frontend
+      - backend_app
+&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Run &lt;code&gt;docker rm -f owncloud_waf_1&lt;/code&gt; to shutdown and remove the running WAF container. Execute &lt;code&gt;docker-compose -p owncloud build&lt;/code&gt; to create a new image which includes the new &lt;code&gt;naxsi_whitelist.rules&lt;/code&gt;. Start it via &lt;code&gt;docker-compose -p owncloud up -d&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;test-the-naxsi-waf&quot;&gt;Test the NAXSI WAF&lt;/h2&gt;
+
+&lt;p&gt;Watch the log file from the &lt;code&gt;owncloud_waf_1&lt;/code&gt; docker container.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;
+∅&amp;gt; docker exec -it owncloud_waf_1 tail -f /var/log/nginx/naxsi_error.log
+&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Go to the owncloud login page and put &lt;code&gt;user’ or 1=1;#&lt;/code&gt; as username and password in the fields. Now you should see an error message in the NAXSI log file.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;
+2016/03/30 09:30:39 [error] 15#0: *389 NAXSI_FMT: ip=127.0.0.1&amp;amp;server=127.0.0.1&amp;amp;uri=/&amp;amp;learning=0&amp;amp;vers=0.55rc1&amp;amp;total_processed=112&amp;amp;total_blocked=2&amp;amp;block=1&amp;amp;cscore0=$SQL&amp;amp;score0=4&amp;amp;cscore1=$XSS&amp;amp;score1=8&amp;amp;zone0=BODY&amp;amp;id0=1008&amp;amp;var_name0=user, client: 127.0.0.1, server: owncloud_naxsi, request: &quot;POST / HTTP/1.0&quot;, host: &quot;127.0.0.1:8080&quot;
+&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;It’s working. Have FUN!!!&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;to-dos&quot;&gt;To Do’s&lt;/h1&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Write permanant NAXSI events to elasticsearch&lt;/li&gt;
+  &lt;li&gt;Clean NAXSI logs&lt;/li&gt;
+  &lt;li&gt;Use Kibana for visualization&lt;/li&gt;
+  &lt;li&gt;Clean rules&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;links&quot;&gt;Links&lt;/h1&gt;
+
+&lt;p&gt;Thanks for the useful information on those websites&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.nbs-system.co.uk/blog-2/naxsi-web-application-firewall-for-nginx.html&quot;&gt;NBS-System Blog&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/nbs-system/naxsi&quot;&gt;NBS-System&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.mare-system.de/blog/page/1365686359/&quot;&gt;NAXSI - Users - Manual&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.admin-magazin.de/Das-Heft/2013/03/Nginx-als-Frontend-Gateway-mit-Naxsi-Firewall/%28offset%29/6&quot;&gt;Admin Magazin&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://spike.nginx-goodies.com/rules/&quot;&gt;NAXSI Rules&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;license-and-author&quot;&gt;License and Author&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Author:: Patrick Muench &lt;a href=&quot;&amp;#109;&amp;#097;&amp;#105;&amp;#108;&amp;#116;&amp;#111;:&amp;#112;&amp;#097;&amp;#116;&amp;#114;&amp;#105;&amp;#099;&amp;#107;&amp;#046;&amp;#109;&amp;#117;&amp;#101;&amp;#110;&amp;#099;&amp;#104;&amp;#049;&amp;#049;&amp;#049;&amp;#049;&amp;#064;&amp;#103;&amp;#109;&amp;#097;&amp;#105;&amp;#108;&amp;#046;&amp;#099;&amp;#111;&amp;#109;&quot;&gt;&amp;#112;&amp;#097;&amp;#116;&amp;#114;&amp;#105;&amp;#099;&amp;#107;&amp;#046;&amp;#109;&amp;#117;&amp;#101;&amp;#110;&amp;#099;&amp;#104;&amp;#049;&amp;#049;&amp;#049;&amp;#049;&amp;#064;&amp;#103;&amp;#109;&amp;#097;&amp;#105;&amp;#108;&amp;#046;&amp;#099;&amp;#111;&amp;#109;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Licensed under the Apache License, Version 2.0 (the “License”);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;http://www.apache.org/licenses/LICENSE-2.0
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an “AS IS” BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.&lt;/p&gt;
+</content>
+ </entry>
+
+ <entry>
+   <title>Create a NAXSI WAF for Owncloud</title>
+   <link href="http://atomic111.github.io/article/create-a-naxsi-waf-for-owncloud"/>
+   <updated>2016-02-17T19:00:00+00:00</updated>
+   <id>http://atomic111.github.io/article/create-a-naxsi-waf-for-owncloud</id>
    <content type="html">&lt;h1 id=&quot;introduction&quot;&gt;Introduction&lt;/h1&gt;
 
 &lt;p&gt;A secure architecture of a web application consists of 3 components: a frontend, an application and a data backend. The frontend server’s task from a security perspective is to terminate SSL and to be the first line of defense. That means it inspects and validates requests from the untrusted outside world.&lt;/p&gt;
