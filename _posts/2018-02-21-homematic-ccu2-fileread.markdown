@@ -30,9 +30,9 @@ with access to the web interface.
 
 The system provides a JSON API, which exposes various methods. While some methods require the connecting user to be authenticated, a number of methods can also be used anonymously.
 
-A code review of the file api/methods/user/getlanguage.tcl revealed that the User.getLanguage method allows unauthenticated attackers to read the first line of an arbitrary file on the CCU2's filesystem.
+A code review of the file `api/methods/user/getlanguage.tcl` revealed that the User.getLanguage method allows unauthenticated attackers to read the first line of an arbitrary file on the CCU2's filesystem.
 
-Please consider the following excerpt from the file api/methods/user/getlanguage.tcl:
+Please consider the following excerpt from the file `api/methods/user/getlanguage.tcl`:
 
 ```
 if {[catch {set fp [open "/etc/config/userprofiles/$args(userName).lang" r]}] == 0} {
