@@ -3,16 +3,16 @@
 	
 	<link href="//gmpg.org/xfn/11" rel="profile">
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<link rel="canonical" href="http://atomic111.github.io/article/homematic-ccu2-remote-code-execution" />
+	<link rel="canonical" href="http://atomic111.github.io/article/homematic-ccu2-untrusted_addon" />
 	<meta name="description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
 	<meta property="og:description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
 	<meta itemprop="image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
 	<meta property="og:image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
-	<meta property="og:title" content="Remote Code Execution in HomeMatic CCU2" />
+	<meta property="og:title" content="Untrusted Addon Installation / Remote Code Execution in HomeMatic CCU2" />
 	<meta property="og:type" content="article" />
-	<meta property="og:url" content="http://atomic111.github.io/article/homematic-ccu2-remote-code-execution" />
+	<meta property="og:url" content="http://atomic111.github.io/article/homematic-ccu2-untrusted_addon" />
 	<meta property="og:site_name" content="Patrick Münch Blog" />
-	<title>Remote Code Execution in HomeMatic CCU2 &middot; Patrick Münch Blog</title>
+	<title>Untrusted Addon Installation / Remote Code Execution in HomeMatic CCU2 &middot; Patrick Münch Blog</title>
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="HandheldFriendly" content="True" />
 	<meta name="MobileOptimized" content="320" />
@@ -70,7 +70,7 @@
 </div>
 
 	<div id="post-info" data-stellar-ratio="0.7">
-		<h1>Remote Code Execution in HomeMatic CCU2</h1>
+		<h1>Untrusted Addon Installation / Remote Code Execution in HomeMatic CCU2</h1>
 		
 		<a class="site-title" href="https://twitter.com/atomiczero111"><div class="site-icon-small" style="background-image: url(https://avatars0.githubusercontent.com/u/7220740?s=400);"></div>Patrick Münch</a>, in 21 February 2018
 	</div>
@@ -91,18 +91,21 @@
 
 <h1 id="issue-description">Issue Description</h1>
 
-<p>While analyzing the implementation of the CCU2’s web interface, a remote code execution vulnerability has been identified, which can be exploited in order to read and write arbitrary files to the CCU2’s filesystem. This vulnerability can be exploited by unauthenticated attackers with access to the web interface.</p>
+<p>While analyzing the implementation of the CCU2’s web interface, in particular the addon installation process and how to build own addon-packages, a remote code execution vulnerability has been identified.</p>
 
-<p>The TCL script interpreter is not secured by any session handling and executes all TCL scripts sent via POST requests to <code>/Text.exe</code> on port 80 or 8181 of the system.</p>
+<p>An authenticated user can upload addon packages, which contain an update_script file. This update_script file will be executed during the addon installation process. This means that an attacker can create or overwrite arbitrary files or install malicious software.</p>
 
-<p>TCL script example:</p>
+<p>This vulnerability can be exploited in order to execute arbitrary code on the system. An attacker can for instance overwrite the <code>/usr/local/crontabs/root</code> crontab in order to reach this goal.</p>
 
-<p><code>
-string stdout;
-string stderr;
-system.Exec("cat /etc/shadow", &amp;stdout, &amp;stderr);
-WriteLine(stdout);
-</code></p>
+<p>This can in particular be problematic if users install untrusted addons from remote sources. It might be advisable to introduce a signing scheme for trusted addons and to warn the user in case they install untrusted or unsigned addons, which could contain malicious code.</p>
+
+<p>Procedure:</p>
+
+<ul>
+  <li>Create a file named update_script containing malicious code</li>
+  <li>Pack the addon package</li>
+  <li>Upload the addon package via the Homematic CCU2 web interface</li>
+</ul>
 
 <h1 id="credit">Credit</h1>
 
@@ -122,7 +125,7 @@ WriteLine(stdout);
 		
 	
 	<script src="https://apis.google.com/js/plusone.js"></script>
-	<div id="g-comments" class="g-comments" data-href="http://atomic111.github.io/article/homematic-ccu2-remote-code-execution" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
+	<div id="g-comments" class="g-comments" data-href="http://atomic111.github.io/article/homematic-ccu2-untrusted_addon" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
 	<script>
 		var width = $('#comments').width() * 0.9;
 		width = Math.round(width);
@@ -144,10 +147,12 @@ WriteLine(stdout);
 </div>
 
 	
-	
-	
-	
-	
+		
+		
+		
+		
+		
+		
 	
 
 
@@ -156,9 +161,9 @@ WriteLine(stdout);
 		<a class="scroll" data-speed="500" href="#article"><span class="genericon genericon-collapse"></span></a>
 	</div>
 	<div id="post-info" data-stellar-ratio="0.5" data-stellar-vertical-offset="120">
-		<h3>Read next</h3>
-		<a href="/article/homematic-ccu2-untrusted_addon">
-			<h1>Untrusted Addon Installation / Remote Code Execution in HomeMatic CCU2</h1>
+		<h3>Featured post</h3>
+		<a href="/article/homematic-ccu2-remote-code-execution">
+			<h1>Remote Code Execution in HomeMatic CCU2</h1>
 			
 				<h2></h2>
 			
