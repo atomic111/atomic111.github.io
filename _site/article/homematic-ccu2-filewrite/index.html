@@ -3,16 +3,16 @@
 	
 	<link href="//gmpg.org/xfn/11" rel="profile">
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<link rel="canonical" href="http://atomic111.github.io/article/homematic-ccu2-flieread" />
+	<link rel="canonical" href="http://atomic111.github.io/article/homematic-ccu2-filewrite" />
 	<meta name="description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
 	<meta property="og:description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
 	<meta itemprop="image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
 	<meta property="og:image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
-	<meta property="og:title" content="Directory Traversal / Arbitrary File Read in HomeMatic CCU2" />
+	<meta property="og:title" content="Arbitrary File Upload / Remote Code Execution in HomeMatic CCU2" />
 	<meta property="og:type" content="article" />
-	<meta property="og:url" content="http://atomic111.github.io/article/homematic-ccu2-flieread" />
-	<meta property="og:site_name" content="Patrick Blog" />
-	<title>Directory Traversal / Arbitrary File Read in HomeMatic CCU2 &middot; Patrick Blog</title>
+	<meta property="og:url" content="http://atomic111.github.io/article/homematic-ccu2-filewrite" />
+	<meta property="og:site_name" content="Patrick Münch Blog" />
+	<title>Arbitrary File Upload / Remote Code Execution in HomeMatic CCU2 &middot; Patrick Münch Blog</title>
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="HandheldFriendly" content="True" />
 	<meta name="MobileOptimized" content="320" />
@@ -53,7 +53,7 @@
 </label>
 <input id="_1" type="checkbox">
 <div class="menu-content">
-	<p class="menu-title">Patrick Blog<p>
+	<p class="menu-title">Patrick Münch Blog<p>
 	<div class="menu" style="background-color: #1a1a1a; z-index: -1;"></div>
 	
 		<a href="/">Home</a>
@@ -70,7 +70,7 @@
 </div>
 
 	<div id="post-info" data-stellar-ratio="0.7">
-		<h1>Directory Traversal / Arbitrary File Read in HomeMatic CCU2</h1>
+		<h1>Arbitrary File Upload / Remote Code Execution in HomeMatic CCU2</h1>
 		
 		<a class="site-title" href="https://twitter.com/atomiczero111"><div class="site-icon-small" style="background-image: url(https://avatars0.githubusercontent.com/u/7220740?s=400);"></div>Patrick Münch</a>, in 21 February 2018
 	</div>
@@ -91,30 +91,17 @@
 
 <h1 id="issue-description">Issue Description</h1>
 
-<p>While analyzing the implementation of the CCU2’s web interface, one Directory Traversal vulnerabilities has been identified, which can be exploited in order to read files from the CCU2’s filesystem. This vulnerability can be exploited by unauthenticated attackers
-with access to the web interface.</p>
+<p>While analyzing the implementation of the CCU2’s web interface, one Directory Traversal vulnerabilities has been identified, which can be exploited in order to write arbitrary files to the CCU2’s filesystem. This vulnerability can be exploited by unauthenticated attackers with access to the web interface.</p>
 
 <p>The system provides a JSON API, which exposes various methods. While some methods require the connecting user to be authenticated, a number of methods can also be used anonymously.</p>
 
-<p>A code review of the file api/methods/user/getlanguage.tcl revealed that the User.getLanguage method allows unauthenticated attackers to read the first line of an arbitrary file on the CCU2’s filesystem.</p>
+<p>A code review of the file <code>api/methods/user/setlanguage.tcl</code> revealed that the User.setLanguage method, which can be used without authentication, is prone to a Directory Traversal vulnerability. Please consider the following excerpt from the affected code:</p>
 
-<p>Please consider the following excerpt from the file api/methods/user/getlanguage.tcl:</p>
+<p><code>
+exec echo $args(userLang)&gt;/etc/config/userprofiles/$args(userName).lang
+</code></p>
 
-<p>```
-if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}] == 0} {
-  set data [read $fp]
-  set lang [split $data “\n”]
-  close $fp
-} else {
-  set lang “0”
-}</p>
-
-<p>jsonrpc_response [lindex $lang 0]
-```</p>
-
-<p>Please note that the web server is running as root, which means that this vulnerability can be exploited in order to disclose the first line of any file on the target’s filesystem.</p>
-
-<p>One particular way to exploit this issue is to read the file /tmp/event/subscriber.list, which contains existing session IDs. These session IDs can subsequently be used to impersonate other users on the system.</p>
+<p>This means that an attacker can create or overwrite arbitrary files on the CCU2’s filesystem. Please note that full control over the target file name can be obtained by injecting a null byte into the userName argument in order to prevent the string “.lang” from being appended to the resulting file name. The file contents can be directly controlled via the userLang argument.</p>
 
 <h1 id="credit">Credit</h1>
 
@@ -134,7 +121,7 @@ if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}
 		
 	
 	<script src="https://apis.google.com/js/plusone.js"></script>
-	<div id="g-comments" class="g-comments" data-href="http://atomic111.github.io/article/homematic-ccu2-flieread" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
+	<div id="g-comments" class="g-comments" data-href="http://atomic111.github.io/article/homematic-ccu2-filewrite" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
 	<script>
 		var width = $('#comments').width() * 0.9;
 		width = Math.round(width);
@@ -149,7 +136,7 @@ if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}
 		<a class="hn-link" href="javascript:window.location=%22http://news.ycombinator.com/submitlink?u=%22+encodeURIComponent(document.location)+%22&amp;t=%22+encodeURIComponent(document.title)">Discuss on Hacker News</a>
 		</div>
 		<div class="network twitter">
-		<a href="https://twitter.com/share" class="twitter-share-button" data-via="atomic111_io" data-count="none">Tweet</a>
+		<a href="https://twitter.com/share" class="twitter-share-button" data-via="atomiczero111" data-count="none">Tweet</a>
 		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
 		</div>
 	</div>
@@ -172,7 +159,7 @@ if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}
 	<div id="post-info" data-stellar-ratio="0.5" data-stellar-vertical-offset="120">
 		<h3>Featured post</h3>
 		<a href="/article/homematic-ccu2-fileread">
-			<h1>  Directory Traversal / Arbitrary File Read in HomeMatic CCU2</h1>
+			<h1>Directory Traversal / Arbitrary File Read in HomeMatic CCU2</h1>
 			
 				<h2></h2>
 			

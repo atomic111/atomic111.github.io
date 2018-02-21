@@ -11,8 +11,8 @@
 	<meta property="og:title" content="Create a NAXSI WAF for Owncloud" />
 	<meta property="og:type" content="article" />
 	<meta property="og:url" content="http://atomic111.github.io/article/create-a-naxsi-waf-for-owncloud" />
-	<meta property="og:site_name" content="Patrick Blog" />
-	<title>Create a NAXSI WAF for Owncloud &middot; Patrick Blog</title>
+	<meta property="og:site_name" content="Patrick Münch Blog" />
+	<title>Create a NAXSI WAF for Owncloud &middot; Patrick Münch Blog</title>
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="HandheldFriendly" content="True" />
 	<meta name="MobileOptimized" content="320" />
@@ -53,7 +53,7 @@
 </label>
 <input id="_1" type="checkbox">
 <div class="menu-content">
-	<p class="menu-title">Patrick Blog<p>
+	<p class="menu-title">Patrick Münch Blog<p>
 	<div class="menu" style="background-color: #1a1a1a; z-index: -1;"></div>
 	
 		<a href="/">Home</a>
@@ -168,7 +168,7 @@
 
 <p>After the execution of <code>start.sh</code> it should look like this.</p>
 
-<p><code>bash
+<p><code>
 ∅&gt; docker ps --format "table :\t"
 NAMES                       PORTS
 owncloud_waf_1:             0.0.0.0:443-&gt;443/tcp
@@ -183,14 +183,14 @@ owncloud_elasticsearch_1:   9200/tcp, 9300/tcp
 
 <p>To log into the WAF, run <code>docker exec -it owncloud_waf_1 bash</code> and add a nxapi index to the elasticsearch database with the following command:</p>
 
-<p><code>bash
+<p><code>
 curl -XPUT 'http://elasticsearch:9200/nxapi/'
 {"acknowledged":true}
 </code></p>
 
 <p>Next, we need to load the data from the log file into ElasticSearch with the following command:</p>
 
-<p>```bash
+<p>```
 nxtool.py -c /etc/nginx/nxapi.json –files=/var/log/nginx/naxsi_error.log
 # size :1000
 WARNING:root:List of files :[‘/var/log/nginx/naxsi_error.log’]
@@ -205,9 +205,9 @@ Written 710 events
 root@18cecd3232a2:/opt#
 ```</p>
 
-<p>The following command displays the top servers which raised the most exceptions. Also the top URIs and zones which raised exceptions are shown. We need the URI list to generate the whitelists for specific requests.  </p>
+<p>The following command displays the top servers which raised the most exceptions. Also the top URIs and zones which raised exceptions are shown. We need the URI list to generate the whitelists for specific requests.</p>
 
-<p><code>bash
+<p><code>
 nxtool.py -x -c /etc/nginx/nxapi.json
 # size :1000
 # Whitelist(ing) ratio :
@@ -238,7 +238,7 @@ root@18cecd3232a2:/opt#
 
 <p>Now generate a whitelist for the first URI and save the <code>BasicRule  wl:1315 "mz:$HEADERS_VAR:cookie";</code> in the <code>naxsi_whitelist.rules</code> file.</p>
 
-<p>```bash
+<p>```
 nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -f –filter ‘uri /core/img/breadcrumb.svg’ –slack
 # size :1000
 #  template :/usr/local/nxapi/tpl/HEADERS/cookies.tpl
@@ -280,14 +280,14 @@ Nb of hits : 0
 Nb of hits : 0
 root@18cecd3232a2:/opt#
 <code>
-</code>bash
-echo “BasicRule  wl:1315 "mz:$HEADERS_VAR:cookie";” &gt; /etc/nginx/naxsi_whitelist.rules<br />
+</code>
+echo “BasicRule  wl:1315 "mz:$HEADERS_VAR:cookie";” &gt; /etc/nginx/naxsi_whitelist.rules
 ```</p>
 
 <p>Now tag the request with the corresponding rule inside elasticsearch.</p>
 
-<p>```bash
-nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -w /etc/nginx/naxsi_whitelist.rules –tag       <br />
+<p>```
+nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -w /etc/nginx/naxsi_whitelist.rules –tag
 # size :1000
 #Loading tpl ‘/etc/nginx/naxsi_whitelist.rules’
 TAG RULE :{‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
@@ -383,8 +383,8 @@ Tagged 49 events out of 49</p>
 
 <p>When you look to the report again, it will confirm, that the number of requests decreased</p>
 
-<p><code>bash
-nxtool.py -x -c /etc/nginx/nxapi.json -s 127.0.0.1                                       
+<p><code>
+nxtool.py -x -c /etc/nginx/nxapi.json -s 127.0.0.1
 # size :1000
 # Whitelist(ing) ratio :
 # Top servers :
@@ -413,7 +413,7 @@ nxtool.py -x -c /etc/nginx/nxapi.json -s 127.0.0.1
 
 <h2 id="create-the-second-naxsi-rule">Create the second NAXSI rule</h2>
 
-<p>```bash
+<p>```
 nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -f –filter ‘uri /index.php/apps/files/ajax/upload.php’ –slack
 # size :1000
 #  template :/usr/local/nxapi/tpl/HEADERS/cookies.tpl
@@ -487,14 +487,14 @@ root@18cecd3232a2:/opt#
 
 <p>Save the rule in the <code>naxsi_whitelist.rules</code>.</p>
 
-<p><code>bash
+<p><code>
 echo "BasicRule  wl:2 \"mz:\$URL:/index.php/apps/files/ajax/upload.php\|BODY\";" &gt;&gt; /etc/nginx/naxsi_whitelist.rules
 </code></p>
 
 <p>Tag the request with the corresponding rule within elasticsearch.</p>
 
-<p>```bash
-nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -w /etc/nginx/naxsi_whitelist.rules –tag                        <br />
+<p>```
+nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -w /etc/nginx/naxsi_whitelist.rules –tag
 # size :1000
 #Loading tpl ‘/etc/nginx/naxsi_whitelist.rules’
 TAG RULE :{‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
@@ -609,7 +609,7 @@ BasicRule wl:17 "mz:$URL_X:/remote.php/webdav|$HEADERS_VAR:Accept"; #wl libinjec
 
 <p>Save this whitelist to <code>waf/naxsi_whitelist.rules</code> in the project’s folder. Change the <code>docker-compose.yml</code> to disable learning mode of NAXSI and switch over to LIVE mode.</p>
 
-<p><code>bash
+<p><code>
 waf:
     build: ./waf
     depends_on:
@@ -634,13 +634,13 @@ waf:
 
 <p>Watch the log file from the <code>owncloud_waf_1</code> docker container.</p>
 
-<p><code>bash
+<p><code>
 ∅&gt; docker exec -it owncloud_waf_1 tail -f /var/log/nginx/naxsi_error.log
 </code></p>
 
 <p>Go to the owncloud login page and put <code>user’ or 1=1;#</code> as username and password in the fields. Now you should see an error message in the NAXSI log file.</p>
 
-<p><code>bash
+<p><code>
 2016/03/30 09:30:39 [error] 15#0: *389 NAXSI_FMT: ip=127.0.0.1&amp;server=127.0.0.1&amp;uri=/&amp;learning=0&amp;vers=0.55rc1&amp;total_processed=112&amp;total_blocked=2&amp;block=1&amp;cscore0=$SQL&amp;score0=4&amp;cscore1=$XSS&amp;score1=8&amp;zone0=BODY&amp;id0=1008&amp;var_name0=user, client: 127.0.0.1, server: owncloud_naxsi, request: "POST / HTTP/1.0", host: "127.0.0.1:8080"
 </code></p>
 
@@ -709,7 +709,7 @@ limitations under the License.</p>
 		<a class="hn-link" href="javascript:window.location=%22http://news.ycombinator.com/submitlink?u=%22+encodeURIComponent(document.location)+%22&amp;t=%22+encodeURIComponent(document.title)">Discuss on Hacker News</a>
 		</div>
 		<div class="network twitter">
-		<a href="https://twitter.com/share" class="twitter-share-button" data-via="atomic111_io" data-count="none">Tweet</a>
+		<a href="https://twitter.com/share" class="twitter-share-button" data-via="atomiczero111" data-count="none">Tweet</a>
 		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
 		</div>
 	</div>
