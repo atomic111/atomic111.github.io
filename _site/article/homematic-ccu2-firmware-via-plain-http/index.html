@@ -3,16 +3,16 @@
 	
 	<link href="//gmpg.org/xfn/11" rel="profile">
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<link rel="canonical" href="http://atomic111.github.io/article/homematic-ccu2-untrusted_addon" />
+	<link rel="canonical" href="http://atomic111.github.io/article/homematic-ccu2-firmware-via-plain-http" />
 	<meta name="description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
 	<meta property="og:description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
 	<meta itemprop="image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
 	<meta property="og:image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
-	<meta property="og:title" content="Untrusted Addon Installation / Remote Code Execution in HomeMatic CCU2" />
+	<meta property="og:title" content="Downloading Firmware via Plain HTTP in HomeMatic CCU2" />
 	<meta property="og:type" content="article" />
-	<meta property="og:url" content="http://atomic111.github.io/article/homematic-ccu2-untrusted_addon" />
+	<meta property="og:url" content="http://atomic111.github.io/article/homematic-ccu2-firmware-via-plain-http" />
 	<meta property="og:site_name" content="Patrick Münch Blog" />
-	<title>Untrusted Addon Installation / Remote Code Execution in HomeMatic CCU2 &middot; Patrick Münch Blog</title>
+	<title>Downloading Firmware via Plain HTTP in HomeMatic CCU2 &middot; Patrick Münch Blog</title>
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="HandheldFriendly" content="True" />
 	<meta name="MobileOptimized" content="320" />
@@ -70,7 +70,7 @@
 </div>
 
 	<div id="post-info" data-stellar-ratio="0.7">
-		<h1>Untrusted Addon Installation / Remote Code Execution in HomeMatic CCU2</h1>
+		<h1>Downloading Firmware via Plain HTTP in HomeMatic CCU2</h1>
 		
 		<a class="site-title" href="https://twitter.com/atomiczero111"><div class="site-icon-small" style="background-image: url(https://avatars0.githubusercontent.com/u/7220740?s=400);"></div>Patrick Münch</a>, in 21 February 2018
 	</div>
@@ -91,27 +91,27 @@
 
 <h1 id="issue-description">Issue Description</h1>
 
-<p>While analyzing the implementation of the CCU2’s web interface, in particular the addon installation process and how to build own addon-packages, a remote code execution vulnerability has been identified.</p>
+<p>While analyzing the CCU2 software, it was found that the system’s crontab file contains an entry for invoking the script <code>/usr/local/etc/config/addons/mh/loopupd.sh</code> on a regular basis. This script contains the following code:</p>
 
-<p>An authenticated user can upload addon packages, which contain an update_script file. This update_script file will be executed during the addon installation process. This means that an attacker can create or overwrite arbitrary files or install malicious software.</p>
+<p>```
+ADDONDIR=/usr/local/etc/config/addons/mh</p>
 
-<p>This vulnerability can be exploited in order to execute arbitrary code on the system. An attacker can for instance overwrite the <code>/usr/local/crontabs/root</code> crontab in order to reach this goal.</p>
+<h1 id="altes-schluessel-paket-loeschen">altes Schluessel-Paket loeschen</h1>
+<p>v1=<code>rm $ADDONDIR/vpnkey_ccu2.tar.gz</code>
+v1b=<code>rm $ADDONDIR/newver</code>
+#
+#das Paket des Benutzers herunter laden
+v2=<code>/usr/bin/wget -O $ADDONDIR/newver 'http://www.meine-homematic.de/getverv2.php?id=29294&amp;key=s35m89s3k73e19y7' -q</code>
+#
+```</p>
 
-<p>This can in particular be problematic if users install untrusted addons from remote sources. It might be advisable to introduce a signing scheme for trusted addons and to warn the user in case they install untrusted or unsigned addons, which could contain malicious code.</p>
-
-<p>Procedure:</p>
-
-<ul>
-  <li>Create a file named update_script containing malicious code</li>
-  <li>Pack the addon package</li>
-  <li>Upload the addon package via the Homematic CCU2 web interface</li>
-</ul>
+<p>It can be observed that software update packages are downloaded via the HTTP protocol, which does not provide any cryptographic protection of the downloaded contents. An attacker with a privileged network position (which could be obtained via DNS spoofing or other approaches) can exploit this issue in order to provide arbitrary malicious firmware updates to the CCU2. This can result in a full system compromise.</p>
 
 <h1 id="credit">Credit</h1>
 
-<p>Patrick Muench of <a href="https://www.sva.de">SVA Systemvertrieb Alexander GmbH</a></p>
-
 <p>Gregor Kopf of <a href="https://secfault-security.com">Secfault Security GmbH</a></p>
+
+<p>Patrick Muench of <a href="https://www.sva.de">SVA Systemvertrieb Alexander GmbH</a></p>
 
 <h1 id="disclaimer">Disclaimer</h1>
 
@@ -125,7 +125,7 @@
 		
 	
 	<script src="https://apis.google.com/js/plusone.js"></script>
-	<div id="g-comments" class="g-comments" data-href="http://atomic111.github.io/article/homematic-ccu2-untrusted_addon" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
+	<div id="g-comments" class="g-comments" data-href="http://atomic111.github.io/article/homematic-ccu2-firmware-via-plain-http" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
 	<script>
 		var width = $('#comments').width() * 0.9;
 		width = Math.round(width);
@@ -147,10 +147,12 @@
 </div>
 
 	
-
-
-
-
+		
+		
+		
+		
+		
+		
 	
 
 
@@ -159,9 +161,9 @@
 		<a class="scroll" data-speed="500" href="#article"><span class="genericon genericon-collapse"></span></a>
 	</div>
 	<div id="post-info" data-stellar-ratio="0.5" data-stellar-vertical-offset="120">
-		<h3>Read next</h3>
-		<a href="/article/homematic-ccu2-firmware-via-plain-http">
-			<h1>Downloading Firmware via Plain HTTP in HomeMatic CCU2</h1>
+		<h3>Featured post</h3>
+		<a href="/article/homematic-ccu2-untrusted_addon">
+			<h1>Untrusted Addon Installation / Remote Code Execution in HomeMatic CCU2</h1>
 			
 				<h2></h2>
 			
