@@ -22,7 +22,6 @@ From the vendor's website ([eQ-3](http://www.eq-3.de/produkte/homematic/zentrale
 
 "The Homematic Central Control Unit CCU2 is responsible for numerous control, signalling and supervision functions across all areas of the Homematic system. The device includes a browser based user interface to the up the system. It can be controlled in the local network as well as via Internet. The Homematic software offers various configuration and application possibilities, so that there are no limits to creativity for installing your individual smart home."
 
-
 # Issue Description
 
 While analyzing the CCU2 software, it was found that the system's crontab file contains an entry for invoking the script `/usr/local/etc/config/addons/mh/loopupd.sh` on a regular basis. This script contains the following code:

