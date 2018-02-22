@@ -38,7 +38,7 @@ This means that an attacker can create or overwrite arbitrary files on the CCU2'
 
 # CVE
 
-[CVE-2018-7300](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7300)
+[CVE-2018-7300](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7300)
 
 # Credit
 

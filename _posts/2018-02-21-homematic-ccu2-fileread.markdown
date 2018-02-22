@@ -52,7 +52,7 @@ One particular way to exploit this issue is to read the file /tmp/event/subscrib
 
 # CVE
 
-[CVE-2018-7296](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7296)
+[CVE-2018-7296](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7296)
 
 # Credit
 
