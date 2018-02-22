@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Downloading Firmware via Plain HTTP in HomeMatic CCU2"
+title: "CVE-2018-7298: Downloading Firmware via Plain HTTP in HomeMatic CCU2"
 date:   2018-02-21 19:40:00
 image:
       url: /assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg
@@ -39,6 +39,10 @@ v2=`/usr/bin/wget -O $ADDONDIR/newver 'http://www.meine-homematic.de/getverv2.ph
 ```
 
 It can be observed that software update packages are downloaded via the HTTP protocol, which does not provide any cryptographic protection of the downloaded contents. An attacker with a privileged network position (which could be obtained via DNS spoofing or other approaches) can exploit this issue in order to provide arbitrary malicious firmware updates to the CCU2. This can result in a full system compromise.
+
+# CVE
+
+[CVE-2018-7298](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7298)
 
 # Credit
 

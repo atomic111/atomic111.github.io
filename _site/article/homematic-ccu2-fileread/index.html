@@ -8,11 +8,11 @@
 	<meta property="og:description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
 	<meta itemprop="image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
 	<meta property="og:image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
-	<meta property="og:title" content="Directory Traversal / Arbitrary File Read in HomeMatic CCU2" />
+	<meta property="og:title" content="CVE-2018-7296: Directory Traversal / Arbitrary File Read in HomeMatic CCU2" />
 	<meta property="og:type" content="article" />
 	<meta property="og:url" content="http://atomic111.github.io/article/homematic-ccu2-fileread" />
 	<meta property="og:site_name" content="Patrick Münch Blog" />
-	<title>Directory Traversal / Arbitrary File Read in HomeMatic CCU2 &middot; Patrick Münch Blog</title>
+	<title>CVE-2018-7296: Directory Traversal / Arbitrary File Read in HomeMatic CCU2 &middot; Patrick Münch Blog</title>
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="HandheldFriendly" content="True" />
 	<meta name="MobileOptimized" content="320" />
@@ -70,7 +70,7 @@
 </div>
 
 	<div id="post-info" data-stellar-ratio="0.7">
-		<h1>Directory Traversal / Arbitrary File Read in HomeMatic CCU2</h1>
+		<h1>CVE-2018-7296: Directory Traversal / Arbitrary File Read in HomeMatic CCU2</h1>
 		
 		<a class="site-title" href="https://twitter.com/atomiczero111"><div class="site-icon-small" style="background-image: url(https://avatars0.githubusercontent.com/u/7220740?s=400);"></div>Patrick Münch</a>, in 21 February 2018
 	</div>
@@ -115,6 +115,10 @@ if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}
 <p>Please note that the web server is running as root, which means that this vulnerability can be exploited in order to disclose the first line of any file on the target’s filesystem.</p>
 
 <p>One particular way to exploit this issue is to read the file /tmp/event/subscriber.list, which contains existing session IDs. These session IDs can subsequently be used to impersonate other users on the system.</p>
+
+<h1 id="cve">CVE</h1>
+
+<p><a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7296">CVE-2018-7296</a></p>
 
 <h1 id="credit">Credit</h1>
 
@@ -170,7 +174,7 @@ if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}
 	<div id="post-info" data-stellar-ratio="0.5" data-stellar-vertical-offset="120">
 		<h3>Read next</h3>
 		<a href="/article/homematic-ccu2-remote-code-execution">
-			<h1>Remote Code Execution in HomeMatic CCU2</h1>
+			<h1>CVE-2018-7297: Remote Code Execution in HomeMatic CCU2</h1>
 			
 				<h2></h2>
 			
