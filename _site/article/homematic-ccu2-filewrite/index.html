@@ -8,11 +8,11 @@
 	<meta property="og:description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
 	<meta itemprop="image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
 	<meta property="og:image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
-	<meta property="og:title" content="Arbitrary File Upload / Remote Code Execution in HomeMatic CCU2" />
+	<meta property="og:title" content="CVE-2018-7300: Arbitrary File Upload / Remote Code Execution in HomeMatic CCU2" />
 	<meta property="og:type" content="article" />
 	<meta property="og:url" content="http://atomic111.github.io/article/homematic-ccu2-filewrite" />
 	<meta property="og:site_name" content="Patrick Münch Blog" />
-	<title>Arbitrary File Upload / Remote Code Execution in HomeMatic CCU2 &middot; Patrick Münch Blog</title>
+	<title>CVE-2018-7300: Arbitrary File Upload / Remote Code Execution in HomeMatic CCU2 &middot; Patrick Münch Blog</title>
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="HandheldFriendly" content="True" />
 	<meta name="MobileOptimized" content="320" />
@@ -70,7 +70,7 @@
 </div>
 
 	<div id="post-info" data-stellar-ratio="0.7">
-		<h1>Arbitrary File Upload / Remote Code Execution in HomeMatic CCU2</h1>
+		<h1>CVE-2018-7300: Arbitrary File Upload / Remote Code Execution in HomeMatic CCU2</h1>
 		
 		<a class="site-title" href="https://twitter.com/atomiczero111"><div class="site-icon-small" style="background-image: url(https://avatars0.githubusercontent.com/u/7220740?s=400);"></div>Patrick Münch</a>, in 21 February 2018
 	</div>
@@ -102,6 +102,10 @@ exec echo $args(userLang)&gt;/etc/config/userprofiles/$args(userName).lang
 </code></p>
 
 <p>This means that an attacker can create or overwrite arbitrary files on the CCU2’s filesystem. Please note that full control over the target file name can be obtained by injecting a null byte into the userName argument in order to prevent the string “.lang” from being appended to the resulting file name. The file contents can be directly controlled via the userLang argument.</p>
+
+<h1 id="cve">CVE</h1>
+
+<p><a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7300">CVE-2018-7300</a></p>
 
 <h1 id="credit">Credit</h1>
 
@@ -157,7 +161,7 @@ exec echo $args(userLang)&gt;/etc/config/userprofiles/$args(userName).lang
 	<div id="post-info" data-stellar-ratio="0.5" data-stellar-vertical-offset="120">
 		<h3>Read next</h3>
 		<a href="/article/homematic-ccu2-firmware-via-plain-http">
-			<h1>Downloading Firmware via Plain HTTP in HomeMatic CCU2</h1>
+			<h1>CVE-2018-7298: Downloading Firmware via Plain HTTP in HomeMatic CCU2</h1>
 			
 				<h2></h2>
 			

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Arbitrary File Upload / Remote Code Execution in HomeMatic CCU2"
+title: "CVE-2018-7300: Arbitrary File Upload / Remote Code Execution in HomeMatic CCU2"
 date:   2018-02-21 18:25:00
 image:
       url: /assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg
@@ -35,6 +35,10 @@ exec echo $args(userLang)>/etc/config/userprofiles/$args(userName).lang
 ```
 
 This means that an attacker can create or overwrite arbitrary files on the CCU2's filesystem. Please note that full control over the target file name can be obtained by injecting a null byte into the userName argument in order to prevent the string ".lang" from being appended to the resulting file name. The file contents can be directly controlled via the userLang argument.
+
+# CVE
+
+[CVE-2018-7300](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7300)
 
 # Credit
 

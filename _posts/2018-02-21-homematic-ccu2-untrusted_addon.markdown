@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Untrusted Addon Installation / Remote Code Execution in HomeMatic CCU2"
+title: "CVE-2018-7299: Untrusted Addon Installation / Remote Code Execution in HomeMatic CCU2"
 date:   2018-02-21 17:00:00
 image:
       url: /assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg
@@ -38,6 +38,10 @@ Procedure:
 - Create a file named update_script containing malicious code
 - Pack the addon package
 - Upload the addon package via the Homematic CCU2 web interface
+
+# CVE
+
+[CVE-2018-7299](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7299)
 
 # Credit
 

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Directory Traversal / Arbitrary File Read in HomeMatic CCU2"
+title: "CVE-2018-7296: Directory Traversal / Arbitrary File Read in HomeMatic CCU2"
 date:   2018-02-21 15:26:00
 image:
       url: /assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg
@@ -49,6 +49,10 @@ jsonrpc_response [lindex $lang 0]
 Please note that the web server is running as root, which means that this vulnerability can be exploited in order to disclose the first line of any file on the target's filesystem.
 
 One particular way to exploit this issue is to read the file /tmp/event/subscriber.list, which contains existing session IDs. These session IDs can subsequently be used to impersonate other users on the system.
+
+# CVE
+
+[CVE-2018-7296](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7296)
 
 # Credit
 
