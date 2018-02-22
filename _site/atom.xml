@@ -4,7 +4,7 @@
  <title>Patrick Münch Blog</title>
  <link href="http://atomic111.github.io/atom.xml" rel="self"/>
  <link href="http://atomic111.github.io/"/>
- <updated>2018-02-22T18:40:55+01:00</updated>
+ <updated>2018-02-22T18:57:27+01:00</updated>
  <id>http://atomic111.github.io</id>
  <author>
    <name>Patrick Münch</name>
@@ -45,7 +45,7 @@ v2=&lt;code&gt;/usr/bin/wget -O $ADDONDIR/newver &#39;http://www.meine-homematic
 
 &lt;h1 id=&quot;cve&quot;&gt;CVE&lt;/h1&gt;
 
-&lt;p&gt;&lt;a href=&quot;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7298&quot;&gt;CVE-2018-7298&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7298&quot;&gt;CVE-2018-7298&lt;/a&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;credit&quot;&gt;Credit&lt;/h1&gt;
 
@@ -90,7 +90,7 @@ exec echo $args(userLang)&amp;gt;/etc/config/userprofiles/$args(userName).lang
 
 &lt;h1 id=&quot;cve&quot;&gt;CVE&lt;/h1&gt;
 
-&lt;p&gt;&lt;a href=&quot;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7300&quot;&gt;CVE-2018-7300&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7300&quot;&gt;CVE-2018-7300&lt;/a&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;credit&quot;&gt;Credit&lt;/h1&gt;
 
@@ -139,7 +139,7 @@ exec echo $args(userLang)&amp;gt;/etc/config/userprofiles/$args(userName).lang
 
 &lt;h1 id=&quot;cve&quot;&gt;CVE&lt;/h1&gt;
 
-&lt;p&gt;&lt;a href=&quot;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7299&quot;&gt;CVE-2018-7299&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7299&quot;&gt;CVE-2018-7299&lt;/a&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;credit&quot;&gt;Credit&lt;/h1&gt;
 
@@ -185,7 +185,7 @@ WriteLine(stdout);
 
 &lt;h1 id=&quot;cve&quot;&gt;CVE&lt;/h1&gt;
 
-&lt;p&gt;&lt;a href=&quot;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7297&quot;&gt;CVE-2018-7297&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7297&quot;&gt;CVE-2018-7297&lt;/a&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;credit&quot;&gt;Credit&lt;/h1&gt;
 
@@ -243,7 +243,7 @@ if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}
 
 &lt;h1 id=&quot;cve&quot;&gt;CVE&lt;/h1&gt;
 
-&lt;p&gt;&lt;a href=&quot;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7296&quot;&gt;CVE-2018-7296&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7296&quot;&gt;CVE-2018-7296&lt;/a&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;credit&quot;&gt;Credit&lt;/h1&gt;
 
@@ -365,7 +365,7 @@ Content-length: 1736
 
 &lt;h1 id=&quot;cve&quot;&gt;CVE&lt;/h1&gt;
 
-&lt;p&gt;&lt;a href=&quot;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7301&quot;&gt;CVE-2018-7301&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7301&quot;&gt;CVE-2018-7301&lt;/a&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;credit&quot;&gt;Credit&lt;/h1&gt;
 

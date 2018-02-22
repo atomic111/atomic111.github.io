@@ -114,7 +114,7 @@ Content-length: 1736
 
 # CVE
 
-[CVE-2018-7301](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7301)
+[CVE-2018-7301](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7301)
 
 # Credit
 

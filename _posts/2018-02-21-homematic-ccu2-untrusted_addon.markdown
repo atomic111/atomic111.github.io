@@ -41,7 +41,7 @@ Procedure:
 
 # CVE
 
-[CVE-2018-7299](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7299)
+[CVE-2018-7299](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7299)
 
 # Credit
 

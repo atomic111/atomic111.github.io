@@ -40,7 +40,7 @@ WriteLine(stdout);
 
 # CVE
 
-[CVE-2018-7297](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7297)
+[CVE-2018-7297](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7297)
 
 # Credit
 
