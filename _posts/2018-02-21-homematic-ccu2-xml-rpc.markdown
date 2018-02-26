@@ -118,7 +118,7 @@ Content-length: 1736
 
 # Credit
 
-Patrick Muench of [SVA Systemvertrieb Alexander GmbH](https://www.sva.de)
+Patrick Muench of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)
 
 Gregor Kopf of [Secfault Security GmbH](https://secfault-security.com)
 
