@@ -4,7 +4,7 @@
  <title>Patrick Münch Blog</title>
  <link href="http://atomic111.github.io/atom.xml" rel="self"/>
  <link href="http://atomic111.github.io/"/>
- <updated>2018-02-22T18:57:27+01:00</updated>
+ <updated>2018-02-26T13:47:35+01:00</updated>
  <id>http://atomic111.github.io</id>
  <author>
    <name>Patrick Münch</name>
@@ -51,7 +51,7 @@ v2=&lt;code&gt;/usr/bin/wget -O $ADDONDIR/newver &#39;http://www.meine-homematic
 
 &lt;p&gt;Gregor Kopf of &lt;a href=&quot;https://secfault-security.com&quot;&gt;Secfault Security GmbH&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA Systemvertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;disclaimer&quot;&gt;Disclaimer&lt;/h1&gt;
 
@@ -96,7 +96,7 @@ exec echo $args(userLang)&amp;gt;/etc/config/userprofiles/$args(userName).lang
 
 &lt;p&gt;Gregor Kopf of &lt;a href=&quot;https://secfault-security.com&quot;&gt;Secfault Security GmbH&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA Systemvertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;disclaimer&quot;&gt;Disclaimer&lt;/h1&gt;
 
@@ -143,7 +143,7 @@ exec echo $args(userLang)&amp;gt;/etc/config/userprofiles/$args(userName).lang
 
 &lt;h1 id=&quot;credit&quot;&gt;Credit&lt;/h1&gt;
 
-&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA Systemvertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;Gregor Kopf of &lt;a href=&quot;https://secfault-security.com&quot;&gt;Secfault Security GmbH&lt;/a&gt;&lt;/p&gt;
 
@@ -189,7 +189,7 @@ WriteLine(stdout);
 
 &lt;h1 id=&quot;credit&quot;&gt;Credit&lt;/h1&gt;
 
-&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA Systemvertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;Gregor Kopf of &lt;a href=&quot;https://secfault-security.com&quot;&gt;Secfault Security GmbH&lt;/a&gt;&lt;/p&gt;
 
@@ -249,7 +249,7 @@ if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}
 
 &lt;p&gt;Gregor Kopf of &lt;a href=&quot;https://secfault-security.com&quot;&gt;Secfault Security GmbH&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA Systemvertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;disclaimer&quot;&gt;Disclaimer&lt;/h1&gt;
 
@@ -369,7 +369,7 @@ Content-length: 1736
 
 &lt;h1 id=&quot;credit&quot;&gt;Credit&lt;/h1&gt;
 
-&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA Systemvertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;Gregor Kopf of &lt;a href=&quot;https://secfault-security.com&quot;&gt;Secfault Security GmbH&lt;/a&gt;&lt;/p&gt;
 

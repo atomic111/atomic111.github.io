@@ -58,7 +58,7 @@ One particular way to exploit this issue is to read the file /tmp/event/subscrib
 
 Gregor Kopf of [Secfault Security GmbH](https://secfault-security.com)
 
-Patrick Muench of [SVA Systemvertrieb Alexander GmbH](https://www.sva.de)
+Patrick Muench of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)
 
 # Disclaimer
 

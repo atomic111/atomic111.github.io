@@ -44,7 +44,7 @@ This means that an attacker can create or overwrite arbitrary files on the CCU2'
 
 Gregor Kopf of [Secfault Security GmbH](https://secfault-security.com)
 
-Patrick Muench of [SVA Systemvertrieb Alexander GmbH](https://www.sva.de)
+Patrick Muench of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)
 
 # Disclaimer
 

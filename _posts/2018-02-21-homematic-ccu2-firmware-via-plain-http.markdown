@@ -48,7 +48,7 @@ It can be observed that software update packages are downloaded via the HTTP pro
 
 Gregor Kopf of [Secfault Security GmbH](https://secfault-security.com)
 
-Patrick Muench of [SVA Systemvertrieb Alexander GmbH](https://www.sva.de)
+Patrick Muench of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)
 
 # Disclaimer
 
