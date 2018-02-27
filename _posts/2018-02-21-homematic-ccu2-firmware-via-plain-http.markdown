@@ -44,6 +44,12 @@ It can be observed that software update packages are downloaded via the HTTP pro
 
 [CVE-2018-7298](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7298)
 
+# CVSSv3 Base Score
+
+CVSS Base Score: __4.8__
+
+CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N
+
 # Credit
 
 Gregor Kopf of [Secfault Security GmbH](https://secfault-security.com)

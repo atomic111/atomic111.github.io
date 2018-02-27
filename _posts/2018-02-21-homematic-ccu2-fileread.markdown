@@ -54,6 +54,12 @@ One particular way to exploit this issue is to read the file /tmp/event/subscrib
 
 [CVE-2018-7296](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7296)
 
+# CVSSv3 Base Score
+
+CVSS Base Score: __5.3__
+
+CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N
+
 # Credit
 
 Gregor Kopf of [Secfault Security GmbH](https://secfault-security.com)

@@ -42,6 +42,12 @@ WriteLine(stdout);
 
 [CVE-2018-7297](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7297)
 
+# CVSSv3 Base Score
+
+CVSS Base Score: __9.4__
+
+CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:L
+
 # Credit
 
 Patrick Muench of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)
