@@ -40,6 +40,12 @@ This means that an attacker can create or overwrite arbitrary files on the CCU2'
 
 [CVE-2018-7300](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7300)
 
+# CVSSv3 Base Score
+
+CVSS Base Score: __9.1__
+
+CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N
+
 # Credit
 
 Gregor Kopf of [Secfault Security GmbH](https://secfault-security.com)

@@ -43,6 +43,12 @@ Procedure:
 
 [CVE-2018-7299](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7299)
 
+# CVSSv3 Base Score
+
+CVSS Base Score: __4.9__
+
+CVSS:3.0/AV:A/AC:L/PR:L/UI:R/S:U/C:L/I:L/A:L
+
 # Credit
 
 Patrick Muench of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)

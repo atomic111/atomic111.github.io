@@ -116,6 +116,12 @@ Content-length: 1736
 
 [CVE-2018-7301](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7301)
 
+# CVSSv3 Base Score
+
+CVSS Base Score: __5.3__
+
+CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N
+
 # Credit
 
 Patrick Muench of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)
