@@ -42,9 +42,9 @@ This means that an attacker can create or overwrite arbitrary files on the CCU2'
 
 # CVSSv3 Base Score
 
-CVSS Base Score: __9.1__
+CVSS Base Score: __9.8__
 
-CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N
+CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H
 
 # Credit
 
