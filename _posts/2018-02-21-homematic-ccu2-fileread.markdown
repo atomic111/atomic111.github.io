@@ -56,9 +56,9 @@ One particular way to exploit this issue is to read the file /tmp/event/subscrib
 
 # CVSSv3 Base Score
 
-CVSS Base Score: __5.3__
+CVSS Base Score: __7.5__
 
-CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N
+CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N
 
 # Credit
 
