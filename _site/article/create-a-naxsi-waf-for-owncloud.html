@@ -3,15 +3,6 @@
 	
 	<link href="//gmpg.org/xfn/11" rel="profile">
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<link rel="canonical" href="http://atomic111.github.io/article/create-a-naxsi-waf-for-owncloud" />
-	<meta name="description" content="# Introduction A secure architecture of a web application consists of 3 components: a frontend, an application and a data..." />
-	<meta property="og:description" content="# Introduction A secure architecture of a web application consists of 3 components: a frontend, an application and a data..." />
-	<meta itemprop="image" content="http://atomic111.github.io/assets/images/cover.jpeg" />
-	<meta property="og:image" content="http://atomic111.github.io/assets/images/cover.jpeg" />
-	<meta property="og:title" content="Create a NAXSI WAF for Owncloud" />
-	<meta property="og:type" content="article" />
-	<meta property="og:url" content="http://atomic111.github.io/article/create-a-naxsi-waf-for-owncloud" />
-	<meta property="og:site_name" content="Patrick Münch Blog" />
 	<title>Create a NAXSI WAF for Owncloud &middot; Patrick Münch Blog</title>
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="HandheldFriendly" content="True" />
@@ -22,9 +13,9 @@
 	<link href="/assets/css/genericons.css" type="text/css" rel="stylesheet" />
 	<link href="/assets/css/syntax.css" type="text/css" rel="stylesheet" />
 	<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Fenix:400,400italic">
-	<link rel="apple-touch-icon" href="http://atomic111.github.io/assets/images/logo.jpeg">
-	<link rel="shortcut icon" href="http://atomic111.github.io/assets/images/favicon.ico">
-	<link rel="alternate" type="application/rss+xml" title="RSS" href="http://atomic111.github.io/atom.xml">
+	<link rel="apple-touch-icon" href="http://localhost:4000/assets/images/logo.jpeg">
+	<link rel="shortcut icon" href="http://localhost:4000/assets/images/favicon.ico">
+	<link rel="alternate" type="application/rss+xml" title="RSS" href="http://localhost:4000/atom.xml">
 	<script type="text/javascript" src="/assets/js/jquery-2.1.0.min.js"></script>
 	
 	<script type="text/javascript" src="/assets/js/jquery.stellar.min.js"></script>
@@ -124,23 +115,23 @@
   <li>str: string matcher</li>
 </ul>
 
-<p>String matcher are faster than regular expressions, which makes them the preferred pattern. This example uses a regular expression to search for the keyword <code>select|from</code> in the request.</p>
+<p>String matcher are faster than regular expressions, which makes them the preferred pattern. This example uses a regular expression to search for the keyword <code class="highlighter-rouge">select|from</code> in the request.</p>
 
 <h3 id="msg">MSG</h3>
 
-<p>MSG is a human readable message and describes the pattern. This example includes the message <code>select and from sql keywords</code></p>
+<p>MSG is a human readable message and describes the pattern. This example includes the message <code class="highlighter-rouge">select and from sql keywords</code></p>
 
 <h3 id="match-zone">Match Zone</h3>
 
-<p>Match zones defines which part of the request will be searched to find the specified pattern. This example rule searches in <code>BODY|URL|ARGS|$HEADERS_VAR:Cookie</code>. With this simple expression, it is easy to target the whole body. This includes the complete content and every variable name in the body. It also searches in the URL and in the request ARGS, including the complete content and every name of variable in its arguments. <code>$HEADERS_VAR:Cookie</code> means that NAXSI will also search in the HTTP “Cookie” header for the specified pattern.</p>
+<p>Match zones defines which part of the request will be searched to find the specified pattern. This example rule searches in <code class="highlighter-rouge">BODY|URL|ARGS|$HEADERS_VAR:Cookie</code>. With this simple expression, it is easy to target the whole body. This includes the complete content and every variable name in the body. It also searches in the URL and in the request ARGS, including the complete content and every name of variable in its arguments. <code class="highlighter-rouge">$HEADERS_VAR:Cookie</code> means that NAXSI will also search in the HTTP “Cookie” header for the specified pattern.</p>
 
 <h3 id="score-section">Score Section</h3>
 
-<p>s is the score section. It is a “named” counter and will increase the <code>SQL</code> counter by 4.</p>
+<p>s is the score section. It is a “named” counter and will increase the <code class="highlighter-rouge">SQL</code> counter by 4.</p>
 
 <h3 id="id">ID</h3>
 
-<p>id is the ID of the rule. This example has the ID <code>1000</code>. Those IDs will be used in NAXSI_FMT and/or to whitelist this ID for a special request.</p>
+<p>id is the ID of the rule. This example has the ID <code class="highlighter-rouge">1000</code>. Those IDs will be used in NAXSI_FMT and/or to whitelist this ID for a special request.</p>
 
 <p>Further reading: <a href="https://github.com/nbs-system/naxsi/wiki/rulessyntax">rules syntax</a></p>
 
@@ -156,59 +147,55 @@
 
 <h3 id="match-zone-1">Match Zone</h3>
 
-<p>Match zones defines which part of the request will be searched for the specified pattern (like for MainRules). This example rule searches in <code>$BODY_VAR:password</code> for the specified pattern. <code>$BODY_VAR:password</code> means NAXSI will search for the body variable named “password” for the specified pattern.</p>
+<p>Match zones defines which part of the request will be searched for the specified pattern (like for MainRules). This example rule searches in <code class="highlighter-rouge">$BODY_VAR:password</code> for the specified pattern. <code class="highlighter-rouge">$BODY_VAR:password</code> means NAXSI will search for the body variable named “password” for the specified pattern.</p>
 
 <p>Further reading <a href="https://github.com/nbs-system/naxsi/wiki/whitelists">whitelists</a></p>
 
 <h1 id="start-the-owncloud-and-create-naxsi-rules">Start the owncloud and create NAXSI rules</h1>
 
-<p>First, we need to install docker and docker-compose. Then download the Project from <a href="https://github.com/atomic111/example-NAXSI-owncloud.git">github</a> and just execute the <code>start.sh</code> bash script. It creates the data volume container for the Postgres database and for the Owncloud application. It also creates the Postgres container with default user/passwords (user=postgres and empty password) and creates Owncloud itself with the default user/password (user = admin, password = admin). <strong>Not a good security practice. Sorry.</strong> Let’s focus on creating the WAF for owncloud.</p>
+<p>First, we need to install docker and docker-compose. Then download the Project from <a href="https://github.com/atomic111/example-NAXSI-owncloud.git">github</a> and just execute the <code class="highlighter-rouge">start.sh</code> bash script. It creates the data volume container for the Postgres database and for the Owncloud application. It also creates the Postgres container with default user/passwords (user=postgres and empty password) and creates Owncloud itself with the default user/password (user = admin, password = admin). <strong>Not a good security practice. Sorry.</strong> Let’s focus on creating the WAF for owncloud.</p>
 
-<p>The <code>start.sh</code> also creates the image and container for the NAXSI WAF. The container starts the WAF in LEARNING MODE and elasticsearch to store NAXSI events.</p>
+<p>The <code class="highlighter-rouge">start.sh</code> also creates the image and container for the NAXSI WAF. The container starts the WAF in LEARNING MODE and elasticsearch to store NAXSI events.</p>
 
-<p>After the execution of <code>start.sh</code> it should look like this.</p>
+<p>After the execution of <code class="highlighter-rouge">start.sh</code> it should look like this.</p>
 
-<p><code>
-∅&gt; docker ps --format "table :\t"
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>∅&gt; docker ps --format "table :\t"
 NAMES                       PORTS
 owncloud_waf_1:             0.0.0.0:443-&gt;443/tcp
 owncloud_app_1:             80/tcp
 owncloud_postgres_1:        5432/tcp
 owncloud_elasticsearch_1:   9200/tcp, 9300/tcp
-</code></p>
+</code></pre></div></div>
 
 <h2 id="create-the-first-naxsi-rule">Create the first NAXSI rule</h2>
 
-<p>Now the application is started and we have to browse the website to generate data in the logfile (<code>/var/log/nginx/naxsi_error.log</code>). Log into owncloud via your browser (<code>https://127.0.0.1</code>), upload a few pictures, create a folder, add a user, delete a file, delete a user, delete a group and click around. Create a lot of different events to prevent false-positives later on.</p>
+<p>Now the application is started and we have to browse the website to generate data in the logfile (<code class="highlighter-rouge">/var/log/nginx/naxsi_error.log</code>). Log into owncloud via your browser (<code class="highlighter-rouge">https://127.0.0.1</code>), upload a few pictures, create a folder, add a user, delete a file, delete a user, delete a group and click around. Create a lot of different events to prevent false-positives later on.</p>
 
-<p>To log into the WAF, run <code>docker exec -it owncloud_waf_1 bash</code> and add a nxapi index to the elasticsearch database with the following command:</p>
+<p>To log into the WAF, run <code class="highlighter-rouge">docker exec -it owncloud_waf_1 bash</code> and add a nxapi index to the elasticsearch database with the following command:</p>
 
-<p><code>
-curl -XPUT 'http://elasticsearch:9200/nxapi/'
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XPUT 'http://elasticsearch:9200/nxapi/'
 {"acknowledged":true}
-</code></p>
+</code></pre></div></div>
 
 <p>Next, we need to load the data from the log file into ElasticSearch with the following command:</p>
 
-<p>```
-nxtool.py -c /etc/nginx/nxapi.json –files=/var/log/nginx/naxsi_error.log
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nxtool.py -c /etc/nginx/nxapi.json --files=/var/log/nginx/naxsi_error.log
 # size :1000
-WARNING:root:List of files :[‘/var/log/nginx/naxsi_error.log’]
+WARNING:root:List of files :['/var/log/nginx/naxsi_error.log']
 log open
-{‘date’: ‘2016-02-16T14:29:33+00’, ‘events’: [{‘zone’: ‘HEADERS’, ‘ip’: ‘127.0.0.1’, ‘uri’: ‘/’, ‘server’: ‘127.0.0.1’, ‘content’: ‘’, ‘var_name’: ‘cookie’, ‘coords’: [104.195397, 35.86166], ‘country’: ‘CN’, ‘date’: ‘2016-02-16T14:29:33+00’, ‘id’: ‘1315’}]}
-{‘date’: ‘2016-02-16T14:29:36+00’, ‘events’: [{‘zone’: ‘HEADERS’, ‘ip’: ‘127.0.0.1’, ‘uri’: ‘/index.php/apps/files/’, ‘server’: ‘127.0.0.1’, ‘content’: ‘’, ‘var_name’: ‘cookie’, ‘coords’: [104.195397, 35.86166], ‘country’: ‘CN’, ‘date’: ‘2016-02-16T14:29:36+00’, ‘id’: ‘1315’}]}</p>
+{'date': '2016-02-16T14:29:33+00', 'events': [{'zone': 'HEADERS', 'ip': '127.0.0.1', 'uri': '/', 'server': '127.0.0.1', 'content': '', 'var_name': 'cookie', 'coords': [104.195397, 35.86166], 'country': 'CN', 'date': '2016-02-16T14:29:33+00', 'id': '1315'}]}
+{'date': '2016-02-16T14:29:36+00', 'events': [{'zone': 'HEADERS', 'ip': '127.0.0.1', 'uri': '/index.php/apps/files/', 'server': '127.0.0.1', 'content': '', 'var_name': 'cookie', 'coords': [104.195397, 35.86166], 'country': 'CN', 'date': '2016-02-16T14:29:36+00', 'id': '1315'}]}
 
-<p>…</p>
+...
 
-<p>{‘date’: ‘2016-02-16T14:52:22+00’, ‘events’: [{‘zone’: ‘HEADERS’, ‘ip’: ‘127.0.0.1’, ‘uri’: ‘/index.php/heartbeat’, ‘server’: ‘127.0.0.1’, ‘content’: ‘’, ‘var_name’: ‘cookie’, ‘coords’: [104.195397, 35.86166], ‘country’: ‘CN’, ‘date’: ‘2016-02-16T14:52:22+00’, ‘id’: ‘1315’}, {‘zone’: ‘BODY’, ‘ip’: ‘127.0.0.1’, ‘uri’: ‘/index.php/heartbeat’, ‘server’: ‘127.0.0.1’, ‘content’: ‘’, ‘var_name’: ‘’, ‘coords’: [104.195397, 35.86166], ‘country’: ‘CN’, ‘date’: ‘2016-02-16T14:52:22+00’, ‘id’: ‘16’}]}
+{'date': '2016-02-16T14:52:22+00', 'events': [{'zone': 'HEADERS', 'ip': '127.0.0.1', 'uri': '/index.php/heartbeat', 'server': '127.0.0.1', 'content': '', 'var_name': 'cookie', 'coords': [104.195397, 35.86166], 'country': 'CN', 'date': '2016-02-16T14:52:22+00', 'id': '1315'}, {'zone': 'BODY', 'ip': '127.0.0.1', 'uri': '/index.php/heartbeat', 'server': '127.0.0.1', 'content': '', 'var_name': '', 'coords': [104.195397, 35.86166], 'country': 'CN', 'date': '2016-02-16T14:52:22+00', 'id': '16'}]}
 Written 710 events
 root@18cecd3232a2:/opt#
-```</p>
+</code></pre></div></div>
 
 <p>The following command displays the top servers which raised the most exceptions. Also the top URIs and zones which raised exceptions are shown. We need the URI list to generate the whitelists for specific requests.</p>
 
-<p><code>
-nxtool.py -x -c /etc/nginx/nxapi.json
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nxtool.py -x -c /etc/nginx/nxapi.json
 # size :1000
 # Whitelist(ing) ratio :
 # Top servers :
@@ -234,24 +221,23 @@ nxtool.py -x -c /etc/nginx/nxapi.json
 # Top Peer(s) :
 # 127.0.0.1 100.0% (total:710/710)
 root@18cecd3232a2:/opt#
-</code></p>
+</code></pre></div></div>
 
-<p>Now generate a whitelist for the first URI and save the <code>BasicRule  wl:1315 "mz:$HEADERS_VAR:cookie";</code> in the <code>naxsi_whitelist.rules</code> file.</p>
+<p>Now generate a whitelist for the first URI and save the <code class="highlighter-rouge">BasicRule  wl:1315 "mz:$HEADERS_VAR:cookie";</code> in the <code class="highlighter-rouge">naxsi_whitelist.rules</code> file.</p>
 
-<p>```
-nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -f –filter ‘uri /core/img/breadcrumb.svg’ –slack
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -f --filter 'uri /core/img/breadcrumb.svg' --slack
 # size :1000
 #  template :/usr/local/nxapi/tpl/HEADERS/cookies.tpl
 Nb of hits : 106
 #  template matched, generating all rules.
-1 whitelists …
+1 whitelists ...
 #Rule (1315) double encoding !
 #total hits 106
 #peers : 127.0.0.1
 #uri : /core/img/breadcrumb.svg
-#var_name : cookie</p>
+#var_name : cookie
 
-<p>BasicRule  wl:1315 “mz:$HEADERS_VAR:cookie”;
+BasicRule  wl:1315 "mz:$HEADERS_VAR:cookie";
 #  template :/usr/local/nxapi/tpl/BODY/url-wide-id.tpl
 Nb of hits : 0
 #  template :/usr/local/nxapi/tpl/BODY/url-wide-id-BODY-NAME.tpl
@@ -279,24 +265,22 @@ Nb of hits : 0
 #  template :/usr/local/nxapi/tpl/URI/site-wide-id.tpl
 Nb of hits : 0
 root@18cecd3232a2:/opt#
-<code>
-</code>
-echo “BasicRule  wl:1315 "mz:$HEADERS_VAR:cookie";” &gt; /etc/nginx/naxsi_whitelist.rules
-```</p>
+</code></pre></div></div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>echo "BasicRule  wl:1315 \"mz:\$HEADERS_VAR:cookie\";" &gt; /etc/nginx/naxsi_whitelist.rules
+</code></pre></div></div>
 
 <p>Now tag the request with the corresponding rule inside elasticsearch.</p>
 
-<p>```
-nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -w /etc/nginx/naxsi_whitelist.rules –tag
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -w /etc/nginx/naxsi_whitelist.rules --tag
 # size :1000
-#Loading tpl ‘/etc/nginx/naxsi_whitelist.rules’
-TAG RULE :{‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
-                             {‘match’: {‘zone’: ‘HEADERS’}},
-                             {‘match’: {‘var_name’: ‘cookie’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-5151 items to be tagged …
+#Loading tpl '/etc/nginx/naxsi_whitelist.rules'
+TAG RULE :{'query': {'bool': {'must': [{'match': {'id': '1315'}},
+                             {'match': {'zone': 'HEADERS'}},
+                             {'match': {'var_name': 'cookie'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+5151 items to be tagged ...
 Tagged 515 events out of 5151
 Tagged 1030 events out of 5151
 Tagged 1545 events out of 5151
@@ -307,16 +291,16 @@ Tagged 3605 events out of 5151
 Tagged 4120 events out of 5151
 Tagged 4635 events out of 5151
 Tagged 5150 events out of 5151
-Tagged 5151 events out of 5151</p>
+Tagged 5151 events out of 5151
 
-<p>TAG RULE :{‘from’: 0,
- ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
-                             {‘match’: {‘zone’: ‘HEADERS’}},
-                             {‘match’: {‘var_name’: ‘cookie’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-178 items to be tagged …
+TAG RULE :{'from': 0,
+ 'query': {'bool': {'must': [{'match': {'id': '1315'}},
+                             {'match': {'zone': 'HEADERS'}},
+                             {'match': {'var_name': 'cookie'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+178 items to be tagged ...
 Tagged 17 events out of 178
 Tagged 34 events out of 178
 Tagged 51 events out of 178
@@ -327,16 +311,16 @@ Tagged 119 events out of 178
 Tagged 136 events out of 178
 Tagged 153 events out of 178
 Tagged 170 events out of 178
-Tagged 178 events out of 178</p>
+Tagged 178 events out of 178
 
-<p>TAG RULE :{‘from’: 0,
- ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
-                             {‘match’: {‘zone’: ‘HEADERS’}},
-                             {‘match’: {‘var_name’: ‘cookie’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-123 items to be tagged …
+TAG RULE :{'from': 0,
+ 'query': {'bool': {'must': [{'match': {'id': '1315'}},
+                             {'match': {'zone': 'HEADERS'}},
+                             {'match': {'var_name': 'cookie'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+123 items to be tagged ...
 Tagged 12 events out of 123
 Tagged 24 events out of 123
 Tagged 36 events out of 123
@@ -347,44 +331,43 @@ Tagged 84 events out of 123
 Tagged 96 events out of 123
 Tagged 108 events out of 123
 Tagged 120 events out of 123
-Tagged 123 events out of 123</p>
+Tagged 123 events out of 123
 
-<p>TAG RULE :{‘from’: 0,
- ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
-                             {‘match’: {‘zone’: ‘HEADERS’}},
-                             {‘match’: {‘var_name’: ‘cookie’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-99 items to be tagged …
-Tagged 99 events out of 99</p>
+TAG RULE :{'from': 0,
+ 'query': {'bool': {'must': [{'match': {'id': '1315'}},
+                             {'match': {'zone': 'HEADERS'}},
+                             {'match': {'var_name': 'cookie'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+99 items to be tagged ...
+Tagged 99 events out of 99
 
-<p>TAG RULE :{‘from’: 0,
- ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
-                             {‘match’: {‘zone’: ‘HEADERS’}},
-                             {‘match’: {‘var_name’: ‘cookie’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-49 items to be tagged …
-Tagged 49 events out of 49</p>
+TAG RULE :{'from': 0,
+ 'query': {'bool': {'must': [{'match': {'id': '1315'}},
+                             {'match': {'zone': 'HEADERS'}},
+                             {'match': {'var_name': 'cookie'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+49 items to be tagged ...
+Tagged 49 events out of 49
 
-<p>TAG RULE :{‘from’: 0,
- ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
-                             {‘match’: {‘zone’: ‘HEADERS’}},
-                             {‘match’: {‘var_name’: ‘cookie’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-0 items to be tagged …</p>
+TAG RULE :{'from': 0,
+ 'query': {'bool': {'must': [{'match': {'id': '1315'}},
+                             {'match': {'zone': 'HEADERS'}},
+                             {'match': {'var_name': 'cookie'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+0 items to be tagged ...
 
-<p>5600 items tagged …
-```</p>
+5600 items tagged ...
+</code></pre></div></div>
 
 <p>When you look to the report again, it will confirm, that the number of requests decreased</p>
 
-<p><code>
-nxtool.py -x -c /etc/nginx/nxapi.json -s 127.0.0.1
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nxtool.py -x -c /etc/nginx/nxapi.json -s 127.0.0.1
 # size :1000
 # Whitelist(ing) ratio :
 # Top servers :
@@ -409,61 +392,60 @@ nxtool.py -x -c /etc/nginx/nxapi.json -s 127.0.0.1
 # ARGS|NAME 6.13% (total:26/424)
 # Top Peer(s) :
 # 127.0.0.1 100.0% (total:424/424)
-</code></p>
+</code></pre></div></div>
 
 <h2 id="create-the-second-naxsi-rule">Create the second NAXSI rule</h2>
 
-<p>```
-nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -f –filter ‘uri /index.php/apps/files/ajax/upload.php’ –slack
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -f --filter 'uri /index.php/apps/files/ajax/upload.php' --slack
 # size :1000
 #  template :/usr/local/nxapi/tpl/HEADERS/cookies.tpl
 Nb of hits : 0
 #  template :/usr/local/nxapi/tpl/BODY/url-wide-id.tpl
 Nb of hits : 44
 #  template matched, generating all rules.
-1 whitelists …
+1 whitelists ...
 #msg: A generic whitelist, true for the whole uri
 #Rule (2) request too big, stored on disk and not parsed
 #total hits 44
 #peers : 127.0.0.1
-#uri : /index.php/apps/files/ajax/upload.php</p>
+#uri : /index.php/apps/files/ajax/upload.php
 
-<p>BasicRule  wl:2 “mz:$URL:/index.php/apps/files/ajax/upload.php|BODY”;
+BasicRule  wl:2 "mz:$URL:/index.php/apps/files/ajax/upload.php|BODY";
 #  template :/usr/local/nxapi/tpl/BODY/url-wide-id-BODY-NAME.tpl
 Nb of hits : 0
 #  template :/usr/local/nxapi/tpl/BODY/precise-id.tpl
 Nb of hits : 44
 #  template matched, generating all rules.
-1 whitelists …
+1 whitelists ...
 #msg: A generic, precise wl tpl (url+var+id)
 #Rule (2) request too big, stored on disk and not parsed
 #total hits 44
 #peers : 127.0.0.1
-#uri : /index.php/apps/files/ajax/upload.php</p>
+#uri : /index.php/apps/files/ajax/upload.php
 
-<p>BasicRule  wl:2 “mz:$URL:/index.php/apps/files/ajax/upload.php|BODY”;
+BasicRule  wl:2 "mz:$URL:/index.php/apps/files/ajax/upload.php|BODY";
 #  template :/usr/local/nxapi/tpl/BODY/var_name-wide-id.tpl
 Nb of hits : 44
 #  template matched, generating all rules.
-1 whitelists …
+1 whitelists ...
 #msg: A generic rule to spot var-name specific WL
 #Rule (2) request too big, stored on disk and not parsed
 #total hits 44
 #peers : 127.0.0.1
-#uri : /index.php/apps/files/ajax/upload.php</p>
+#uri : /index.php/apps/files/ajax/upload.php
 
-<p>BasicRule  wl:2 “mz:BODY”;
+BasicRule  wl:2 "mz:BODY";
 #  template :/usr/local/nxapi/tpl/BODY/site-wide-id.tpl
 Nb of hits : 44
 #  template matched, generating all rules.
-1 whitelists …
+1 whitelists ...
 #msg: A generic, wide (id+zone) wl
 #Rule (2) request too big, stored on disk and not parsed
 #total hits 44
 #peers : 127.0.0.1
-#uri : /index.php/apps/files/ajax/upload.php</p>
+#uri : /index.php/apps/files/ajax/upload.php
 
-<p>BasicRule  wl:2 “mz:BODY”;
+BasicRule  wl:2 "mz:BODY";
 #  template :/usr/local/nxapi/tpl/ARGS/url-wide-id.tpl
 Nb of hits : 0
 #  template :/usr/local/nxapi/tpl/ARGS/url-wide-id-NAME.tpl
@@ -481,66 +463,63 @@ Nb of hits : 0
 #  template :/usr/local/nxapi/tpl/URI/site-wide-id.tpl
 Nb of hits : 0
 root@18cecd3232a2:/opt#
-```</p>
+</code></pre></div></div>
 
-<p>NXTOOL creates some rules for the same URI. The Main rule 2 protects against request which are to big and won´t be parsed. If we choose the <code>BasicRule  wl:2 "mz:BODY";</code>, we would allow for big requests on all URIs. That is not what we want. Instead, I recommend the <code>BasicRule  wl:2 "mz:$URL:/index.php/apps/files/ajax/upload.php|BODY";</code> because this rules allows only big requests for a specific URI.</p>
+<p>NXTOOL creates some rules for the same URI. The Main rule 2 protects against request which are to big and won´t be parsed. If we choose the <code class="highlighter-rouge">BasicRule  wl:2 "mz:BODY";</code>, we would allow for big requests on all URIs. That is not what we want. Instead, I recommend the <code class="highlighter-rouge">BasicRule  wl:2 "mz:$URL:/index.php/apps/files/ajax/upload.php|BODY";</code> because this rules allows only big requests for a specific URI.</p>
 
-<p>Save the rule in the <code>naxsi_whitelist.rules</code>.</p>
+<p>Save the rule in the <code class="highlighter-rouge">naxsi_whitelist.rules</code>.</p>
 
-<p><code>
-echo "BasicRule  wl:2 \"mz:\$URL:/index.php/apps/files/ajax/upload.php\|BODY\";" &gt;&gt; /etc/nginx/naxsi_whitelist.rules
-</code></p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>echo "BasicRule  wl:2 \"mz:\$URL:/index.php/apps/files/ajax/upload.php\|BODY\";" &gt;&gt; /etc/nginx/naxsi_whitelist.rules
+</code></pre></div></div>
 
 <p>Tag the request with the corresponding rule within elasticsearch.</p>
 
-<p>```
-nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -w /etc/nginx/naxsi_whitelist.rules –tag
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -w /etc/nginx/naxsi_whitelist.rules --tag
 # size :1000
-#Loading tpl ‘/etc/nginx/naxsi_whitelist.rules’
-TAG RULE :{‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
-                             {‘match’: {‘zone’: ‘HEADERS’}},
-                             {‘match’: {‘var_name’: ‘cookie’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-0 items to be tagged …</p>
+#Loading tpl '/etc/nginx/naxsi_whitelist.rules'
+TAG RULE :{'query': {'bool': {'must': [{'match': {'id': '1315'}},
+                             {'match': {'zone': 'HEADERS'}},
+                             {'match': {'var_name': 'cookie'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+0 items to be tagged ...
 
-<p>TAG RULE :{‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘2’}},
-                             {‘match’: {‘uri’: ‘/index.php/apps/files/ajax/upload.php’}},
-                             {‘match’: {‘zone’: ‘BODY’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-44 items to be tagged …
-Tagged 44 events out of 44</p>
+TAG RULE :{'query': {'bool': {'must': [{'match': {'id': '2'}},
+                             {'match': {'uri': '/index.php/apps/files/ajax/upload.php'}},
+                             {'match': {'zone': 'BODY'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+44 items to be tagged ...
+Tagged 44 events out of 44
 
-<p>TAG RULE :{‘from’: 0,
- ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘2’}},
-                             {‘match’: {‘uri’: ‘/index.php/apps/files/ajax/upload.php’}},
-                             {‘match’: {‘zone’: ‘BODY’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-44 items to be tagged …
-Tagged 44 events out of 44</p>
+TAG RULE :{'from': 0,
+ 'query': {'bool': {'must': [{'match': {'id': '2'}},
+                             {'match': {'uri': '/index.php/apps/files/ajax/upload.php'}},
+                             {'match': {'zone': 'BODY'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+44 items to be tagged ...
+Tagged 44 events out of 44
 
-<p>TAG RULE :{‘from’: 0,
- ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘2’}},
-                             {‘match’: {‘uri’: ‘/index.php/apps/files/ajax/upload.php’}},
-                             {‘match’: {‘zone’: ‘BODY’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-0 items to be tagged …</p>
+TAG RULE :{'from': 0,
+ 'query': {'bool': {'must': [{'match': {'id': '2'}},
+                             {'match': {'uri': '/index.php/apps/files/ajax/upload.php'}},
+                             {'match': {'zone': 'BODY'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+0 items to be tagged ...
 
-<p>88 items tagged …
+88 items tagged ...
 root@18cecd3232a2:/opt#
-```</p>
+</code></pre></div></div>
 
 <p>Repeat these steps for all other requests until you get a complete whitelist similar to this:</p>
 
-<p><code>
-BasicRule  wl:1000 "mz:$URL:/apps/activity/img/delete-color.svg|URL";
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>BasicRule  wl:1000 "mz:$URL:/apps/activity/img/delete-color.svg|URL";
 BasicRule  wl:1000 "mz:$URL:/apps/files/img/delete.svg|URL";
 BasicRule  wl:1000 "mz:$URL:/apps/updater/css/updater.css|URL";
 BasicRule  wl:1000 "mz:$URL:/apps/updater/img/app.svg|URL";
@@ -605,12 +584,11 @@ BasicRule  wl:16 "mz:$URL:/index.php/heartbeat|BODY";
 BasicRule  wl:2 "mz:$URL:/index.php/apps/files/ajax/upload.php|BODY";
 BasicRule  wl:2 "mz:$URL:/index.php/avatar/|BODY";
 BasicRule wl:17 "mz:$URL_X:/remote.php/webdav|$HEADERS_VAR:Accept"; #wl libinjection_sql on header
-</code></p>
+</code></pre></div></div>
 
-<p>Save this whitelist to <code>waf/naxsi_whitelist.rules</code> in the project’s folder. Change the <code>docker-compose.yml</code> to disable learning mode of NAXSI and switch over to LIVE mode.</p>
+<p>Save this whitelist to <code class="highlighter-rouge">waf/naxsi_whitelist.rules</code> in the project’s folder. Change the <code class="highlighter-rouge">docker-compose.yml</code> to disable learning mode of NAXSI and switch over to LIVE mode.</p>
 
-<p><code>
-waf:
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>waf:
     build: ./waf
     depends_on:
       - app
@@ -626,23 +604,21 @@ waf:
     networks:
       - frontend
       - backend_app
-</code></p>
+</code></pre></div></div>
 
-<p>Run <code>docker rm -f owncloud_waf_1</code> to shutdown and remove the running WAF container. Execute <code>docker-compose -p owncloud build</code> to create a new image which includes the new <code>naxsi_whitelist.rules</code>. Start it via <code>docker-compose -p owncloud up -d</code></p>
+<p>Run <code class="highlighter-rouge">docker rm -f owncloud_waf_1</code> to shutdown and remove the running WAF container. Execute <code class="highlighter-rouge">docker-compose -p owncloud build</code> to create a new image which includes the new <code class="highlighter-rouge">naxsi_whitelist.rules</code>. Start it via <code class="highlighter-rouge">docker-compose -p owncloud up -d</code></p>
 
 <h2 id="test-the-naxsi-waf">Test the NAXSI WAF</h2>
 
-<p>Watch the log file from the <code>owncloud_waf_1</code> docker container.</p>
+<p>Watch the log file from the <code class="highlighter-rouge">owncloud_waf_1</code> docker container.</p>
 
-<p><code>
-∅&gt; docker exec -it owncloud_waf_1 tail -f /var/log/nginx/naxsi_error.log
-</code></p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>∅&gt; docker exec -it owncloud_waf_1 tail -f /var/log/nginx/naxsi_error.log
+</code></pre></div></div>
 
-<p>Go to the owncloud login page and put <code>user’ or 1=1;#</code> as username and password in the fields. Now you should see an error message in the NAXSI log file.</p>
+<p>Go to the owncloud login page and put <code class="highlighter-rouge">user’ or 1=1;#</code> as username and password in the fields. Now you should see an error message in the NAXSI log file.</p>
 
-<p><code>
-2016/03/30 09:30:39 [error] 15#0: *389 NAXSI_FMT: ip=127.0.0.1&amp;server=127.0.0.1&amp;uri=/&amp;learning=0&amp;vers=0.55rc1&amp;total_processed=112&amp;total_blocked=2&amp;block=1&amp;cscore0=$SQL&amp;score0=4&amp;cscore1=$XSS&amp;score1=8&amp;zone0=BODY&amp;id0=1008&amp;var_name0=user, client: 127.0.0.1, server: owncloud_naxsi, request: "POST / HTTP/1.0", host: "127.0.0.1:8080"
-</code></p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2016/03/30 09:30:39 [error] 15#0: *389 NAXSI_FMT: ip=127.0.0.1&amp;server=127.0.0.1&amp;uri=/&amp;learning=0&amp;vers=0.55rc1&amp;total_processed=112&amp;total_blocked=2&amp;block=1&amp;cscore0=$SQL&amp;score0=4&amp;cscore1=$XSS&amp;score1=8&amp;zone0=BODY&amp;id0=1008&amp;var_name0=user, client: 127.0.0.1, server: owncloud_naxsi, request: "POST / HTTP/1.0", host: "127.0.0.1:8080"
+</code></pre></div></div>
 
 <p><strong>It’s working. Have FUN!!!</strong></p>
 
@@ -672,15 +648,15 @@ waf:
 <h2 id="license-and-author">License and Author</h2>
 
 <ul>
-  <li>Author:: Patrick Muench <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#112;&#097;&#116;&#114;&#105;&#099;&#107;&#046;&#109;&#117;&#101;&#110;&#099;&#104;&#049;&#049;&#049;&#049;&#064;&#103;&#109;&#097;&#105;&#108;&#046;&#099;&#111;&#109;">&#112;&#097;&#116;&#114;&#105;&#099;&#107;&#046;&#109;&#117;&#101;&#110;&#099;&#104;&#049;&#049;&#049;&#049;&#064;&#103;&#109;&#097;&#105;&#108;&#046;&#099;&#111;&#109;</a></li>
+  <li>Author:: Patrick Muench <a href="mailto:patrick.muench1111@gmail.com">patrick.muench1111@gmail.com</a></li>
 </ul>
 
 <p>Licensed under the Apache License, Version 2.0 (the “License”);
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at</p>
 
-<pre><code>http://www.apache.org/licenses/LICENSE-2.0
-</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>http://www.apache.org/licenses/LICENSE-2.0
+</code></pre></div></div>
 
 <p>Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an “AS IS” BASIS,
@@ -694,7 +670,7 @@ limitations under the License.</p>
 		
 	
 	<script src="https://apis.google.com/js/plusone.js"></script>
-	<div id="g-comments" class="g-comments" data-href="http://atomic111.github.io/article/create-a-naxsi-waf-for-owncloud" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
+	<div id="g-comments" class="g-comments" data-href="http://localhost:4000/article/create-a-naxsi-waf-for-owncloud" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
 	<script>
 		var width = $('#comments').width() * 0.9;
 		width = Math.round(width);
@@ -715,13 +691,6 @@ limitations under the License.</p>
 	</div>
 </div>
 
-	
-	
-	
-	
-	
-	
-
 
 <footer class="clean" style="background-image: url(/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg); height: 75%; min-height: 500px; " data-stellar-background-ratio="0.5" data-stellar-horizontal-offset="50" data-stellar-vertical-offset="50">
 	<div id="nav-icon" style="top: 60px;" data-stellar-ratio="0.8">
@@ -736,7 +705,7 @@ limitations under the License.</p>
 			
 		</a>
 	</div>
-	<p class="copyright">&copy;2018, <a href="http://atomic111.github.io" target="_blank">Patrick Münch</a>. <a href="" target="_blank">All rights reserved</a>.</p>
+	<p class="copyright">&copy;2019, <a href="http://atomic111.github.io" target="_blank">Patrick Münch</a>. <a href="" target="_blank">All rights reserved</a>.</p>
 </footer>
 <script src="/assets/js/smooth-scroll.js"></script>
 

