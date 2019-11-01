@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "CVE-2019-xxxx: Reflected XSS in DOMOS"
+title: "CVE-2019-18664: Reflected XSS in DOMOS"
 date:   2019-11-01 15:00:00
 image:
       url: /assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg
@@ -52,7 +52,7 @@ session_id=09bced960d7c7bb0cc15d28c7128b5bc86e7c611
 
 # CVE
 
-[CVE-2019-xxxx](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-xxxx)
+[CVE-2019-18664](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-18664)
 
 # CVSSv3 Base Score
 

