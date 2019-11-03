@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "CVE-2019-xxxx: SQL-Injection in ARP-GUARD"
+title: "CVE-2019-18663: SQL-Injection in ARP-GUARD"
 date:   2019-11-01 14:00:00
 image:
       url: /assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg
@@ -63,7 +63,7 @@ It was possible to extract the admin password for the web application via the ti
 
 # CVE
 
-[CVE-2019-xxxx](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-xxxx)
+[CVE-2019-18663](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-18663)
 
 # CVSSv3 Base Score
 

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "CVE-2019-xxxx: Directory Traversal in DOMOS"
+title: "CVE-2019-18665: Directory Traversal in DOMOS"
 date:   2019-11-01 14:00:00
 image:
       url: /assets/article_images/2016-05-30-inspec-cis-docker/cover.jpeg
@@ -80,7 +80,7 @@ daemon:*:17632:0:99999:7:::
 
 # CVE
 
-[CVE-2019-xxxx](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-xxxx)
+[CVE-2019-18665](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-18665)
 
 # CVSSv3 Base Score
 
