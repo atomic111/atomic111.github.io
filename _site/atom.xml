@@ -4,7 +4,7 @@
  <title>Patrick Münch Blog</title>
  <link href="http://localhost:4000/atom.xml" rel="self"/>
  <link href="http://localhost:4000/"/>
- <updated>2019-11-03T20:05:42+01:00</updated>
+ <updated>2019-11-05T07:30:49+01:00</updated>
  <id>http://localhost:4000</id>
  <author>
    <name>Patrick Münch</name>
@@ -66,9 +66,11 @@ session_id=09bced960d7c7bb0cc15d28c7128b5bc86e7c611
 
 &lt;h1 id=&quot;credit&quot;&gt;Credit&lt;/h1&gt;
 
-&lt;p&gt;Pascal Keul of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;
-Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;
-Torsten Löbner of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Pascal Keul of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Torsten Löbner of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;disclaimer&quot;&gt;Disclaimer&lt;/h1&gt;
 
@@ -77,7 +79,7 @@ Torsten Löbner of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertr
 &lt;p&gt;The contents of this advisory are copyright (c) 2019 SVA System Vertrieb Alexander GmbH and may be distributed freely provided that no fee is charged for this distribution and proper credit is given.&lt;/p&gt;
 </content>
  </entry>
-
+ 
  <entry>
    <title>CVE-2019-18665: Directory Traversal in DOMOS</title>
    <link href="http://localhost:4000/article/secudos-domos-directory_traversal"/>
@@ -159,9 +161,11 @@ daemon:*:17632:0:99999:7:::
 
 &lt;h1 id=&quot;credit&quot;&gt;Credit&lt;/h1&gt;
 
-&lt;p&gt;Pascal Keul of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;
-Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;
-Torsten Löbner of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Pascal Keul of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Torsten Löbner of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;disclaimer&quot;&gt;Disclaimer&lt;/h1&gt;
 
@@ -170,7 +174,7 @@ Torsten Löbner of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertr
 &lt;p&gt;The contents of this advisory are copyright (c) 2019 SVA System Vertrieb Alexander GmbH and may be distributed freely provided that no fee is charged for this distribution and proper credit is given.&lt;/p&gt;
 </content>
  </entry>
-
+ 
  <entry>
    <title>CVE-2019-18663: SQL-Injection in ARP-GUARD</title>
    <link href="http://localhost:4000/article/arp-guard-sql-injection"/>
@@ -236,9 +240,11 @@ answer=myniceanwser&amp;amp;check=Pr%C3%BCfen&amp;amp;username=username&amp;amp;
 
 &lt;h1 id=&quot;credit&quot;&gt;Credit&lt;/h1&gt;
 
-&lt;p&gt;Pascal Keul of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;
-Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;
-Torsten Löbner of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Pascal Keul of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Patrick Muench of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Torsten Löbner of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertrieb Alexander GmbH&lt;/a&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;disclaimer&quot;&gt;Disclaimer&lt;/h1&gt;
 
@@ -247,7 +253,7 @@ Torsten Löbner of &lt;a href=&quot;https://www.sva.de&quot;&gt;SVA System Vertr
 &lt;p&gt;The contents of this advisory are copyright (c) 2019 SVA System Vertrieb Alexander GmbH and may be distributed freely provided that no fee is charged for this distribution and proper credit is given.&lt;/p&gt;
 </content>
  </entry>
-
+ 
  <entry>
    <title>CVE-2019-9727: Unauthenticated password hash disclosure in Homematic CCU3</title>
    <link href="http://localhost:4000/article/homematic-ccu3-unauthenticated-password-hash-disclosure"/>
