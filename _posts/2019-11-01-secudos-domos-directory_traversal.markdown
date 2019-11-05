@@ -91,7 +91,9 @@ CVSS:3.0/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N
 # Credit
 
 Pascal Keul of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)
+
 Patrick Muench of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)
+
 Torsten Löbner of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)
 
 # Disclaimer
