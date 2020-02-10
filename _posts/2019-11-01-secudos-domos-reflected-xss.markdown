@@ -24,7 +24,7 @@ author_link: "https://twitter.com/atomiczero111"
 
 # Background
 
-DOMOS is an own and hardened operating system of SCUDOS GmbH. The operating system is used as a platform by several applications. It also offers a web interface for the administration of operating system settings.
+DOMOS is an own and hardened operating system of SECUDOS GmbH. The operating system is used as a platform by several applications. It also offers a web interface for the administration of operating system settings.
 
 # Issue Description
 
