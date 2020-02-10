@@ -35,9 +35,9 @@ When a user changes the path of a group in gitlab, Docker registries are not ada
 
 The following steps illustrate the inadequate access control to docker registry:
 
-1. create two gitlab user (pentest1, pentest2) with ssh keys
+- create two gitlab user (pentest1, pentest2) with ssh keys
 
-~~~ text    
+~~~ text
 username = pentest1
 mail = pentest1@groupofdestruction.de
 pw = ...[SNIP]...
@@ -47,12 +47,12 @@ mail = pentest2@groupofdestruction.de
 pw = ...[SNIP]...
 ~~~
 
-2. Login as user pentest1
-3. Go to [https://gitlab.com/dashboard/groups?nav_source=navbar](https://gitlab.com/dashboard/groups?nav_source=navbar)
-4. Create a new group with user pentest1 [https://gitlab.com/groups/new](https://gitlab.com/groups/new ) called grouppentest1 with private as default selection
-5. Create a new private project with name trial1 in group grouppentest1
-6. Go to [https://gitlab.com/grouppentest1/trial1](https://gitlab.com/grouppentest1/trial1)
-7. Create a new file .gitlab-ci.yml [https://gitlab.com/grouppentest1/trial1/new/master](https://gitlab.com/grouppentest1/trial1/new/master) with the content located in this repo
+- Login as user pentest1
+- Go to [https://gitlab.com/dashboard/groups?nav_source=navbar](https://gitlab.com/dashboard/groups?nav_source=navbar)
+- Create a new group with user pentest1 [https://gitlab.com/groups/new](https://gitlab.com/groups/new ) called grouppentest1 with private as default selection
+- Create a new private project with name trial1 in group grouppentest1
+- Go to [https://gitlab.com/grouppentest1/trial1](https://gitlab.com/grouppentest1/trial1)
+- Create a new file .gitlab-ci.yml [https://gitlab.com/grouppentest1/trial1/new/master](https://gitlab.com/grouppentest1/trial1/new/master) with the content located in this repo
 
 ~~~ text
 build:docker:
@@ -78,14 +78,14 @@ script:
   - docker push $CI_REGISTRY_IMAGE:2.13.1
 ~~~
 
-8. Wait until CI is done and go to [https://gitlab.com/grouppentest1/trial1/container_registry](https://gitlab.com/grouppentest1/trial1/container_registry) and you should see the published repos
-9. Go to group management [https://gitlab.com/groups/grouppentest1/-/edit](https://gitlab.com/groups/grouppentest1/-/edit) and change groupname to grouppentest2 and path to grouppentest2
-10. Project registry does not show any container [https://gitlab.com/grouppentest1/trial1/container_registry](https://gitlab.com/grouppentest1/trial1/container_registry)
-11. Logout as user pentest1
-12. Login with user pentest2
-13. Create a new group called grouppentest1
-14. Create a new project called trial1
-15. See docker images from previous user pentest1
+- Wait until CI is done and go to [https://gitlab.com/grouppentest1/trial1/container_registry](https://gitlab.com/grouppentest1/trial1/container_registry) and you should see the published repos
+- Go to group management [https://gitlab.com/groups/grouppentest1/-/edit](https://gitlab.com/groups/grouppentest1/-/edit) and change groupname to grouppentest2 and path to grouppentest2
+- Project registry does not show any container [https://gitlab.com/grouppentest1/trial1/container_registry](https://gitlab.com/grouppentest1/trial1/container_registry)
+- Logout as user pentest1
+- Login with user pentest2
+- Create a new group called grouppentest1
+- Create a new project called trial1
+- See docker images from previous user pentest1
 
 # CVE
 
