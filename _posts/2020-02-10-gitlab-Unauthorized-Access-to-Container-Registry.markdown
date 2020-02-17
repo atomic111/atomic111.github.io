@@ -17,25 +17,25 @@ author_link: "https://twitter.com/atomiczero111"
 # Overview
 
 - Vendor: GitLab Inc.
-- Product: gitlab Enterprise (gitlab.com)
+- Product: Gitlab Enterprise (gitlab.com)
 - Version: 12.0.0-pre
 - Vulnerability: Relected Cross-Site Scripting
 - Fixed Version: 12.5
 
 # Background
 
-itLab provides a Git-repository manager with on top services and tools like a web-based DevOps lifecycle tool, wiki, issue-tracking and CI/CD pipeline features. GitLab is using an open-source license and developed by GitLab Inc.
+GitLab provides a Git-repository manager with on top services and tools like a web-based DevOps lifecycle tool, wiki, issue-tracking and CI/CD pipeline features. GitLab is using an open-source license and developed by GitLab Inc.
 
 From the vendor's website:
 "GitLab is the first single application for the entire DevOps lifecycle. From planning to monitoring GitLab covers every stage and additionally lets you manage and secure across stages. Only GitLab enables Concurrent DevOps, unlocking organizations from the constraints of the toolchain. GitLab provides unmatched visibility, higher levels of efficiency, and comprehensive governance. This makes the software lifecycle 200% faster, radically improving the speed of business."
 
 # Issue Description
 
-When a user changes the path of a group in gitlab, Docker registries are not adapted, leaving them in the old namespace. They are not protected and are available to all other users with no previous access to the repo.
+When a user changes the path of a group in Gitlab, Docker registries are not adapted, leaving them in the old namespace. They are not protected and are available to all other users with no previous access to the repo.
 
 The following steps illustrate the inadequate access control to docker registry:
 
-- create two gitlab user (pentest1, pentest2) with ssh keys
+- create two Gitlab user (pentest1, pentest2) with ssh keys
 
 ~~~ text
 username = pentest1
@@ -93,9 +93,9 @@ script:
 
 # CVSSv3 Base Score
 
-CVSS Base Score: __5.9__
+CVSS Base Score: __5.6__
 
-CVSS:3.0/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N
+CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N
 
 # Credit
 
