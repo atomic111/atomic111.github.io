@@ -50,9 +50,11 @@ As an example, the Vulnerabilites were spotted in the following HTTP-Parameters,
 
 # CVE
 
-- [CVE-2020-12517](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-12517)
-- [VDE CERT](https://cert.vde.com/en-us/advisories/vde-2020-049)
-- [NVD](https://nvd.nist.gov/vuln/detail/CVE-2020-12517)
+[CVE-2020-12517](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-12517)
+
+[VDE CERT](https://cert.vde.com/en-us/advisories/vde-2020-049)
+
+[NVD](https://nvd.nist.gov/vuln/detail/CVE-2020-12517)
 
 # CVSSv3.1 Base Score
 
@@ -63,9 +65,13 @@ CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H
 # Credit
 
 Patrick Muench of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)
+
 Torsten Loebner of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)
+
 Pascal Keul of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)
+
 Maurice Rothe of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)
+
 Daniel Hackel of[SVA System Vertrieb Alexander GmbH](https://www.sva.de)
 
 # Disclaimer

@@ -39,9 +39,11 @@ While analyzing the implementation of PLCnext it was possible to use a privilege
 
 # CVE
 
-- [CVE-2020-12519](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-12519)
-- [VDE CERT](https://cert.vde.com/en-us/advisories/vde-2020-049)
-- [NVD](https://nvd.nist.gov/vuln/detail/CVE-2020-12519)
+[CVE-2020-12519](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-12519)
+
+[VDE CERT](https://cert.vde.com/en-us/advisories/vde-2020-049)
+
+[NVD](https://nvd.nist.gov/vuln/detail/CVE-2020-12519)
 
 # CVSSv3.1 Base Score
 
@@ -52,9 +54,13 @@ CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H
 # Credit
 
 Patrick Muench of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)
+
 Torsten Loebner of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)
+
 Pascal Keul of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)
+
 Maurice Rothe of [SVA System Vertrieb Alexander GmbH](https://www.sva.de)
+
 Daniel Hackel of[SVA System Vertrieb Alexander GmbH](https://www.sva.de)
 
 # Disclaimer
