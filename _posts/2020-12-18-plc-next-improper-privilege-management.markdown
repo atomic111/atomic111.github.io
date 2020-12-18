@@ -39,9 +39,9 @@ While analyzing the implementation of PLCnext it was possible to use a privilege
 
 # CVE
 
-[CVE-2020-12519](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-12519)
-[VDE CERT](https://cert.vde.com/en-us/advisories/vde-2020-049)
-[NVD](https://nvd.nist.gov/vuln/detail/CVE-2020-12519)
+- [CVE-2020-12519](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-12519)
+- [VDE CERT](https://cert.vde.com/en-us/advisories/vde-2020-049)
+- [NVD](https://nvd.nist.gov/vuln/detail/CVE-2020-12519)
 
 # CVSSv3.1 Base Score
 
