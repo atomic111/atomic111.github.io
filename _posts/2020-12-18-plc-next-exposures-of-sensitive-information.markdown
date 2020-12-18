@@ -39,9 +39,9 @@ While analyzing the the Linux operating system of PLCnext it is possible to read
 
 # CVE
 
-[CVE-2020-12518](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-12518)
-[VDE CERT](https://cert.vde.com/en-us/advisories/vde-2020-049)
-[NVD](https://nvd.nist.gov/vuln/detail/CVE-2020-12518)
+- [CVE-2020-12518](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-12518)
+- [VDE CERT](https://cert.vde.com/en-us/advisories/vde-2020-049)
+- [NVD](https://nvd.nist.gov/vuln/detail/CVE-2020-12518)
 
 # CVSSv3.1 Base Score
 
